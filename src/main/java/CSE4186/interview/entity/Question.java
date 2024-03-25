@@ -27,6 +27,5 @@ public class Question {
     private SelfIntroduction selfIntroduction;
 
     @CreatedDate
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    private LocalDateTime created_at;
 }

@@ -26,6 +26,5 @@ public class Video {
     private User user;
 
     @CreatedDate
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    private LocalDateTime created_at;
 }
