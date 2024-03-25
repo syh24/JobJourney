@@ -30,13 +30,8 @@ public class Board {
     private User user;
 
     @CreatedDate
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
-
+    private LocalDateTime created_at;
     @LastModifiedDate
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
-    @Column(name = "deleted_at")
-    private LocalDateTime deletedAt;
+    private LocalDateTime updated_at;
+    private LocalDateTime deleted_at;
 }

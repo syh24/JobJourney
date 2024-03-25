@@ -31,13 +31,8 @@ public class Comment {
     private Board board;
 
     @CreatedDate
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
-
+    private LocalDateTime created_at;
     @LastModifiedDate
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
-    @Column(name = "deletedAt")
-    private LocalDateTime deletedAt;
+    private LocalDateTime updated_at;
+    private LocalDateTime deleted_at;
 }
