@@ -25,5 +25,6 @@ public class SelfIntroduction {
     private User user;
 
     @CreatedDate
-    private LocalDateTime created_at;
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
 }
