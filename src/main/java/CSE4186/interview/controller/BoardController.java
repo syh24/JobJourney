@@ -26,7 +26,13 @@ public class BoardController {
     }
 
     @PostMapping
-    public Board addBoard(@RequestBody BoardRequestDto request) {
-        return boardService.addBoard(request);
+    public BoardResponseDto addBoard(@RequestBody BoardRequestDto request) {
+        Board board = boardService.addBoard(request);
+        return BoardResponseDto.builder()
+                .BoardId(board.getId())
+                .title(board.getTitle())
+                .content(board.getContent())
+                .build();
     }
+
 }
