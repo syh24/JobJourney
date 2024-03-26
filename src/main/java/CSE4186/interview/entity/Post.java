@@ -7,16 +7,22 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-public class Board {
+@EntityListeners(AuditingEntityListener.class)
+public class Post {
+
 
     @Builder
-    public Board(String title, String content, User user) {
+    public Post(Long id, String title, String content, User user) {
+        this.id = id;
         this.title = title;
         this.content = content;
         this.user = user;
@@ -24,7 +30,7 @@ public class Board {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "board_id")
+    @Column(name = "post_id")
     private Long id;
 
     @Column(nullable = false)
@@ -37,6 +43,10 @@ public class Board {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @OneToMany(mappedBy = "post", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
+    @OrderBy("id asc")
+    private List<Comment> comments = new ArrayList<>();
+
     @CreatedDate
     @Column(name = "created_at")
     private LocalDateTime createdAt;
@@ -47,4 +57,9 @@ public class Board {
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
+
+    public void updatePost(String title, String content) {
+        this.title = title;
+        this.content = content;
+    }
 }
