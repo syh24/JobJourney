@@ -1,4 +1,4 @@
-package CSE4186.interview.DTO;
+package CSE4186.interview.controller.dto;
 
 import lombok.Builder;
 import org.springframework.security.authentication.ProviderNotFoundException;

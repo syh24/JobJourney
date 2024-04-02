@@ -1,7 +1,7 @@
 package CSE4186.interview.Oauth2;
 
-import CSE4186.interview.DTO.Oauth2Principal;
-import CSE4186.interview.DTO.Oauth2UserInfo;
+import CSE4186.interview.controller.dto.Oauth2Principal;
+import CSE4186.interview.controller.dto.Oauth2UserInfo;
 import CSE4186.interview.entity.Authority;
 import CSE4186.interview.entity.User;
 import CSE4186.interview.repository.AuthRepository;
@@ -54,7 +54,7 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
     }
 
     private User getUser(Oauth2UserInfo oAuth2UserInfo){
-        Optional<User> memberOptional=userRepository.findByEmail(oAuth2UserInfo.email());
+        Optional<User> memberOptional= Optional.ofNullable(userRepository.findByEmail(oAuth2UserInfo.email()));
         User user=memberOptional.orElseGet(()->{
             Authority authority = authRepository.findById("ROLE_USER").orElseGet(()->{
                 Authority newAuthority = new Authority("ROLE_USER");

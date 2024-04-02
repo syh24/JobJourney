@@ -1,4 +1,4 @@
-package CSE4186.interview.DTO;
+package CSE4186.interview.controller.dto;
 
 import CSE4186.interview.entity.Authority;
 import CSE4186.interview.entity.User;

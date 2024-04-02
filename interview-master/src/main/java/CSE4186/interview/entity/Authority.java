@@ -13,6 +13,7 @@ import java.io.Serializable;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+//authority 제거하고 enum으로 role 생성
 public class Authority implements Serializable {
     @Id
     @Column(name="authority")

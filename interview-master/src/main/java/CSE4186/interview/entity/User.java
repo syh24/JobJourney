@@ -16,6 +16,13 @@ import java.util.Set;
 @EntityListeners(AuditingEntityListener.class)
 public class User {
 
+    @Builder
+    public User(String name, String email, String password){
+        this.name=name;
+        this.email=email;
+        this.password=password;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")

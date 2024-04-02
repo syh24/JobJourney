@@ -40,7 +40,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
                                 .requestMatchers("/").permitAll()
-                                .requestMatchers("/login/oauth2/**").permitAll()
+                                .requestMatchers("/login/**").permitAll()
+                                .requestMatchers("/login/oauth2/**").permitAll()                                .requestMatchers("/join").permitAll()
                                 .anyRequest().authenticated()
                 )
 

@@ -1,13 +1,12 @@
 package CSE4186.interview.controller;
 
 
-import CSE4186.interview.DTO.UserDTO;
+import CSE4186.interview.controller.dto.BaseResponseDto;
+import CSE4186.interview.controller.dto.UserDTO;
 import CSE4186.interview.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.apache.catalina.connector.Request;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -18,19 +17,37 @@ public class LoginController {
     private final UserService userService;
 
     @PostMapping("/join")
-    public void join(@RequestBody UserDTO userDTO){
-        userService.join(userDTO.getName(),userDTO.getEmail(),userDTO.getPassword());
+    public ResponseEntity<BaseResponseDto<String>> join(@RequestBody UserDTO.joinRequest request){
+        userService.join(request);
+        return ResponseEntity.ok(
+                new BaseResponseDto<>(
+                        "success",
+                        "",
+                        ""
+                ));
     }
 
-    //일반적인 로그인
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody UserDTO userDTO){
+    public ResponseEntity<BaseResponseDto<String>> login(@RequestBody UserDTO.loginRequest request){
 
-        if(!userService.login(userDTO.getName(),userDTO.getPassword())){
-            return ResponseEntity.status(401).body("Unauthorized: Invalid username or password");
+        if(!userService.login(request)){
+            return ResponseEntity.ok(
+                    new BaseResponseDto<>(
+                            "fail",
+                            "",
+                            ""
+                    ));
         }
 
-        return (ResponseEntity<String>) ResponseEntity.ok();
+        else{
+            return ResponseEntity.ok(
+                    new BaseResponseDto<>(
+                            "success",
+                            "",
+                            ""
+                    ));
+        }
+
     }
 
 }
