@@ -34,8 +34,9 @@ dependencies {
 	testCompileOnly 'org.projectlombok:lombok'
 	testAnnotationProcessor 'org.projectlombok:lombok'
 
+	//spring security
 	implementation 'org.springframework.boot:spring-boot-starter-security'
-
+	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 
 	//Querydsl 추가
 	implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
