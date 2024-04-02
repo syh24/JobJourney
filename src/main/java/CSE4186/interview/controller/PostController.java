@@ -1,5 +1,6 @@
 package CSE4186.interview.controller;
 
+import CSE4186.interview.controller.dto.BaseResponseDto;
 import CSE4186.interview.controller.dto.CommentDto;
 import CSE4186.interview.controller.dto.PostDto;
 import CSE4186.interview.entity.Comment;
@@ -26,46 +27,76 @@ public class PostController {
 
     @GetMapping("/list")
     @Operation(summary = "Get All Posts", description = "모든 게시글을 조회한다.")
-    public ResponseEntity<List<PostDto.Response>> getAllPosts() {
+    public ResponseEntity<BaseResponseDto<List<PostDto.Response>>> getAllPosts() {
         List<PostDto.Response> response = postService.findAllPosts()
                 .stream().map(PostDto.Response::new)
                 .collect(Collectors.toList());
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(
+                new BaseResponseDto<List<PostDto.Response>>(
+                "success",
+                "",
+                response
+        ));
     }
     @GetMapping("/{id}")
     @Operation(summary = "Get Post", description = "게시글 상세")
-    public ResponseEntity<PostDto.Response> getPost(@PathVariable(name = "id") Long id) {
+    public ResponseEntity<BaseResponseDto<PostDto.Response>> getPost(@PathVariable(name = "id") Long id) {
         Post post = postService.findPost(id);
-        return ResponseEntity.ok(new PostDto.Response(post));
+        return ResponseEntity.ok(
+                new BaseResponseDto<PostDto.Response>(
+                        "success",
+                        "",
+                new PostDto.Response(post)
+        ));
     }
 
     @PostMapping
     @Operation(summary = "Add Post", description = "게시글 생성")
-    public ResponseEntity<PostDto.Response> addPost(@RequestBody PostDto.createRequest request) {
+    public ResponseEntity<BaseResponseDto<PostDto.Response>> addPost(@RequestBody PostDto.createRequest request) {
         Post post = postService.addPost(request);
-        return ResponseEntity.ok(new PostDto.Response(post));
+        return ResponseEntity.ok(
+                new BaseResponseDto<PostDto.Response>(
+                        "success",
+                        "",
+                        new PostDto.Response(post)
+                ));
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Update Post", description = "게시글 수정")
-    public ResponseEntity<Long> updatePost(@PathVariable Long id, @RequestBody PostDto.updateRequest request) {
+    public ResponseEntity<BaseResponseDto<Long>> updatePost(@PathVariable Long id, @RequestBody PostDto.updateRequest request) {
         postService.updatePost(id, request);
-        return ResponseEntity.ok(id);
+        return ResponseEntity.ok(
+                new BaseResponseDto<Long>(
+                        "success",
+                        "",
+                        id
+                ));
     }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete Post", description = "게시글 삭제")
-    public ResponseEntity<Long> delete(@PathVariable(name = "id") Long id) {
+    public ResponseEntity<BaseResponseDto<Long>> delete(@PathVariable(name = "id") Long id) {
         postService.deletePost(id);
-        return ResponseEntity.ok(id);
+        return ResponseEntity.ok(
+                new BaseResponseDto<Long>(
+                        "success",
+                        "",
+                        id
+                ));
     }
 
     @PostMapping("/{id}/comment")
     @Operation(summary = "Add Comment", description = "댓글 생성")
-    public ResponseEntity<CommentDto.Response> addPost(@RequestBody CommentDto.createRequest request,
+    public ResponseEntity<BaseResponseDto<CommentDto.Response>> addPost(@RequestBody CommentDto.createRequest request,
                                                        @PathVariable(name = "id") Long id) {
         Comment comment= commentService.addComment(request, id);
-        return ResponseEntity.ok(new CommentDto.Response(comment));
+        return ResponseEntity.ok(
+            new BaseResponseDto<CommentDto.Response>(
+                    "success",
+                    "",
+                    new CommentDto.Response(comment)
+            ));
     }
 
 }
