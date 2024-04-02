@@ -2,6 +2,7 @@ package CSE4186.interview.controller.dto;
 
 import CSE4186.interview.entity.Post;
 import CSE4186.interview.entity.User;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -15,24 +16,22 @@ public class PostDto {
     @AllArgsConstructor
     @NoArgsConstructor
     @Builder
-    public static class Request {
+    public static class createRequest {
+        private String title;
+        private String content;
+        @NotBlank
+        private Long userId;
+    }
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Builder
+    public static class updateRequest {
+        @NotBlank
         private Long id;
         private String title;
         private String content;
-        private String createdAt = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm"));
-        private String updatedAt = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm"));
-        private User user;
-
-        public Post toEntity() {
-            return Post.builder()
-                    .id(id)
-                    .title(title)
-                    .content(content)
-                    .user(user)
-                    .build();
-        }
-
-
     }
 
     @RequiredArgsConstructor
