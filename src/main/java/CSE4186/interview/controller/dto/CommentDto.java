@@ -3,6 +3,7 @@ package CSE4186.interview.controller.dto;
 import CSE4186.interview.entity.Comment;
 import CSE4186.interview.entity.Post;
 import CSE4186.interview.entity.User;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
 public class CommentDto {
@@ -11,32 +12,14 @@ public class CommentDto {
     @Builder
     @AllArgsConstructor
     @NoArgsConstructor
+    @Schema(name = "commentCreateRequest", description = "댓글 생성 DTO")
     public static class createRequest {
         private String content;
         private Long userId;
     }
 
-    @Data
-    @Builder
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static class Request {
-        private Long id;
-        private String content;
-        private User user;
-        private Post post;
-
-        public Comment toEntity() {
-            return Comment.builder()
-                    .id(id)
-                    .content(content)
-                    .user(user)
-                    .post(post)
-                    .build();
-        }
-    }
-
     @Getter
+    @Schema(name = "commentResponse", description = "댓글 응답 DTO")
     public static class Response {
         private final Long id;
         private final String content;

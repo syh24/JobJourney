@@ -25,7 +25,7 @@ public class PostController {
     private final CommentService commentService;
 
     @GetMapping("/list")
-    @Operation(summary = "Get All Posts", description = "모든 게시글을 조회한다.")
+    @Operation(summary = "Get All Posts", description = "모든 게시글을 조회")
     public ResponseEntity<List<PostDto.Response>> getAllPosts() {
         List<PostDto.Response> response = postService.findAllPosts()
                 .stream().map(PostDto.Response::new)

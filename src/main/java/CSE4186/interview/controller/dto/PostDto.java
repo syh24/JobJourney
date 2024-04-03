@@ -2,6 +2,7 @@ package CSE4186.interview.controller.dto;
 
 import CSE4186.interview.entity.Post;
 import CSE4186.interview.entity.User;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
@@ -16,6 +17,7 @@ public class PostDto {
     @AllArgsConstructor
     @NoArgsConstructor
     @Builder
+    @Schema(name = "postCreateRequest", description = "게시글 생성 DTO")
     public static class createRequest {
         private String title;
         private String content;
@@ -27,6 +29,7 @@ public class PostDto {
     @AllArgsConstructor
     @NoArgsConstructor
     @Builder
+    @Schema(name = "postUpdateRequest", description = "게시글 수정 DTO")
     public static class updateRequest {
         @NotBlank
         private Long id;
@@ -36,6 +39,7 @@ public class PostDto {
 
     @RequiredArgsConstructor
     @Getter
+    @Schema(name = "postResponse", description = "게시글 응답 DTO")
     public static class Response {
         private final Long id;
         private final String title;
