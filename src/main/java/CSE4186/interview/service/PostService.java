@@ -26,11 +26,11 @@ public class PostService {
         return postRepository.findAll();
     }
 
-    public Post addPost(PostDto.Request request) {
-//        User findUser = userRepository.findById(request.getUser())
-//                .orElseThrow(() -> new NoSuchElementException("no user"));
+    public Post addPost(PostDto.createRequest request) {
+        User findUser = userRepository.findById(request.getUserId())
+                .orElseThrow(() -> new NoSuchElementException("no user"));
         return postRepository.save(Post.builder()
-                        .user(request.getUser())
+                        .user(findUser)
                         .title(request.getTitle())
                         .content(request.getContent())
                         .build()
@@ -44,9 +44,14 @@ public class PostService {
         postRepository.delete(post);
     }
 
-    public void updatePost(Long id, PostDto.Request request) {
+    public void updatePost(Long id, PostDto.updateRequest request) {
         Post post = postRepository.findById(id).orElseThrow(() ->
                 new IllegalArgumentException("해당 게시글이 존재하지 않습니다. id=" + id));
         post.updatePost(request.getTitle(), request.getContent());
+    }
+
+    public Post findPost(Long id) {
+        return postRepository.findById(id).orElseThrow(() ->
+                new IllegalArgumentException("해당 게시글이 존재하지 않습니다. id=" + id));
     }
 }
