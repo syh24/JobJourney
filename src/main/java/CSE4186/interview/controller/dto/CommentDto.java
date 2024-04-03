@@ -11,6 +11,15 @@ public class CommentDto {
     @Builder
     @AllArgsConstructor
     @NoArgsConstructor
+    public static class createRequest {
+        private String content;
+        private Long userId;
+    }
+
+    @Data
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
     public static class Request {
         private Long id;
         private String content;
