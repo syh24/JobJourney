@@ -27,7 +27,7 @@ public class SecurityConfig {
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer(){
         return (web)->web.ignoring().requestMatchers(
-                "/css/**","/js/**","/images/**","/favicon.ico","/error", "/swagger-ui/**", "/v3/api-docs/**");
+                "/css/**","/js/**","/images/**","/favicon.ico","/error");
     }
 
     @Bean
@@ -47,6 +47,7 @@ public class SecurityConfig {
                                 .requestMatchers("/login/**").permitAll()
                                 .requestMatchers("/login/oauth2/**").permitAll()
                                 .requestMatchers("/join").permitAll()
+                                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                                 .anyRequest().authenticated()
                 )
 
