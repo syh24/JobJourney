@@ -27,15 +27,13 @@ public class SecurityConfig {
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer(){
         return (web)->web.ignoring().requestMatchers(
-                "/css/**","/js/**","/images/**","/favicon.ico","/error");
+                "/css/**","/js/**","/images/**","/favicon.ico","/error", "/swagger-ui/**", "/v3/api-docs/**");
     }
 
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder(){
         return new BCryptPasswordEncoder();
     }
-
-
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -47,7 +45,8 @@ public class SecurityConfig {
                         authorizeRequests
                                 .requestMatchers("/").permitAll()
                                 .requestMatchers("/login/**").permitAll()
-                                .requestMatchers("/login/oauth2/**").permitAll()                                .requestMatchers("/join").permitAll()
+                                .requestMatchers("/login/oauth2/**").permitAll()
+                                .requestMatchers("/join").permitAll()
                                 .anyRequest().authenticated()
                 )
 
