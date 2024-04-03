@@ -1,21 +1,27 @@
 package CSE4186.interview.entity;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
 public class User {
+
+    @Builder
+    public User(String name, String email, String password){
+        this.name=name;
+        this.email=email;
+        this.password=password;
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,6 +45,28 @@ public class User {
     private LocalDateTime updatedAt;
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name="member_authority",
+            joinColumns={@JoinColumn(name="member_id",referencedColumnName = "user_id")},
+            inverseJoinColumns={@JoinColumn(name="authority_name",referencedColumnName = "authority")}
+    )
+    private Set<Authority> authoritySet = new HashSet<>();
+
+    public User(String name, String email, String password, Authority authority){
+        this.name=name;
+        this.email=email;
+        this.password=password;
+        authoritySet.add(authority);
+    }
+
+    public User(String name, String email, Authority authority){
+        this.name=name;
+        this.email=email;
+        this.password="";
+        authoritySet.add(authority);
+    }
 
 
 }
