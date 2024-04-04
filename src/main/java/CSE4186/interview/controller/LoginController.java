@@ -6,6 +6,7 @@ import CSE4186.interview.controller.dto.UserDTO;
 import CSE4186.interview.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -35,26 +36,14 @@ public class LoginController {
 
     @PostMapping("/login")
     @Operation(summary = "Login", description = "로그인")
-    public ResponseEntity<BaseResponseDto<String>> login(@RequestBody UserDTO.loginRequest request){
+    public ResponseEntity<BaseResponseDto<String>> login(HttpServletResponse response) {
 
-        if(!userService.login(request)){
-            return ResponseEntity.ok(
-                    new BaseResponseDto<>(
-                            "fail",
-                            "",
-                            ""
-                    ));
-        }
-
-        else{
-            return ResponseEntity.ok(
-                    new BaseResponseDto<>(
-                            "success",
-                            "",
-                            ""
-                    ));
-        }
-
+        return ResponseEntity.ok(
+                            new BaseResponseDto<>(
+                                    "success",
+                                    "",
+                                    ""
+                            ));
     }
 
 }

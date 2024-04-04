@@ -60,7 +60,7 @@ public class TokenProvider implements InitializingBean {
     }
 
     public Authentication getAuthentication(String token) {
-        logger.debug("TokenProvider-getAuthentication");
+        logger.info("TokenProvider-getAuthentication");
         Claims claims = Jwts
                 .parserBuilder() //받은 token을 파싱할 수 있는 객체(JwtParserBuilder)를 리턴
                 .setSigningKey(key) //ParserBuilder의 key 설정
