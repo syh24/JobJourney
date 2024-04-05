@@ -1,0 +1,7 @@
+package CSE4186.interview.repository;
+
+import CSE4186.interview.entity.Post;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface PostRepository extends JpaRepository<Post, Long> {
+}
