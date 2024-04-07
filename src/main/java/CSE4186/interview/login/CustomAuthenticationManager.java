@@ -21,8 +21,6 @@ public class CustomAuthenticationManager implements AuthenticationManager {
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         UserDetails userDetails= customUserDetailsService.loadUserByUsername(authentication.getName());
-        System.out.println(userDetails.getPassword());
-        System.out.println((String)authentication.getCredentials());
         if(bCryptPasswordEncoder.matches((String)authentication.getCredentials(), userDetails.getPassword())){
             return new UsernamePasswordAuthenticationToken(userDetails.getUsername(),userDetails.getPassword(),userDetails.getAuthorities());
         }

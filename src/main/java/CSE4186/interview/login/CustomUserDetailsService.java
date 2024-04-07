@@ -24,7 +24,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         return userRepository.findByEmail(email)
                 .map(user->createUser(email,user))
-                .orElseThrow(()->new UsernameNotFoundException((email+"해당 email을 가진 멤버가 존재하지 않음")));
+                .orElseThrow(()->new UsernameNotFoundException("wrong email"));
     }
 
     private org.springframework.security.core.userdetails.User createUser(String email, User user) {

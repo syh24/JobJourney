@@ -63,12 +63,11 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
                                               AuthenticationException failed) throws IOException, ServletException {
-        logger.info("login failed");
         // ResponseEntity를 사용하여 실패 메시지를 JSON 형태로 반환
         ResponseEntity<BaseResponseDto<String>> responseEntity = ResponseEntity.badRequest().body(
                 new BaseResponseDto<>(
                         "fail",
-                        "",
+                        failed.getMessage(),
                         ""
                 ));
 
