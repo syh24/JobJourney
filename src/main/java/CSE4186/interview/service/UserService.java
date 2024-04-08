@@ -23,13 +23,6 @@ public class UserService {
                 .orElseThrow(() -> new NoSuchElementException("no user"));
     }
 
-    public boolean login(UserDTO.loginRequest request) {
-        User user=userRepository.findByEmail(request.getEmail());
-
-        if(user!=null && bCryptPasswordEncoder.matches(request.getPassword(), user.getPassword())) return true;
-        else return false;
-    }
-
     public void join(UserDTO.joinRequest request) {
         Authority authority = authRepository.findById("ROLE_USER").orElseGet(()-> {
             Authority newAuthority=new Authority("ROLE_USER");

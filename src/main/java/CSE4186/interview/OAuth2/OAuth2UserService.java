@@ -54,7 +54,7 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
     }
 
     private User getUser(Oauth2UserInfo oAuth2UserInfo) {
-        Optional<User> memberOptional = Optional.ofNullable(userRepository.findByEmail(oAuth2UserInfo.email()));
+        Optional<User> memberOptional = userRepository.findByEmail(oAuth2UserInfo.email());
         User user = memberOptional.orElseGet(() -> {
             Authority authority = authRepository.findById("ROLE_USER").orElseGet(() -> {
                 Authority newAuthority = new Authority("ROLE_USER");
