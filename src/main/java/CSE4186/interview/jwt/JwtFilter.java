@@ -24,6 +24,7 @@ public class JwtFilter extends OncePerRequestFilter {
     }
 
     private String ResolveAccessToken(HttpServletRequest httpServletRequest) {
+        logger.info("resolveAccessToken");
         String bearerToken= httpServletRequest.getHeader(AUTHORIZATION_HEADER);
 
         //jwt 토큰은 bearer로 시작함
@@ -41,6 +42,7 @@ public class JwtFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String accessToken=ResolveAccessToken(request);
         String requestURI=request.getRequestURI();
+        logger.info("jwt filter running...");
 
         //유효한 토큰 보유
         if(StringUtils.hasText(accessToken) && tokenProvider.validateAccessToken(accessToken,request)){
