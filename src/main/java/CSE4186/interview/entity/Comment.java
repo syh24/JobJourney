@@ -51,4 +51,8 @@ public class Comment {
         this.user = user;
         this.post = post;
     }
+
+    public void updateComment(String content) {
+        this.content = content;
+    }
 }

@@ -59,4 +59,14 @@ public class PostDto {
             this.comments = post.getComments().stream().map(CommentDto.Response::new).collect(Collectors.toList());
         }
     }
+
+    @Getter
+    @Schema(name = "postUpdateResponse", description = "게시글 수정 DTO")
+    public static class updateResponse {
+        private final Long id;
+
+        public updateResponse(Long id) {
+            this.id = id;
+        }
+    }
 }
