@@ -89,7 +89,7 @@ public class PostController {
                     new BaseResponseDto<>(
                             "success",
                             "",
-                            new PostDto.updateResponse(request.getId())
+                            new PostDto.updateResponse(id)
                     ));
         } catch (Exception e) {
             return ResponseEntity.ok(

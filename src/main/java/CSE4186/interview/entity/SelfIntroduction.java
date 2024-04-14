@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-public class SelfIntroduction {
+public class SelfIntroduction extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,7 +28,4 @@ public class SelfIntroduction {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @CreatedDate
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
 }

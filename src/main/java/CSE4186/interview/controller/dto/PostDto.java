@@ -31,8 +31,6 @@ public class PostDto {
     @Builder
     @Schema(name = "postUpdateRequest", description = "게시글 수정 DTO")
     public static class updateRequest {
-        @NotBlank
-        private Long id;
         private String title;
         private String content;
     }
