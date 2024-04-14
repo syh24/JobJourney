@@ -15,4 +15,8 @@ public class BaseResponseDto<T> {
         this.message = message;
         this.body = body;
     }
+
+    public static <T> BaseResponseDto<T> fail(String errorMessage) {
+        return new BaseResponseDto<>("fail", errorMessage, null);
+    }
 }
