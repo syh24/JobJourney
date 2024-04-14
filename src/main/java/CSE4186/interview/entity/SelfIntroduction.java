@@ -20,6 +20,8 @@ public class SelfIntroduction {
     @Column(name = "self_introduction_id")
     private Long id;
 
+    private String title;
+
     private String content;
 
     @ManyToOne(fetch = FetchType.LAZY)

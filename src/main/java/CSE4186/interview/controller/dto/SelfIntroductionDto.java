@@ -12,6 +12,7 @@ public class SelfIntroductionDto {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class Request{
+        private String title;
         private String content;
     }
 }
