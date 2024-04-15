@@ -56,6 +56,9 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         String AccessJwt=tokenProvider.createAccessToken(authResult);
         response.setHeader("Authorization","Bearer "+AccessJwt);
 
+        //save user at securityContext
+        logger.info(authResult.getName());
+
         chain.doFilter(request,response);
     }
 
