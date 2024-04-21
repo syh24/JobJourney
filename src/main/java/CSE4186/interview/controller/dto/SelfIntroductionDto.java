@@ -18,6 +18,7 @@ public class SelfIntroductionDto {
     @AllArgsConstructor
     @Schema(name = "selfIntroductionCreateRequest", description = "자소서 생성 DTO")
     public static class Request{
+        private String title;
         @NotBlank
         private Long id;
         private String content;
