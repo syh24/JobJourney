@@ -14,7 +14,7 @@ import java.util.Set;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
-public class User {
+public class User extends BaseTimeEntity {
 
     @Builder
     public User(String name, String email, String password){
@@ -37,14 +37,6 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    @CreatedDate
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
-    @LastModifiedDate
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-    @Column(name = "deleted_at")
-    private LocalDateTime deletedAt;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(

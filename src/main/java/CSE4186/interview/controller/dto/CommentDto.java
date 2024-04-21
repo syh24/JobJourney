@@ -18,6 +18,25 @@ public class CommentDto {
         private Long userId;
     }
 
+    @Data
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Schema(name = "commentUpdateRequest", description = "댓글 수정 DTO")
+    public static class updateRequest {
+        private Long id;
+        private String content;
+    }
+
+    @Data
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Schema(name = "commentDeleteRequest", description = "댓글 삭제 DTO")
+    public static class deleteRequest {
+        private Long id;
+    }
+
     @Getter
     @Schema(name = "commentResponse", description = "댓글 응답 DTO")
     public static class Response {
@@ -39,4 +58,15 @@ public class CommentDto {
             this.postId = comment.getPost().getId();
         }
     }
+
+    @Getter
+    @Schema(name = "commentUpdateResponse", description = "댓글 수정 DTO")
+    public static class updateResponse {
+        private final Long id;
+
+        public updateResponse(Long id) {
+            this.id = id;
+        }
+    }
+
 }

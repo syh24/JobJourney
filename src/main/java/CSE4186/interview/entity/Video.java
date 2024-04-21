@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
 @Entity
-public class Video {
+public class Video extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,7 +27,4 @@ public class Video {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @CreatedDate
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
 }
