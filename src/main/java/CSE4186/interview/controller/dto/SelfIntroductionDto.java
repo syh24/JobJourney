@@ -33,7 +33,7 @@ public class SelfIntroductionDto {
     public static class Response {
         private Long id;
         private String content;
-        private LocalDateTime createdAt;
+        private String createdAt;
 
         public Response(SelfIntroduction selfIntroduction){
             id= selfIntroduction.getId();;
