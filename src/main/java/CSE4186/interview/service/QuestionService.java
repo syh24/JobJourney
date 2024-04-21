@@ -21,9 +21,12 @@ import java.util.stream.IntStream;
 @Service
 public class QuestionService {
 
+    //라이브러리 사용해서 json 파싱하기
+    //기본 json 파일 만들어두고 text 부분만 수정하기
+
     private final String apiKey;
     private final ObjectMapper objectMapper;
-    private final String prompt="넌 이제부터 면접관이야. 아래에 있는 자기소개서를 읽고 질문 10개를 만들어줘. 이 때, 질문 앞에 1. 2. 처럼 숫자와 온점을 찍어서 질문을 구분해줘. 예를 들면 1. 하기 싫은 업무를 맡게 되면 어떻게 할 것인가요? << 이런식으로.\n 이제 자기소개서를 보내줄게.";
+    private String prompt="넌 이제부터 면접관이야. 아래에 있는 자기소개서를 읽고 질문 %d개를 만들어줘. 이 때, 질문 앞에 1. 2. 처럼 숫자와 온점을 찍어서 질문을 구분해줘. 예를 들면 1. 하기 싫은 업무를 맡게 되면 어떻게 할 것인가요? << 이런식으로.\n 이제 자기소개서를 보내줄게.";
 
     public QuestionService(@Value("${google.api-key}") String secret, ObjectMapper objectMapper){
         apiKey=secret;
@@ -129,11 +132,13 @@ public class QuestionService {
     }
 
 
-    public Mono<ResponseEntity<String>> createQuestion(String selfIntroductionContent) throws Exception {
+    public Mono<ResponseEntity<String>> createQuestion(int questionNum, String selfIntroductionContent) throws Exception {
         String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" + apiKey;
 
         String requestBody=createRequestBody(selfIntroductionContent);
         WebClient webClient = WebClient.create();
+        prompt=String.format(prompt,questionNum);
+        System.out.println("rr");
 
         return webClient.post()
                 .uri(url)
