@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Entity
 @EntityListeners(AuditingEntityListener.class)
+@Builder
 public class SelfIntroduction extends BaseTimeEntity {
 
     @Id
