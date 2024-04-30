@@ -11,6 +11,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,9 +31,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     private org.springframework.security.core.userdetails.User createUser(String email, User user) {
 
-        List<GrantedAuthority> grantedAuthorities = user.getAuthoritySet().stream()
-                .map(authority -> new SimpleGrantedAuthority(authority.getAuthority()))
-                .collect(Collectors.toList());
+        List<GrantedAuthority> grantedAuthorities = new ArrayList<>(Collections.singleton(new SimpleGrantedAuthority(Role.getIncludingRoles("USER"))));
 
         return new org.springframework.security.core.userdetails.User(
                 String.valueOf(user.getId()),

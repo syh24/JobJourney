@@ -25,18 +25,15 @@ public class QuestionController {
 
     @PostMapping("/question/create")
     @Operation(summary = "Create Question", description = "Gemini를 사용하여 질문 생성")
-    public Mono<ResponseEntity<String>> createQuestionWithGemini(@RequestBody QuestionDto.Request request) {
+    public ResponseEntity<BaseResponseDto<String>> createQuestionWithGemini(@RequestBody QuestionDto.Request request) {
 
         int questionNum= request.getQuestionNum();;
         String selfIntroductionContent = request.getContent();
 
         try {
-            return questionService.createQuestion(questionNum,selfIntroductionContent)
-                    .map(responseEntity -> {
-                        return ResponseEntity.ok(responseEntity.getBody());
-                    });
+            return questionService.createQuestion(questionNum,selfIntroductionContent);
         } catch (Exception e) {
-            return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 

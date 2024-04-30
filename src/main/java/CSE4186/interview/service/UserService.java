@@ -1,9 +1,8 @@
 package CSE4186.interview.service;
 
 import CSE4186.interview.controller.dto.UserDTO;
-import CSE4186.interview.entity.Authority;
 import CSE4186.interview.entity.User;
-import CSE4186.interview.repository.AuthRepository;
+import CSE4186.interview.login.Role;
 import CSE4186.interview.repository.UserRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,7 +16,6 @@ import java.util.*;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
-    private final AuthRepository authRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final ObjectMapper objectMapper;
 
@@ -27,14 +25,8 @@ public class UserService {
     }
 
     public void join(UserDTO.joinRequest request) {
-        Authority authority = authRepository.findById("ROLE_USER").orElseGet(()-> {
-            Authority newAuthority=new Authority("ROLE_USER");
-            authRepository.save(newAuthority);
-            return newAuthority;
-        });
         String encodedPassword=bCryptPasswordEncoder.encode(request.getPassword());
-        User newUser=new User(request.getName(), request.getEmail(), encodedPassword,authority);
-
+        User newUser=new User(request.getName(), request.getEmail(), encodedPassword, Role.USER);
         userRepository.save(newUser);
     }
 

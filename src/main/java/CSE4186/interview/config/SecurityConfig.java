@@ -70,7 +70,7 @@ public class SecurityConfig {
                                 .requestMatchers("/login/oauth2/**").permitAll()
                                 .requestMatchers("/join").permitAll()
                                 .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-                                .anyRequest().authenticated()
+                                .anyRequest().hasAnyRole("USER")
                 )
 
                 .oauth2Login(oauth2 ->
