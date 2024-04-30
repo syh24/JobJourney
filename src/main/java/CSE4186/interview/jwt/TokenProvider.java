@@ -68,6 +68,8 @@ public class TokenProvider implements InitializingBean {
                 .parseClaimsJws(token) //토큰을 파싱하여
                 .getBody(); //body를 리턴함
 
+        logger.info(claims.get(AUTHORITIES_KEY).toString());
+
         Collection<? extends GrantedAuthority> authorities = Arrays.stream(claims.get(AUTHORITIES_KEY).toString().split(","))
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());

@@ -1,16 +1,18 @@
 package CSE4186.interview.service;
 
+import CSE4186.interview.controller.dto.BaseResponseDto;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -77,108 +79,76 @@ public class QuestionService {
         }
     }
 
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Getter
-    public static class ApiResponseBody{
 
-        private List<Candidate> candidates;
-        private PromptFeedback promptFeedback;
-
-        @Builder
-        @Getter
-        @NoArgsConstructor
-        @AllArgsConstructor
-        static class Candidate{
-            private Content content;
-            private String finishReason;
-            private int index;
-            private List<ratingElem> safetyRatings;
-        }
-
-        @Builder
-        @Getter
-        @NoArgsConstructor
-        @AllArgsConstructor
-        static class Content{
-            private List<Part> parts;
-            private String role;
-        }
-
-        @Builder
-        @Getter
-        @NoArgsConstructor
-        @AllArgsConstructor
-        static class PromptFeedback{
-            private List<ratingElem> safetyRatings;
-        }
-
-        @Builder
-        @Getter
-        @NoArgsConstructor
-        @AllArgsConstructor
-        static class Part{
-            private String text;
-        }
-
-        @Builder
-        @Getter
-        @NoArgsConstructor
-        @AllArgsConstructor
-        static class ratingElem{
-            private String category;
-            private String probability;
-        }
-    }
-
-
-    public Mono<ResponseEntity<String>> createQuestion(int questionNum, String selfIntroductionContent) throws Exception {
+    public ResponseEntity<BaseResponseDto<String>> createQuestion(int questionNum, String selfIntroductionContent) throws Exception {
         String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" + apiKey;
 
-        String requestBody=createRequestBody(selfIntroductionContent);
-        WebClient webClient = WebClient.create();
+        RestTemplate template = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
         prompt=String.format(prompt,questionNum);
-        System.out.println("rr");
+        String requestBody=createRequestBody(selfIntroductionContent);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
 
-        return webClient.post()
-                .uri(url)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(BodyInserters.fromValue(requestBody))
-                .retrieve()
-                .bodyToMono(ApiResponseBody.class)
-                .flatMap(body -> {
-                    String response=
-                            body.getCandidates()
-                                .get(0)
-                                .getContent()
-                                .getParts()
-                                .get(0)
-                                .getText();
+        HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
 
-                    String[] parsedQuestions=response.split("\n");
-                    String[] rawQuestions=Arrays.stream(parsedQuestions)
-                                                .map(q->q.replaceAll("\\d+\\.","").trim())
-                                                .toArray(String[]::new);
+        ResponseEntity<String> responseEntity = template.exchange(
+                url,
+                HttpMethod.POST,
+                requestEntity,
+                String.class);
+        String result = responseEntity.getBody();
+        try{
+            Map<String, Object> jsonMap = objectMapper.readValue(result, new TypeReference<Map<String, Object>>() {});
+            Map<String, Object> candidates= (Map<String, Object>)((List<Object>)jsonMap.get("candidates")).get(0);
+            List<Map<String, Object>> parts=(List<Map<String,Object>>)((Map<String,Object>) candidates.get("content")).get("parts");
+            String response = (String)parts.get(0).get("text");
+            System.out.println(response);
 
-                    List<Map<String,String>> taggedQuestions=new ArrayList<>();
-                    IntStream.range(0, rawQuestions.length)
-                            .forEach(index->{
-                                Map<String,String> taggedQuestionMap=new HashMap<>();
-                                taggedQuestionMap.put(Integer.toString(index),rawQuestions[index]);
-                                taggedQuestions.add(taggedQuestionMap);
-                            });
+            String[] parsedQuestions=response.split("\n");
+            String[] rawQuestions=Arrays.stream(parsedQuestions)
+                    .map(q->q.replaceAll("\\d+\\.","").trim())
+                    .toArray(String[]::new);
 
-                    Map<String, List<Map<String,String>>> questionToJson = new HashMap<>();
-                    questionToJson.put("questions",taggedQuestions);
+            List<Map<String,String>> taggedQuestions=new ArrayList<>();
+            IntStream.range(0, rawQuestions.length)
+                    .forEach(index->{
+                        Map<String,String> taggedQuestionMap=new HashMap<>();
+                        taggedQuestionMap.put(Integer.toString(index),rawQuestions[index]);
+                        taggedQuestions.add(taggedQuestionMap);
+                    });
 
-                    try {
-                        String jsonResponseString = objectMapper.writeValueAsString(questionToJson);
-                        return Mono.just(ResponseEntity.ok(jsonResponseString));
-                    } catch (JsonProcessingException e) {
-                        return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
-                    }
-                });
+            Map<String, List<Map<String,String>>> questionToJson = new HashMap<>();
+            questionToJson.put("questions",taggedQuestions);
 
+            try {
+                String jsonResponseString = objectMapper.writeValueAsString(questionToJson);
+                return ResponseEntity.ok(
+                        new BaseResponseDto<String>(
+                                "success",
+                            "",
+                                    jsonResponseString
+                        )
+                );
+            } catch (JsonProcessingException e) {
+                return ResponseEntity.ok(
+                        new  BaseResponseDto<String>(
+                                "fail",
+                                "",
+                                ""
+                        )
+                );
+            }
+
+        } catch (Exception e){
+            e.printStackTrace();
+            return ResponseEntity.ok(
+                    new  BaseResponseDto<String>(
+                            "fail",
+                            "",
+                            ""
+                    )
+            );
+        }
 
     }
 
