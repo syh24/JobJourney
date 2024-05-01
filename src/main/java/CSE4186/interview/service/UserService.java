@@ -36,7 +36,6 @@ public class UserService {
 
         if(user.isPresent()){
             userIdMap.put("userId",user.get().getId());
-            System.out.println("d");
         }
 
         return objectMapper.writeValueAsString(userIdMap);
