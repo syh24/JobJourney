@@ -49,8 +49,8 @@ public class PostDto {
 
         public  Response(Post post) {
             this.id = post.getId();
+            this.title = post.getTitle();
             this.content = post.getContent();
-            this.title = post.getContent();
             this.createdAt = String.valueOf(post.getCreatedAt());
             this.updatedAt = String.valueOf(post.getUpdatedAt());
             this.userId = post.getUser().getId();

@@ -68,7 +68,7 @@ public class PostController {
         try {
             Post post = postService.addPost(request);
             return ResponseEntity.ok(
-                    new BaseResponseDto<PostDto.Response>(
+                    new BaseResponseDto<>(
                             "success",
                             "",
                             new PostDto.Response(post)
