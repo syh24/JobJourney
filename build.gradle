@@ -48,6 +48,11 @@ dependencies {
 	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
 	implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
 	implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+
+	//webClient
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+	//swagger? 이 라인 설치 없이 webClient dependency만 추가했을 때는 설치 에러 발생함.
+	//implementation 'org.springdoc:springdoc-openapi-webflux-ui:1.5.12'
 }
 
 tasks.named('test') {
