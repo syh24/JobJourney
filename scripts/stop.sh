@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ROOT_PATH="/home/ubuntu/interview"
+ROOT_PATH="/home/ubuntu/interview-production"
 JAR="$ROOT_PATH/application.jar"
 STOP_LOG="$ROOT_PATH/stop.log"
 SERVICE_PID=$(pgrep -f $JAR)
