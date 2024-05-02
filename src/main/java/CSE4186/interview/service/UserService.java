@@ -5,11 +5,13 @@ import CSE4186.interview.entity.Authority;
 import CSE4186.interview.entity.User;
 import CSE4186.interview.repository.AuthRepository;
 import CSE4186.interview.repository.UserRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.NoSuchElementException;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -17,17 +19,11 @@ public class UserService {
     private final UserRepository userRepository;
     private final AuthRepository authRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final ObjectMapper objectMapper;
 
     public User findUser(Long id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("no user"));
-    }
-
-    public boolean login(UserDTO.loginRequest request) {
-        User user=userRepository.findByEmail(request.getEmail());
-
-        if(user!=null && bCryptPasswordEncoder.matches(request.getPassword(), user.getPassword())) return true;
-        else return false;
     }
 
     public void join(UserDTO.joinRequest request) {
@@ -40,5 +36,25 @@ public class UserService {
         User newUser=new User(request.getName(), request.getEmail(), encodedPassword,authority);
 
         userRepository.save(newUser);
+    }
+
+    public String getUserId(String email) throws JsonProcessingException {
+        Map<String, Long> userIdMap=new HashMap<>();
+        Optional<User> user=userRepository.findByEmail(email);
+
+        if(user.isPresent()){
+            userIdMap.put("userId",user.get().getId());
+            System.out.println("d");
+        }
+
+        return objectMapper.writeValueAsString(userIdMap);
+    }
+
+
+    public List<String> checkNameAndEmail(String name, String email) {
+        List<String>invalidProperties=new ArrayList<>();
+        if(userRepository.findByName(name).isPresent()) invalidProperties.add("name");
+        if(userRepository.findByEmail(email).isPresent()) invalidProperties.add("email");
+        return invalidProperties;
     }
 }

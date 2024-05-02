@@ -31,8 +31,6 @@ public class PostDto {
     @Builder
     @Schema(name = "postUpdateRequest", description = "게시글 수정 DTO")
     public static class updateRequest {
-        @NotBlank
-        private Long id;
         private String title;
         private String content;
     }
@@ -51,12 +49,22 @@ public class PostDto {
 
         public  Response(Post post) {
             this.id = post.getId();
+            this.title = post.getTitle();
             this.content = post.getContent();
-            this.title = post.getContent();
             this.createdAt = String.valueOf(post.getCreatedAt());
             this.updatedAt = String.valueOf(post.getUpdatedAt());
             this.userId = post.getUser().getId();
             this.comments = post.getComments().stream().map(CommentDto.Response::new).collect(Collectors.toList());
+        }
+    }
+
+    @Getter
+    @Schema(name = "postUpdateResponse", description = "게시글 수정 DTO")
+    public static class updateResponse {
+        private final Long id;
+
+        public updateResponse(Long id) {
+            this.id = id;
         }
     }
 }
