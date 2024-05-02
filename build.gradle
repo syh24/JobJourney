@@ -49,6 +49,9 @@ dependencies {
 	implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
 	implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 
+	//tts
+	implementation 'com.google.cloud:google-cloud-texttospeech:2.43.0'
+
 	//webClient
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 	//swagger? 이 라인 설치 없이 webClient dependency만 추가했을 때는 설치 에러 발생함.
