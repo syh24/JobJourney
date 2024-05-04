@@ -10,6 +10,8 @@ import CSE4186.interview.service.PostService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,9 +29,13 @@ public class PostController {
 
     @GetMapping("/list")
     @Operation(summary = "Get All Posts", description = "모든 게시글을 조회")
-    public ResponseEntity<BaseResponseDto<List<PostDto.Response>>> getAllPosts() {
+    public ResponseEntity<BaseResponseDto<List<PostDto.Response>>> getAllPosts(
+            @PageableDefault(page = 1, size = 10) Pageable pageable,
+            @RequestParam(value = "q", defaultValue = "") String q,
+            @RequestParam(value = "searchBy", defaultValue = "") String searchBy
+    ) {
         try {
-            List<PostDto.Response> response = postService.findAllPosts()
+            List<PostDto.Response> response = postService.findPostsByCondition(pageable, q, searchBy)
                     .stream().map(PostDto.Response::new)
                     .collect(Collectors.toList());
             return ResponseEntity.ok(
