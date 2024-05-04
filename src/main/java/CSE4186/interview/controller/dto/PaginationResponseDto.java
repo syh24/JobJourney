@@ -3,11 +3,11 @@ package CSE4186.interview.controller.dto;
 import lombok.Getter;
 
 @Getter
-public class PaginationResponseDto<T> extends BaseResponseDto {
+public class PaginationResponseDto<T> extends BaseResponseDto<T> {
 
     private final int pageCount;
 
-    public PaginationResponseDto(String result, String message, Object body, int pageCount) {
+    public PaginationResponseDto(String result, String message, T body, int pageCount) {
         super(result, message, body);
         this.pageCount = pageCount;
     }
