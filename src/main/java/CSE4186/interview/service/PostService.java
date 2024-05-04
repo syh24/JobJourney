@@ -6,6 +6,10 @@ import CSE4186.interview.entity.User;
 import CSE4186.interview.repository.PostRepository;
 import CSE4186.interview.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,8 +26,14 @@ public class PostService {
     private final UserRepository userRepository;
 
     @Transactional(readOnly = true)
-    public List<Post> findAllPosts() {
-        return postRepository.findAll();
+    public Page<Post> findPostsByCondition(Pageable pageable, String q, String condition) {
+        int page = pageable.getPageNumber() - 1;
+
+        if(!q.isEmpty() && !condition.isEmpty()) {
+            return postRepository.findPostsBySearchCondition(q, condition, PageRequest.of(page, pageable.getPageSize()));
+        }
+
+        return postRepository.findAll(PageRequest.of(page, pageable.getPageSize(), Sort.by(Sort.Direction.DESC, "createdAt")));
     }
 
     public Post addPost(PostDto.createRequest request) {
