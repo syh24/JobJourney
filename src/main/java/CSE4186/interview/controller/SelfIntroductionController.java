@@ -21,7 +21,7 @@ public class SelfIntroductionController {
 
     private final SelfIntroductionService selfIntroductionService;
 
-    @GetMapping("/List")
+    @GetMapping("/List/{id}")
     @Operation(summary = "Get selfIntroductions", description = "모든 자소서를 조회")
     public ResponseEntity<List<SelfIntroductionDto.Response>> getSelfIntroductionList(@PathVariable(name = "id") Long id){
         List<SelfIntroductionDto.Response> response=selfIntroductionService.findAllSelfIntroductions(id)
@@ -30,7 +30,7 @@ public class SelfIntroductionController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/Save")
+    @PostMapping("/Save/{id}")
     @Operation(summary = "Save selfIntroductions", description = "자소서를 저장")
     public ResponseEntity<Long> saveSelfIntroductionList(SelfIntroductionDto.Request request){
         selfIntroductionService.save(request.getId(), request.getTitle(), request.getContent());
