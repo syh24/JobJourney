@@ -2,6 +2,7 @@ package CSE4186.interview.controller;
 
 import CSE4186.interview.controller.dto.BaseResponseDto;
 import CSE4186.interview.controller.dto.CommentDto;
+import CSE4186.interview.controller.dto.PaginationResponseDto;
 import CSE4186.interview.controller.dto.PostDto;
 import CSE4186.interview.entity.Comment;
 import CSE4186.interview.entity.Post;
@@ -10,6 +11,9 @@ import CSE4186.interview.service.PostService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,20 +31,27 @@ public class PostController {
 
     @GetMapping("/list")
     @Operation(summary = "Get All Posts", description = "모든 게시글을 조회")
-    public ResponseEntity<BaseResponseDto<List<PostDto.Response>>> getAllPosts() {
+    public ResponseEntity<PaginationResponseDto<List<PostDto.Response>>> getAllPosts(
+            @PageableDefault(page = 1, size = 10) Pageable pageable,
+            @RequestParam(value = "q", defaultValue = "") String q,
+            @RequestParam(value = "searchBy", defaultValue = "") String searchBy
+    ) {
         try {
-            List<PostDto.Response> response = postService.findAllPosts()
+            Page<Post> postsByCondition = postService.findPostsByCondition(pageable, q, searchBy);
+            List<PostDto.Response> response = postsByCondition
                     .stream().map(PostDto.Response::new)
                     .collect(Collectors.toList());
+
             return ResponseEntity.ok(
-                    new BaseResponseDto<List<PostDto.Response>>(
+                    new PaginationResponseDto<>(
                             "success",
                             "",
-                            response
+                            response,
+                            postsByCondition.getTotalPages()
                     ));
         } catch (Exception e) {
             return ResponseEntity.ok(
-                    BaseResponseDto.fail(e.getMessage())
+                    PaginationResponseDto.p_fail(e.getMessage())
             );
         }
     }
@@ -50,7 +61,7 @@ public class PostController {
         try {
             Post post = postService.findPost(id);
             return ResponseEntity.ok(
-                    new BaseResponseDto<PostDto.Response>(
+                    new BaseResponseDto<>(
                             "success",
                             "",
                             new PostDto.Response(post)
@@ -68,7 +79,7 @@ public class PostController {
         try {
             Post post = postService.addPost(request);
             return ResponseEntity.ok(
-                    new BaseResponseDto<PostDto.Response>(
+                    new BaseResponseDto<>(
                             "success",
                             "",
                             new PostDto.Response(post)
