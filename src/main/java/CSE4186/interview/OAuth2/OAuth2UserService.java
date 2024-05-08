@@ -2,9 +2,8 @@ package CSE4186.interview.OAuth2;
 
 import CSE4186.interview.controller.dto.Oauth2Principal;
 import CSE4186.interview.controller.dto.Oauth2UserInfo;
-import CSE4186.interview.entity.Authority;
 import CSE4186.interview.entity.User;
-import CSE4186.interview.repository.AuthRepository;
+import CSE4186.interview.login.Role;
 import CSE4186.interview.repository.UserRepository;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +23,6 @@ import java.util.Optional;
 public class OAuth2UserService extends DefaultOAuth2UserService {
 
     private final UserRepository userRepository;
-    private final AuthRepository authRepository;
     private final Logger logger = LoggerFactory.getLogger(OAuth2UserService.class);
 
     private final HttpSession httpSession;
@@ -56,12 +54,7 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
     private User getUser(Oauth2UserInfo oAuth2UserInfo) {
         Optional<User> memberOptional = userRepository.findByEmail(oAuth2UserInfo.email());
         User user = memberOptional.orElseGet(() -> {
-            Authority authority = authRepository.findById("ROLE_USER").orElseGet(() -> {
-                Authority newAuthority = new Authority("ROLE_USER");
-                authRepository.save(newAuthority);
-                return newAuthority;
-            });
-            User newUser = new User(oAuth2UserInfo.name(), oAuth2UserInfo.email(), authority);
+            User newUser = new User(oAuth2UserInfo.name(), oAuth2UserInfo.email(), Role.USER);
             userRepository.save(newUser);
             return newUser;
         });

@@ -68,6 +68,8 @@ public class TokenProvider implements InitializingBean {
                 .parseClaimsJws(token) //토큰을 파싱하여
                 .getBody(); //body를 리턴함
 
+        logger.info(claims.get(AUTHORITIES_KEY).toString());
+
         Collection<? extends GrantedAuthority> authorities = Arrays.stream(claims.get(AUTHORITIES_KEY).toString().split(","))
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());
@@ -83,19 +85,19 @@ public class TokenProvider implements InitializingBean {
             return true;
         } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
             logger.info("잘못된 JWT 서명입니다.");
-            httpServletRequest.setAttribute("exception", JwtExceptionCode.WRONG_TOKEN.getCode());
+            httpServletRequest.setAttribute("exception", JwtExceptionCode.WRONG_TOKEN.getMessage());
             System.out.println("1 JWT");
         } catch (ExpiredJwtException e) {
             logger.info("2 JWT");
-            httpServletRequest.setAttribute("exception", JwtExceptionCode.EXPIRED_TOKEN.getCode());
+            httpServletRequest.setAttribute("exception", JwtExceptionCode.EXPIRED_TOKEN.getMessage());
             System.out.println("만료된 JWT 토큰입니다");
         } catch (UnsupportedJwtException e) {
             logger.info("지원되지 않는 JWT 토큰입니다");
-            httpServletRequest.setAttribute("exception", JwtExceptionCode.UNSUPPORTED_TOKEN.getCode());
+            httpServletRequest.setAttribute("exception", JwtExceptionCode.UNSUPPORTED_TOKEN.getMessage());
             System.out.println("3 JWT");
         } catch (IllegalArgumentException e) {
             logger.info("JWT 토큰이 잘못되었습니다");
-            httpServletRequest.setAttribute("exception", JwtExceptionCode.ILLEGAL_TOKEN.getCode());
+            httpServletRequest.setAttribute("exception", JwtExceptionCode.ILLEGAL_TOKEN.getMessage());
             System.out.println("4 JWT");
         }
         return false;

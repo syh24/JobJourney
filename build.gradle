@@ -53,6 +53,9 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 	//swagger? 이 라인 설치 없이 webClient dependency만 추가했을 때는 설치 에러 발생함.
 	//implementation 'org.springdoc:springdoc-openapi-webflux-ui:1.5.12'
+
+	//HttpClient
+	implementation group: 'org.apache.httpcomponents.client5', name: 'httpclient5', version: '5.3.1'
 }
 
 tasks.named('test') {
