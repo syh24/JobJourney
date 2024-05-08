@@ -56,6 +56,9 @@ dependencies {
 
 	//HttpClient
 	implementation group: 'org.apache.httpcomponents.client5', name: 'httpclient5', version: '5.3.1'
+
+	//tts
+	implementation 'com.google.cloud:google-cloud-texttospeech:2.43.0'
 }
 
 tasks.named('test') {
