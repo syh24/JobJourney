@@ -3,13 +3,16 @@ package CSE4186.interview.controller;
 
 import CSE4186.interview.controller.dto.BaseResponseDto;
 import CSE4186.interview.controller.dto.UserDTO;
+import CSE4186.interview.jwt.TokenProvider;
 import CSE4186.interview.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -39,15 +43,16 @@ public class LoginController {
 
     @PostMapping("/join/check")
     @Operation(summary = "checkNameAndEmail", description = "네임, 이메일 중복 체크")
-    public ResponseEntity<BaseResponseDto<List<String>>> check(@RequestBody UserDTO.joinRequest request){
+    public ResponseEntity<BaseResponseDto<String>> check(@RequestBody UserDTO.joinRequest request){
 
         List<String> result=userService.checkNameAndEmail(request.getName(),request.getEmail());
+        String dup;
 
         return ResponseEntity.ok(
                 new BaseResponseDto<>(
-                        result.size()>0?"invalid":"valid",
-                        "",
-                        result
+                        result.size()>0?"fail":"success",
+                        result.stream().collect(Collectors.joining(",")),
+                        ""
                 ));
 
     }
@@ -66,6 +71,19 @@ public class LoginController {
                                     userIdMap
                             ));
 
+    }
+
+    //유효한 jwt 토큰인지 검사
+    @GetMapping("/token/check")
+    @Operation(summary="JWT validity check", description = "jwt 토큰 유효성 체크")
+    public ResponseEntity<BaseResponseDto<String>> tokenValidityCheck(HttpServletRequest request){
+        String exceptionCode = (String) request.getAttribute("exception");
+        return ResponseEntity.ok(
+                new BaseResponseDto<>(
+                        "success",
+                        exceptionCode.equals(null)?"":exceptionCode,
+                        ""
+                ));
     }
 
 

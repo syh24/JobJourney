@@ -30,10 +30,10 @@ public class SelfIntroductionController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/Save")
+    @PostMapping("/Save")
     @Operation(summary = "Save selfIntroductions", description = "자소서를 저장")
     public ResponseEntity<Long> saveSelfIntroductionList(SelfIntroductionDto.Request request){
-        selfIntroductionService.save(request.getId(), request.getContent());
+        selfIntroductionService.save(request.getId(), request.getTitle(), request.getContent());
         return ResponseEntity.ok(request.getId());
     }
 }

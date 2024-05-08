@@ -32,6 +32,7 @@ public class SelfIntroductionDto {
     @Schema(name = "selfIntroductionRequest", description = "자소서 응답 DTO")
     public static class Response {
         private Long id;
+        private String title;
         private String content;
         private String createdAt;
 
