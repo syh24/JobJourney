@@ -3,8 +3,8 @@ package CSE4186.interview.controller;
 
 import CSE4186.interview.controller.dto.BaseResponseDto;
 import CSE4186.interview.controller.dto.UserDTO;
-import CSE4186.interview.jwt.TokenProvider;
 import CSE4186.interview.service.UserService;
+import CSE4186.interview.utils.ApiUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -31,14 +31,9 @@ public class LoginController {
 
     @PostMapping("/join")
     @Operation(summary = "Join User", description = "회원가입")
-    public ResponseEntity<BaseResponseDto<String>> join(@RequestBody UserDTO.joinRequest request){
+    public ApiUtil.ApiSuccessResult<String> join(@RequestBody UserDTO.joinRequest request){
         userService.join(request);
-        return ResponseEntity.ok(
-                new BaseResponseDto<>(
-                        "success",
-                        "",
-                        ""
-                ));
+        return ApiUtil.success("회원가입이 완료되었습니다.");
     }
 
     @PostMapping("/join/check")
@@ -59,17 +54,12 @@ public class LoginController {
 
     @PostMapping("/login")
     @Operation(summary = "Login", description = "로그인")
-    public ResponseEntity<BaseResponseDto<Map<String, String>>> login(@AuthenticationPrincipal User loginUser){
+    public ApiUtil.ApiSuccessResult<Map<String, String>> login(@AuthenticationPrincipal User loginUser){
 
         Map<String,String> userIdMap=new HashMap<>();
         userIdMap.put("userId", loginUser.getUsername());
 
-        return ResponseEntity.ok(
-                            new BaseResponseDto<>(
-                                    "success",
-                                    "",
-                                    userIdMap
-                            ));
+        return ApiUtil.success(userIdMap);
 
     }
 
@@ -85,7 +75,4 @@ public class LoginController {
                         ""
                 ));
     }
-
-
-
 }
