@@ -12,7 +12,7 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ReviewDto {
     private List<Integer> verbal;
-    @JsonProperty("non_verbal")
+    @JsonProperty("nonverbal")
     private List<Integer> nonVerbal;
     private String review;
 
