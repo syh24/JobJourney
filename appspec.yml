@@ -7,7 +7,7 @@ files:
     overwrite: yes
 
 permissions:
-  - object: /
+  - object: /home/ubuntu
     owner: ubuntu
     group: ubuntu
 
