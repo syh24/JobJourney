@@ -1,6 +1,5 @@
 package CSE4186.interview.controller;
 
-import CSE4186.interview.controller.dto.BaseResponseDto;
 import CSE4186.interview.controller.dto.CommentDto;
 import CSE4186.interview.controller.dto.PaginationResponseDto;
 import CSE4186.interview.controller.dto.PostDto;
@@ -8,6 +7,7 @@ import CSE4186.interview.entity.Comment;
 import CSE4186.interview.entity.Post;
 import CSE4186.interview.service.CommentService;
 import CSE4186.interview.service.PostService;
+import CSE4186.interview.utils.ApiUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -36,151 +36,67 @@ public class PostController {
             @RequestParam(value = "q", defaultValue = "") String q,
             @RequestParam(value = "searchBy", defaultValue = "") String searchBy
     ) {
-        try {
-            Page<Post> postsByCondition = postService.findPostsByCondition(pageable, q, searchBy);
-            List<PostDto.Response> response = postsByCondition
-                    .stream().map(PostDto.Response::new)
-                    .collect(Collectors.toList());
 
-            return ResponseEntity.ok(
-                    new PaginationResponseDto<>(
-                            "success",
-                            "",
-                            response,
-                            postsByCondition.getTotalPages()
-                    ));
-        } catch (Exception e) {
-            return ResponseEntity.ok(
-                    PaginationResponseDto.p_fail(e.getMessage())
-            );
-        }
+        Page<Post> postsByCondition = postService.findPostsByCondition(pageable, q, searchBy);
+        List<PostDto.Response> response = postsByCondition
+                .stream().map(PostDto.Response::new)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(
+                new PaginationResponseDto<>(
+                        "success",
+                        "",
+                        response,
+                        postsByCondition.getTotalPages()
+                ));
     }
     @GetMapping("/{id}")
     @Operation(summary = "Get Post", description = "게시글 상세")
-    public ResponseEntity<BaseResponseDto<PostDto.Response>> getPost(@PathVariable(name = "id") Long id) {
-        try {
-            Post post = postService.findPost(id);
-            return ResponseEntity.ok(
-                    new BaseResponseDto<>(
-                            "success",
-                            "",
-                            new PostDto.Response(post)
-                    ));
-        } catch (Exception e) {
-            return ResponseEntity.ok(
-                    BaseResponseDto.fail(e.getMessage())
-            );
-        }
+    public ApiUtil.ApiSuccessResult<PostDto.Response> getPost(@PathVariable(name = "id") Long id) {
+        Post post = postService.findPost(id);
+        return ApiUtil.success(new PostDto.Response(post));
     }
 
     @PostMapping
     @Operation(summary = "Add Post", description = "게시글 생성")
-    public ResponseEntity<BaseResponseDto<PostDto.Response>> addPost(@RequestBody PostDto.createRequest request) {
-        try {
-            Post post = postService.addPost(request);
-            return ResponseEntity.ok(
-                    new BaseResponseDto<>(
-                            "success",
-                            "",
-                            new PostDto.Response(post)
-                    ));
-        } catch (Exception e) {
-            return ResponseEntity.ok(
-                    BaseResponseDto.fail(e.getMessage())
-            );
-        }
+    public ApiUtil.ApiSuccessResult<PostDto.Response> addPost(@RequestBody PostDto.createRequest request) {
+        Post post = postService.addPost(request);
+        return ApiUtil.success(new PostDto.Response(post));
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Update Post", description = "게시글 수정")
-    public ResponseEntity<BaseResponseDto<PostDto.updateResponse>> updatePost(@PathVariable Long id, @RequestBody PostDto.updateRequest request) {
-        try {
-            postService.updatePost(id, request);
-            return ResponseEntity.ok(
-                    new BaseResponseDto<>(
-                            "success",
-                            "",
-                            new PostDto.updateResponse(id)
-                    ));
-        } catch (Exception e) {
-            return ResponseEntity.ok(
-                    BaseResponseDto.fail(e.getMessage())
-            );
-        }
+    public ApiUtil.ApiSuccessResult<PostDto.updateResponse> updatePost(@PathVariable Long id, @RequestBody PostDto.updateRequest request) {
+        postService.updatePost(id, request);
+        return ApiUtil.success(new PostDto.updateResponse(id));
     }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete Post", description = "게시글 삭제")
-    public ResponseEntity<BaseResponseDto<String>> delete(@PathVariable(name = "id") Long id) {
-        try {
-            postService.deletePost(id);
-            return ResponseEntity.ok(
-                    new BaseResponseDto<>(
-                            "success",
-                            "",
-                            ""
-                    ));
-        } catch (Exception e) {
-            return ResponseEntity.ok(
-                    BaseResponseDto.fail(e.getMessage())
-            );
-        }
+    public ApiUtil.ApiSuccessResult<String> delete(@PathVariable(name = "id") Long id) {
+        postService.deletePost(id);
+        return ApiUtil.success("게시글이 삭제되었습니다.");
     }
 
     @PostMapping("/{id}/comment")
     @Operation(summary = "Add Comment", description = "댓글 생성")
-    public ResponseEntity<BaseResponseDto<CommentDto.Response>> addPost(@RequestBody CommentDto.createRequest request,
-                                                                        @PathVariable(name = "id") Long id) {
-        try {
-            Comment comment = commentService.addComment(request, id);
-            return ResponseEntity.ok(
-                    new BaseResponseDto<>(
-                            "success",
-                            "",
-                            new CommentDto.Response(comment)
-                    ));
-        } catch (Exception e) {
-            return ResponseEntity.ok(
-                    BaseResponseDto.fail(e.getMessage())
-            );
-        }
+    public ApiUtil.ApiSuccessResult<CommentDto.Response> addPost(@RequestBody CommentDto.createRequest request,
+                                                                 @PathVariable(name = "id") Long id) {
+        Comment comment = commentService.addComment(request, id);
+        return ApiUtil.success(new CommentDto.Response(comment));
     }
 
     @PutMapping("/{id}/comment")
     @Operation(summary = "Update Comment", description = "댓글 수정")
-    public ResponseEntity<BaseResponseDto<CommentDto.updateResponse>> updateComment(@RequestBody CommentDto.updateRequest request) {
-        try {
-            commentService.updateComment(request);
-            return ResponseEntity.ok(
-                    new BaseResponseDto<>(
-                            "success",
-                            "",
-                            new CommentDto.updateResponse(request.getId())
-                    ));
-        } catch (Exception e) {
-            return ResponseEntity.ok(
-                    BaseResponseDto.fail(e.getMessage())
-            );
-        }
+    public ApiUtil.ApiSuccessResult<CommentDto.updateResponse> updateComment(@RequestBody CommentDto.updateRequest request) {
+        commentService.updateComment(request);
+        return ApiUtil.success(new CommentDto.updateResponse(request.getId()));
     }
 
     @DeleteMapping("/{id}/comment")
     @Operation(summary = "Delete Comment", description = "댓글 삭제")
-    public ResponseEntity<BaseResponseDto<String>> deleteComment(@RequestBody CommentDto.deleteRequest request) {
-        try {
-            commentService.deleteComment(request.getId());
-            return ResponseEntity.ok(
-                    new BaseResponseDto<>(
-                            "success",
-                            "",
-                            ""
-                    ));
-        } catch (Exception e) {
-            return ResponseEntity.ok(
-                    BaseResponseDto.fail(e.getMessage())
-            );
-        }
+    public ApiUtil.ApiSuccessResult<String> deleteComment(@RequestBody CommentDto.deleteRequest request) {
+        commentService.deleteComment(request.getId());
+        return ApiUtil.success("댓글이 삭제되었습니다.");
     }
-
-
 }
