@@ -2,6 +2,7 @@ package CSE4186.interview.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
@@ -27,4 +28,10 @@ public class Video extends BaseTimeEntity {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @Builder
+    public Video(String title, String link, User user) {
+        this.title = title;
+        this.link = link;
+        this.user = user;
+    }
 }
