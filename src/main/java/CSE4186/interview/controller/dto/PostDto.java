@@ -46,7 +46,7 @@ public class PostDto {
         private final Long userId;
         private final List<CommentDto.Response> comments;
 
-        public  Response(Post post) {
+        public Response(Post post) {
             this.id = post.getId();
             this.title = post.getTitle();
             this.content = post.getContent();
