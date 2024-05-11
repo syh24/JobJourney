@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.util.List;
@@ -14,8 +15,6 @@ public class PostDto {
 
     @Data
     @AllArgsConstructor
-    @NoArgsConstructor
-    @Builder
     @Schema(name = "postCreateRequest", description = "게시글 생성 DTO")
     public static class createRequest {
         private String title;
@@ -26,8 +25,6 @@ public class PostDto {
 
     @Data
     @AllArgsConstructor
-    @NoArgsConstructor
-    @Builder
     @Schema(name = "postUpdateRequest", description = "게시글 수정 DTO")
     public static class updateRequest {
         private String title;
@@ -55,6 +52,15 @@ public class PostDto {
             this.userId = post.getUser().getId();
             this.comments = post.getComments().stream().map(CommentDto.Response::new).collect(Collectors.toList());
         }
+    }
+
+    @Data
+    @RequiredArgsConstructor
+    @Schema(name = "postListResponse", description = "게시글 전체 list 응답 DTO")
+    public static class postListResponse {
+        @NotNull
+        private final List<PostDto.Response> list;
+        private final int pageCount;
     }
 
     @Getter
