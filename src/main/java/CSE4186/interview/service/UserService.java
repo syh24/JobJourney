@@ -56,7 +56,7 @@ public class UserService {
                 .orElseThrow(() -> new NotFoundException("해당 유저가 존재하지 않습니다."));
 
         if (user.getSuspensionStatus()) {
-            throw new Exception("해당 계정은 정지된 계정입니다.");
+            throw new IllegalStateException("해당 계정은 정지된 계정입니다.");
         }
     }
 }
