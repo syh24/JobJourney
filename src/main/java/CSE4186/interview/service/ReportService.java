@@ -46,6 +46,15 @@ public class ReportService {
 
         Report report = reportRepository.save(reportBuilder.build());
 
+        checkReportCount(findUser);
+
         return report.getId();
+    }
+
+    private void checkReportCount(User user) {
+        Long reportCount = reportRepository.findReportCountByUser(user.getId());
+        if (reportCount >= 3) {
+            user.accountSuspension();
+        }
     }
 }
