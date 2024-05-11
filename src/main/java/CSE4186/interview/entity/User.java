@@ -38,6 +38,8 @@ public class User extends BaseTimeEntity {
     @Column(nullable = false)
     private String password;
 
+    private Boolean suspensionStatus = false;
+
     @Enumerated(EnumType.STRING)
     private Role authority;
 
@@ -55,5 +57,7 @@ public class User extends BaseTimeEntity {
         this.authority=authority;
     }
 
-
+    public void accountSuspension() {
+        this.suspensionStatus = true;
+    }
 }

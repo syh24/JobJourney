@@ -40,12 +40,11 @@ public class LoginController {
     @Operation(summary = "checkNameAndEmail", description = "네임, 이메일 중복 체크")
     public ResponseEntity<BaseResponseDto<String>> check(@RequestBody UserDTO.joinRequest request){
 
-        List<String> result=userService.checkNameAndEmail(request.getName(),request.getEmail());
-        String dup;
+        List<String> result = userService.checkNameAndEmail(request.getName(), request.getEmail());
 
         return ResponseEntity.ok(
                 new BaseResponseDto<>(
-                        result.size()>0?"fail":"success",
+                        result.size() > 0 ? "fail" : "success",
                         result.stream().collect(Collectors.joining(",")),
                         ""
                 ));
@@ -54,13 +53,12 @@ public class LoginController {
 
     @PostMapping("/login")
     @Operation(summary = "Login", description = "로그인")
-    public ApiUtil.ApiSuccessResult<Map<String, String>> login(@AuthenticationPrincipal User loginUser){
+    public ApiUtil.ApiSuccessResult<Map<String, String>> login(@AuthenticationPrincipal User loginUser) throws Exception {
+        userService.checkAccountStatus(loginUser.getUsername());
 
-        Map<String,String> userIdMap=new HashMap<>();
+        Map<String, String> userIdMap = new HashMap<>();
         userIdMap.put("userId", loginUser.getUsername());
-
         return ApiUtil.success(userIdMap);
-
     }
 
     //유효한 jwt 토큰인지 검사
@@ -71,7 +69,7 @@ public class LoginController {
         return ResponseEntity.ok(
                 new BaseResponseDto<>(
                         "success",
-                        exceptionCode.equals(null)?"":exceptionCode,
+                        exceptionCode.equals(null) ? "" : exceptionCode,
                         ""
                 ));
     }
