@@ -1,7 +1,6 @@
 package CSE4186.interview.controller;
 
 import CSE4186.interview.controller.dto.CommentDto;
-import CSE4186.interview.controller.dto.PaginationResponseDto;
 import CSE4186.interview.controller.dto.PostDto;
 import CSE4186.interview.entity.Comment;
 import CSE4186.interview.entity.Post;
@@ -14,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -31,7 +29,7 @@ public class PostController {
 
     @GetMapping("/list")
     @Operation(summary = "Get All Posts", description = "모든 게시글을 조회")
-    public ResponseEntity<PaginationResponseDto<List<PostDto.Response>>> getAllPosts(
+    public ApiUtil.ApiSuccessResult<PostDto.postListResponse> getAllPosts(
             @PageableDefault(page = 1, size = 10) Pageable pageable,
             @RequestParam(value = "q", defaultValue = "") String q,
             @RequestParam(value = "searchBy", defaultValue = "") String searchBy
@@ -40,15 +38,9 @@ public class PostController {
         Page<Post> postsByCondition = postService.findPostsByCondition(pageable, q, searchBy);
         List<PostDto.Response> response = postsByCondition
                 .stream().map(PostDto.Response::new)
-                .collect(Collectors.toList());
+                .toList();
 
-        return ResponseEntity.ok(
-                new PaginationResponseDto<>(
-                        "success",
-                        "",
-                        response,
-                        postsByCondition.getTotalPages()
-                ));
+        return ApiUtil.success(new PostDto.postListResponse(response, postsByCondition.getTotalPages()));
     }
     @GetMapping("/{id}")
     @Operation(summary = "Get Post", description = "게시글 상세")
