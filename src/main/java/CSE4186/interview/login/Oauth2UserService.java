@@ -1,4 +1,4 @@
-package CSE4186.interview.service;
+package CSE4186.interview.login;
 
 import CSE4186.interview.controller.dto.BaseResponseDto;
 import CSE4186.interview.entity.User;
