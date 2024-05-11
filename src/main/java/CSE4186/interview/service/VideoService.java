@@ -7,10 +7,12 @@ import CSE4186.interview.exception.NotFoundException;
 import CSE4186.interview.repository.UserRepository;
 import CSE4186.interview.repository.VideoRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.NoSuchElementException;
 
 @Service
 @RequiredArgsConstructor
@@ -33,5 +35,10 @@ public class VideoService {
 
         videoRepository.save(video);
         return video.getId();
+    }
+
+    public Page<Video> findAllVideo(Pageable pageable) {
+        int page = pageable.getPageNumber() - 1;
+        return videoRepository.findAll(PageRequest.of(page, pageable.getPageSize(), Sort.by(Sort.Direction.DESC, "createdAt")));
     }
 }
