@@ -3,6 +3,7 @@ package CSE4186.interview.service;
 import CSE4186.interview.controller.dto.VideoDto;
 import CSE4186.interview.entity.User;
 import CSE4186.interview.entity.Video;
+import CSE4186.interview.exception.NotFoundException;
 import CSE4186.interview.repository.UserRepository;
 import CSE4186.interview.repository.VideoRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +23,7 @@ public class VideoService {
     @Transactional
     public Long addVideo(VideoDto.createRequest request) {
         User findUser = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new NoSuchElementException("no user"));
+                .orElseThrow(() -> new NotFoundException("해당 유저가 존재하지 않습니다."));
 
         Video video = Video.builder()
                 .link(request.getLink())
