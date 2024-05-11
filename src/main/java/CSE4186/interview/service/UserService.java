@@ -49,4 +49,14 @@ public class UserService {
         if(userRepository.findByEmail(email).isPresent()) invalidProperties.add("email");
         return invalidProperties;
     }
+
+    public void checkAccountStatus(String userId) throws Exception {
+        Long id = Long.parseLong(userId);
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("해당 유저가 존재하지 않습니다."));
+
+        if (user.getSuspensionStatus()) {
+            throw new IllegalStateException("해당 계정은 정지된 계정입니다.");
+        }
+    }
 }
