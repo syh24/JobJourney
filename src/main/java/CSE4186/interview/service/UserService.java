@@ -44,7 +44,7 @@ public class UserService {
 
 
     public Boolean isDuplicatedNameOrEmail(String name, String email) {
-        return userRepository.findByName(name).isPresent() || userRepository.findByEmail(email).isPresent()
+        return userRepository.findByName(name).isPresent() || userRepository.findByEmail(email).isPresent();
     }
 
     public void checkAccountStatus(String userId) throws Exception {

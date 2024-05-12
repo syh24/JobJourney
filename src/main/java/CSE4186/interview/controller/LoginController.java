@@ -38,8 +38,7 @@ public class LoginController {
     @PostMapping("/join/check")
     @Operation(summary = "checkNameAndEmail", description = "네임, 이메일 중복 체크")
     public ApiUtil.ApiSuccessResult<Boolean> check(@Valid @RequestBody UserDTO.joinRequest request){
-        Boolean result = userService.isDuplicatedNameOrEmail(request.getName(), request.getEmail());
-        return ApiUtil.success(result);
+        return ApiUtil.success(userService.isDuplicatedNameOrEmail(request.getName(), request.getEmail()));
     }
 
     @PostMapping("/login")
