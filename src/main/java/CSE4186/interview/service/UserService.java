@@ -43,11 +43,8 @@ public class UserService {
     }
 
 
-    public List<String> checkNameAndEmail(String name, String email) {
-        List<String>invalidProperties=new ArrayList<>();
-        if(userRepository.findByName(name).isPresent()) invalidProperties.add("name");
-        if(userRepository.findByEmail(email).isPresent()) invalidProperties.add("email");
-        return invalidProperties;
+    public Boolean isDuplicatedNameOrEmail(String name, String email) {
+        return userRepository.findByName(name).isPresent() || userRepository.findByEmail(email).isPresent()
     }
 
     public void checkAccountStatus(String userId) throws Exception {
