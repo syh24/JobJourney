@@ -62,7 +62,9 @@ public class PostService {
     }
 
     public Post findPost(Long id) {
-        return postRepository.findById(id).orElseThrow(() ->
+        Post post = postRepository.findById(id).orElseThrow(() ->
                 new NotFoundException("해당 게시글이 존재하지 않습니다. id=" + id));
+        post.addViewCount();
+        return post;
     }
 }

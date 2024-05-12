@@ -38,6 +38,9 @@ public class PostDto {
         private final Long id;
         private final String title;
         private final String content;
+        private final Integer like;
+        private final Integer dislike;
+        private final Integer viewCount;
         private final String createdAt;
         private final String updatedAt;
         private final Long userId;
@@ -51,6 +54,9 @@ public class PostDto {
             this.updatedAt = String.valueOf(post.getUpdatedAt());
             this.userId = post.getUser().getId();
             this.comments = post.getComments().stream().map(CommentDto.Response::new).collect(Collectors.toList());
+            this.like = post.getLikeCount();
+            this.dislike = post.getDislikeCount();
+            this.viewCount = post.getViewCount();
         }
     }
 
