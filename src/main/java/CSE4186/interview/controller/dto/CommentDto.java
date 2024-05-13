@@ -6,32 +6,32 @@ import CSE4186.interview.entity.User;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 public class CommentDto {
 
     @Data
-    @Builder
     @AllArgsConstructor
     @NoArgsConstructor
     @Schema(name = "commentCreateRequest", description = "댓글 생성 DTO")
     public static class createRequest {
-        private String content;
-        private Long userId;
+        @NotNull private String content;
+        @NotNull private Long userId;
     }
 
     @Data
-    @Builder
     @AllArgsConstructor
     @NoArgsConstructor
     @Schema(name = "commentUpdateRequest", description = "댓글 수정 DTO")
     public static class updateRequest {
+        @NotNull
         private Long id;
+        @NotNull
         private String content;
     }
 
     @Data
-    @Builder
     @AllArgsConstructor
     @NoArgsConstructor
     @Schema(name = "commentDeleteRequest", description = "댓글 삭제 DTO")

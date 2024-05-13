@@ -8,6 +8,7 @@ import CSE4186.interview.utils.ApiUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -18,9 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -31,24 +30,15 @@ public class LoginController {
 
     @PostMapping("/join")
     @Operation(summary = "Join User", description = "회원가입")
-    public ApiUtil.ApiSuccessResult<String> join(@RequestBody UserDTO.joinRequest request){
+    public ApiUtil.ApiSuccessResult<String> join(@Valid @RequestBody UserDTO.joinRequest request){
         userService.join(request);
         return ApiUtil.success("회원가입이 완료되었습니다.");
     }
 
     @PostMapping("/join/check")
     @Operation(summary = "checkNameAndEmail", description = "네임, 이메일 중복 체크")
-    public ResponseEntity<BaseResponseDto<String>> check(@RequestBody UserDTO.joinRequest request){
-
-        List<String> result = userService.checkNameAndEmail(request.getName(), request.getEmail());
-
-        return ResponseEntity.ok(
-                new BaseResponseDto<>(
-                        result.size() > 0 ? "fail" : "success",
-                        result.stream().collect(Collectors.joining(",")),
-                        ""
-                ));
-
+    public ApiUtil.ApiSuccessResult<Boolean> check(@Valid @RequestBody UserDTO.joinRequest request){
+        return ApiUtil.success(userService.isDuplicatedNameOrEmail(request.getName(), request.getEmail()));
     }
 
     @PostMapping("/login")
