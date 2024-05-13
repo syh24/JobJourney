@@ -52,12 +52,23 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
                                             Authentication authResult) throws IOException, ServletException {
         logger.info("login success");
 
-        //Access Token
+        //1. accessToken 생성
         String AccessJwt=tokenProvider.createAccessToken(authResult);
+
+        //2. 헤더에 담는다.
         response.setHeader("Authorization","Bearer "+AccessJwt);
 
-        //save user at securityContext
-        logger.info(authResult.getName());
+        //3. refreshToken 생성
+        String refreshToken=tokenProvider.createRefreshToken(authResult,null);
+
+        //4. 쿠키에 담기
+        response.setHeader("Set-Cookie",
+                "refreshToken="+refreshToken+"; "+
+                        "Path=/;" +
+                        "Domain=localhost; " +
+                        "HttpOnly; " +
+                        "Max-Age=604800; "
+        );
 
         chain.doFilter(request,response);
     }
