@@ -129,10 +129,10 @@ public class QuestionService {
             for (int i = 0; i < rawQuestions.length; i++){
 
                 String rawQuestion = rawQuestions[i];
-                try {
+                //try {
                     // Generate speech for the question using TextToSpeechService
                     byte[] audioData = textToSpeechService.synthesizeText(rawQuestion);
-
+                    //System.out.println(audioData);
                     // Convert audio data to base64 string
                     String audioBase64 = Base64.getEncoder().encodeToString(audioData);
 
@@ -146,10 +146,10 @@ public class QuestionService {
 
                     // Add the question with text and audio data to the list
                     taggedQuestionAudioPairs.add(taggedQuestionAudioPair);
-                } catch (IOException e) {
-                    e.printStackTrace();
+               // } catch (IOException e) {
+                    //e.printStackTrace();
                     // Handle the exception appropriately
-                }
+                //}
             }
 
             Map<String, List<Map<String,Map<String, Object>>>> questionToJson = new HashMap<>();
