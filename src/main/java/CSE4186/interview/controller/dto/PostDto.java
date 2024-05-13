@@ -17,9 +17,11 @@ public class PostDto {
     @AllArgsConstructor
     @Schema(name = "postCreateRequest", description = "게시글 생성 DTO")
     public static class createRequest {
+        @NotNull
         private String title;
+        @NotNull
         private String content;
-        @NotBlank
+        @NotNull
         private Long userId;
     }
 
@@ -27,7 +29,10 @@ public class PostDto {
     @AllArgsConstructor
     @Schema(name = "postUpdateRequest", description = "게시글 수정 DTO")
     public static class updateRequest {
+
+        @NotNull
         private String title;
+        @NotNull
         private String content;
     }
 
