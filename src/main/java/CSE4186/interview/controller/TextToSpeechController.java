@@ -19,10 +19,11 @@ public class TextToSpeechController {
     @PostMapping("/synthesize")
     public ResponseEntity<byte[]> synthesizeSpeech(@RequestBody String text) {
         try {
-            byte[] audioContent = textToSpeechService.synthesizeText(text);
+            byte[] audioContent = textToSpeechService.convertTextToSpeech(text);
             return ResponseEntity.ok()
                     .header("Content-Type", "audio/mpeg")
                     .body(audioContent);
+            //return textToSpeechService.convertTextToSpeech(text);
         } catch (Exception e) {
             System.out.println("e = " + e.getMessage());
             return ResponseEntity.internalServerError().build();
