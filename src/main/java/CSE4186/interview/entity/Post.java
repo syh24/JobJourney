@@ -44,15 +44,15 @@ public class Post extends BaseTimeEntity {
 
     @ColumnDefault("0")
     @Column(name = "view_count",nullable = false)
-    private Integer viewCount;
+    private Integer viewCount = 0;
 
     @ColumnDefault("0")
     @Column(name = "like_count",nullable = false)
-    private Integer likeCount;
+    private Integer likeCount = 0;
 
     @ColumnDefault("0")
     @Column(name = "dislike_count",nullable = false)
-    private Integer dislikeCount;
+    private Integer dislikeCount = 0;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
