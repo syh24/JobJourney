@@ -126,26 +126,32 @@ public class QuestionService {
             //[{index, {text, audio}}, {index, {text, audio}}, ....]
             List<Map<String,Map<String, Object>>> taggedQuestionAudioPairs = new ArrayList<>();
 
+            List<Map<String, String>> questions = new ArrayList<>();
+
             // Iterate over the raw questions
             for (int i = 0; i < rawQuestions.length; i++){
 
                 String rawQuestion = rawQuestions[i];
+                Map<String, String> question = new HashMap<>();
+                question.put("question", rawQuestions[i]);
+                questions.add(question);
+
                 //try {
                     // Generate speech for the question using TextToSpeechService
-                    byte[] audioData = textToSpeechService.synthesizeText(rawQuestion);
+                    //byte[] audioData = textToSpeechService.synthesizeText(rawQuestion);
                     //System.out.println(audioData);
                     // Convert audio data to base64 string
-                    String audioBase64 = Base64.getEncoder().encodeToString(audioData);
+                    //String audioBase64 = Base64.getEncoder().encodeToString(audioData);
 
                     // Create a map to store question with text and audio data
-                    Map<String, Object> questionAudioPair = new HashMap<>();
-                    questionAudioPair.put(rawQuestion, audioBase64);
+                    //Map<String, Object> questionAudioPair = new HashMap<>();
+                    //questionAudioPair.put(rawQuestion, audioBase64);
 
-                    Map<String, Map<String, Object>> taggedQuestionAudioPair = new HashMap<>();
-                    taggedQuestionAudioPair.put(Integer.toString(i), questionAudioPair);
+                    //Map<String, Map<String, Object>> taggedQuestionAudioPair = new HashMap<>();
+                    //taggedQuestionAudioPair.put(Integer.toString(i), questionAudioPair);
 
                     // Add the question with text and audio data to the list
-                    taggedQuestionAudioPairs.add(taggedQuestionAudioPair);
+                    //taggedQuestionAudioPairs.add(taggedQuestionAudioPair);
 
                // } catch (IOException e) {
                     //e.printStackTrace();
@@ -153,8 +159,12 @@ public class QuestionService {
                 //}
             }
 
-            Map<String, List<Map<String,Map<String, Object>>>> questionToJson = new HashMap<>();
-            questionToJson.put("questions",taggedQuestionAudioPairs);
+            //Map<String, List<Map<String,Map<String, Object>>>> questionToJson = new HashMap<>();
+            //questionToJson.put("questions",taggedQuestionAudioPairs);
+
+
+            Map<String, List<Map<String, String>>> questionToJson = new HashMap<>();
+            questionToJson.put("questions",questions);
 
             ObjectMapper objectMapper = new ObjectMapper();
             try {
