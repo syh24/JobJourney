@@ -20,7 +20,7 @@ public class SelfIntroductionController {
 
     private final SelfIntroductionService selfIntroductionService;
 
-    @GetMapping("/list/{id}")
+    @GetMapping("/List")
     @Operation(summary = "Get selfIntroductions", description = "모든 자소서를 조회")
     public ApiUtil.ApiSuccessResult<List<SelfIntroductionDto.Response>> getSelfIntroductionList(@PathVariable(name = "id") Long id){
         List<SelfIntroductionDto.Response> response=selfIntroductionService.findAllSelfIntroductions(id)
@@ -29,7 +29,7 @@ public class SelfIntroductionController {
         return ApiUtil.success(response);
     }
 
-    @PostMapping("/save/{id}")
+    @PostMapping("/Save")
     @Operation(summary = "Save selfIntroductions", description = "자소서를 저장")
     public ApiUtil.ApiSuccessResult<Long> saveSelfIntroductionList(SelfIntroductionDto.Request request){
         selfIntroductionService.save(request.getId(), request.getTitle(), request.getContent());
