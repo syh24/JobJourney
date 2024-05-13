@@ -22,13 +22,11 @@ public class Post extends BaseTimeEntity {
 
 
     @Builder
-    public Post(Long id, String title, String content, User user, Integer likeCount, Integer dislikeCount) {
+    public Post(Long id, String title, String content, User user) {
         this.id = id;
         this.title = title;
         this.content = content;
         this.user = user;
-        this.likeCount = likeCount;
-        this.dislikeCount = dislikeCount;
     }
 
     @Id
@@ -44,15 +42,15 @@ public class Post extends BaseTimeEntity {
 
     @ColumnDefault("0")
     @Column(name = "view_count",nullable = false)
-    private Integer viewCount;
+    private Integer viewCount = 0;
 
     @ColumnDefault("0")
     @Column(name = "like_count",nullable = false)
-    private Integer likeCount;
+    private Integer likeCount = 0;
 
     @ColumnDefault("0")
     @Column(name = "dislike_count",nullable = false)
-    private Integer dislikeCount;
+    private Integer dislikeCount = 0;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
