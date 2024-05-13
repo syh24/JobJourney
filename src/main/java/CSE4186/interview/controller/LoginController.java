@@ -10,6 +10,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -80,7 +81,7 @@ public class LoginController {
     }
 
     @PostMapping("oauth2/google")
-    BaseResponseDto<Map<String,String>> getOauth2Token(@RequestBody UserDTO.oauth2LoginRequest oauth2LoginRequest, HttpServletRequest httpServletRequest) throws JsonProcessingException {
+    BaseResponseDto<Map<String,String>> getOauth2Token(@RequestBody UserDTO.oauth2LoginRequest oauth2LoginRequest, HttpServletResponse httpServletResponse) throws JsonProcessingException {
 
         //1. 코드를 받는다.
         String code= oauth2LoginRequest.getCode();
@@ -88,8 +89,8 @@ public class LoginController {
         //2. 코드를 사용해 토큰을 받아온다.
         String token= OAuth2UserService.requestGoogleToken(code);
 
-        //2. 토큰을 통해 구글 서버에서 계정 정보를 가져온다.
-        BaseResponseDto<Map<String,String>> response= OAuth2UserService.requestGoogleAccountAndLogin(token);
+        //3. 토큰을 통해 구글 서버에서 계정 정보를 가져와 로그인한다.
+        BaseResponseDto<Map<String,String>> response= OAuth2UserService.requestGoogleAccountAndLogin(token, httpServletResponse);
 
         return response;
     }

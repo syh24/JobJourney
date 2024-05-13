@@ -17,8 +17,6 @@ public class JwtFilter extends OncePerRequestFilter {
 
     private static final Logger logger= LoggerFactory.getLogger(JwtFilter.class);
     public static final String AUTHORIZATION_HEADER="Authorization";
-    private static final Integer accessTokenValidityInMilliseconds=60*60*1000; //60 min
-    private static final Integer refreshTokenValidityInMilliseconds=5*60*60*1000; //5 hours
     private TokenProvider tokenProvider;
 
     public JwtFilter(TokenProvider tokenProvider){
