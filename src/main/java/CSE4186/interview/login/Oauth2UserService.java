@@ -3,12 +3,13 @@ package CSE4186.interview.login;
 import CSE4186.interview.controller.dto.BaseResponseDto;
 import CSE4186.interview.entity.User;
 import CSE4186.interview.jwt.JwtFilter;
-import CSE4186.interview.login.Role;
+import CSE4186.interview.jwt.TokenProvider;
 import CSE4186.interview.repository.UserRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,21 +35,24 @@ public class Oauth2UserService {
 
     private final ObjectMapper objectMapper;
     private final UserRepository userRepository;
+    private final TokenProvider tokenProvider;
     private final String client_id;
     private final String client_secret;
     private final String redirect_uri;
+    public static final String AUTHORIZATION_HEADER="Authorization";
     private static final Logger logger= LoggerFactory.getLogger(JwtFilter.class);
 
     public Oauth2UserService(@Value("${spring.security.oauth2.client.registration.google.client-id}") String clientId,
                              @Value("${spring.security.oauth2.client.registration.google.client-secret}") String clientSecret,
                              @Value("${spring.security.oauth2.client.registration.google.redirect-uri}") String redirectUri,
                              ObjectMapper objectMapper,
-                             UserRepository userRepository){
+                             UserRepository userRepository, TokenProvider tokenProvider){
         client_id=clientId;
         client_secret=clientSecret;
         redirect_uri=redirectUri;
         this.objectMapper=objectMapper;
         this.userRepository=userRepository;
+        this.tokenProvider = tokenProvider;
     }
 
     private org.springframework.security.core.userdetails.User createUser(String email, User user) {
@@ -97,7 +101,7 @@ public class Oauth2UserService {
         logger.info("token : "+token);
         return token;
     }
-    public BaseResponseDto<Map<String,String>> requestGoogleAccountAndLogin(String token) {
+    public BaseResponseDto<Map<String,String>> requestGoogleAccountAndLogin(String token, HttpServletResponse httpServletResponse) {
 
         //1. 구글에 email 요청
         String url = "https://www.googleapis.com/userinfo/v2/me";
@@ -139,6 +143,21 @@ public class Oauth2UserService {
             Authentication authentication=authenticate(User);
             //SecurityContextHolder에 저장하기
             SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            //accessToken 발급받아 헤더에 세팅하기
+            String accessToken=tokenProvider.createAccessToken(authentication);
+            httpServletResponse.setHeader(AUTHORIZATION_HEADER,"Bearer "+accessToken);
+
+            //refreshToken 발급받아 쿠키에 세팅하기
+            String refreshToken=tokenProvider.createRefreshToken(authentication,null);
+            httpServletResponse.setHeader("Set-Cookie",
+                    "refreshToken="+refreshToken+"; "+
+                            "Path=/;" +
+                            "Domain=localhost; " +
+                            "HttpOnly; " +
+                            "Max-Age=604800; "
+            );
+
             //유저 아이디
             Map<String,String> userIdMap=new HashMap<>();
             userIdMap.put("userId", String.valueOf(user.getId()));
@@ -156,4 +175,5 @@ public class Oauth2UserService {
         }
 
     }
+
 }
