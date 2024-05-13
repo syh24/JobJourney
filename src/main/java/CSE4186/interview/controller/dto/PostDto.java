@@ -17,9 +17,11 @@ public class PostDto {
     @AllArgsConstructor
     @Schema(name = "postCreateRequest", description = "게시글 생성 DTO")
     public static class createRequest {
+        @NotNull
         private String title;
+        @NotNull
         private String content;
-        @NotBlank
+        @NotNull
         private Long userId;
     }
 
@@ -27,7 +29,10 @@ public class PostDto {
     @AllArgsConstructor
     @Schema(name = "postUpdateRequest", description = "게시글 수정 DTO")
     public static class updateRequest {
+
+        @NotNull
         private String title;
+        @NotNull
         private String content;
     }
 
@@ -38,6 +43,9 @@ public class PostDto {
         private final Long id;
         private final String title;
         private final String content;
+        private final Integer like;
+        private final Integer dislike;
+        private final Integer viewCount;
         private final String createdAt;
         private final String updatedAt;
         private final Long userId;
@@ -51,6 +59,9 @@ public class PostDto {
             this.updatedAt = String.valueOf(post.getUpdatedAt());
             this.userId = post.getUser().getId();
             this.comments = post.getComments().stream().map(CommentDto.Response::new).collect(Collectors.toList());
+            this.like = post.getLikeCount();
+            this.dislike = post.getDislikeCount();
+            this.viewCount = post.getViewCount();
         }
     }
 

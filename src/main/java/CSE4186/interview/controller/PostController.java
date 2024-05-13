@@ -9,6 +9,7 @@ import CSE4186.interview.service.PostService;
 import CSE4186.interview.utils.ApiUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -51,14 +52,14 @@ public class PostController {
 
     @PostMapping
     @Operation(summary = "Add Post", description = "게시글 생성")
-    public ApiUtil.ApiSuccessResult<PostDto.Response> addPost(@RequestBody PostDto.createRequest request) {
+    public ApiUtil.ApiSuccessResult<PostDto.Response> addPost(@Valid @RequestBody PostDto.createRequest request) {
         Post post = postService.addPost(request);
         return ApiUtil.success(new PostDto.Response(post));
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Update Post", description = "게시글 수정")
-    public ApiUtil.ApiSuccessResult<PostDto.updateResponse> updatePost(@PathVariable Long id, @RequestBody PostDto.updateRequest request) {
+    public ApiUtil.ApiSuccessResult<PostDto.updateResponse> updatePost(@PathVariable Long id, @Valid @RequestBody PostDto.updateRequest request) {
         postService.updatePost(id, request);
         return ApiUtil.success(new PostDto.updateResponse(id));
     }
@@ -72,7 +73,7 @@ public class PostController {
 
     @PostMapping("/{id}/comment")
     @Operation(summary = "Add Comment", description = "댓글 생성")
-    public ApiUtil.ApiSuccessResult<CommentDto.Response> addPost(@RequestBody CommentDto.createRequest request,
+    public ApiUtil.ApiSuccessResult<CommentDto.Response> addPost(@Valid @RequestBody CommentDto.createRequest request,
                                                                  @PathVariable(name = "id") Long id) {
         Comment comment = commentService.addComment(request, id);
         return ApiUtil.success(new CommentDto.Response(comment));
@@ -80,14 +81,14 @@ public class PostController {
 
     @PutMapping("/{id}/comment")
     @Operation(summary = "Update Comment", description = "댓글 수정")
-    public ApiUtil.ApiSuccessResult<CommentDto.updateResponse> updateComment(@RequestBody CommentDto.updateRequest request) {
+    public ApiUtil.ApiSuccessResult<CommentDto.updateResponse> updateComment(@Valid @RequestBody CommentDto.updateRequest request) {
         commentService.updateComment(request);
         return ApiUtil.success(new CommentDto.updateResponse(request.getId()));
     }
 
     @DeleteMapping("/{id}/comment")
     @Operation(summary = "Delete Comment", description = "댓글 삭제")
-    public ApiUtil.ApiSuccessResult<String> deleteComment(@RequestBody CommentDto.deleteRequest request) {
+    public ApiUtil.ApiSuccessResult<String> deleteComment(@Valid @RequestBody CommentDto.deleteRequest request) {
         commentService.deleteComment(request.getId());
         return ApiUtil.success("댓글이 삭제되었습니다.");
     }
