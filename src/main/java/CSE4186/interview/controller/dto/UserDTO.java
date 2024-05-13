@@ -26,15 +26,6 @@ public class UserDTO {
         private String password;
     }
 
-    @Data
-    @Builder
-    @AllArgsConstructor
-    @NoArgsConstructor
-    @Schema(name = "userOauth2LoginRequest", description = "구글 로그인 Request DTO")
-    public static class oauth2LoginRequest{
-        private String code;
-    }
-
 
 
 }
