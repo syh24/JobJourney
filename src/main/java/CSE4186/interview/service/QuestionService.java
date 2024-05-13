@@ -93,6 +93,7 @@ public class QuestionService {
 
 
     public ResponseEntity<BaseResponseDto<String>> createQuestion(int questionNum, String selfIntroductionContent) throws Exception {
+
         String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" + apiKey;
 
         RestTemplate template = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
@@ -171,7 +172,7 @@ public class QuestionService {
                 return ResponseEntity.ok(
                         new  BaseResponseDto<String>(
                                 "fail",
-                                e.getMessage(),
+                                "tojson error",
                                 ""
                         )
                 );
@@ -181,7 +182,7 @@ public class QuestionService {
             return ResponseEntity.ok(
                     new  BaseResponseDto<String>(
                             "fail",
-                            e.getMessage(),
+                            "questioncreate error",
                             ""
                     )
             );
