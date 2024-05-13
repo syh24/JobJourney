@@ -47,10 +47,9 @@ public class SecurityConfig {
                         CorsConfiguration config = new CorsConfiguration();
                         config.setAllowedOrigins(Collections.singletonList("http://localhost:9000"));
                         config.setAllowedMethods(Collections.singletonList("*"));
-//                        config.setAllowedMethods(List.of("GET","POST","PUT","PATCH","POST","DELETE","OPTIONS"));
                         config.setAllowCredentials(true);
                         config.setExposedHeaders(List.of("Authorization"));
-                        config.setAllowedHeaders(List.of("Content-Type"));
+                        config.setAllowedHeaders(Collections.singletonList("*"));
                         config.setMaxAge(3600L); //1시간
                         return config;
                     }
