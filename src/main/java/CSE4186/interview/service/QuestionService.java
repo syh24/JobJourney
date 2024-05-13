@@ -143,9 +143,9 @@ public class QuestionService {
                     Map<String, Map<String, Object>> taggedQuestionAudioPair = new HashMap<>();
                     taggedQuestionAudioPair.put(Integer.toString(i), questionAudioPair);
 
-
                     // Add the question with text and audio data to the list
                     taggedQuestionAudioPairs.add(taggedQuestionAudioPair);
+
                // } catch (IOException e) {
                     //e.printStackTrace();
                     // Handle the exception appropriately
@@ -171,7 +171,7 @@ public class QuestionService {
                 return ResponseEntity.ok(
                         new  BaseResponseDto<String>(
                                 "fail",
-                                "",
+                                e.getMessage(),
                                 ""
                         )
                 );
@@ -181,7 +181,7 @@ public class QuestionService {
             return ResponseEntity.ok(
                     new  BaseResponseDto<String>(
                             "fail",
-                            "",
+                            e.getMessage(),
                             ""
                     )
             );
