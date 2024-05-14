@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class QuestionService {
@@ -25,7 +26,7 @@ public class QuestionService {
     //기본 json 파일 만들어두고 text 부분만 수정하기
     private final String apiKey;
     private final ObjectMapper objectMapper;
-    private String prompt="넌 이제부터 면접관이야. 아래에 있는 자기소개서를 읽고 질문 %d개를 만들어줘. 이 때, 질문 앞에 1. 2. 처럼 숫자와 온점을 찍어서 질문을 구분해줘. 예를 들면 1. 하기 싫은 업무를 맡게 되면 어떻게 할 것인가요? << 이런식으로. 질문 개수는 꼭 맞춰서 생성해줘. \n  이제 자기소개서를 보내줄게.";
+    private String prompt="넌 이제부터 면접관이야. 면접자는 %s직무에 지원한 상태야. 아래에 있는 자기소개서를 읽고 질문 %d개를 만들어줘. 이 때, 질문 앞에 1. 2. 처럼 숫자와 온점을 찍어서 질문을 구분해줘. 예를 들면 1. 하기 싫은 업무를 맡게 되면 어떻게 할 것인가요? << 이런식으로. 질문 개수는 꼭 맞춰서 생성해줘. \n  이제 자기소개서를 보내줄게.";
 
     private TextToSpeechService textToSpeechService;
 
@@ -81,12 +82,12 @@ public class QuestionService {
     }
 
 
-    public ResponseEntity<BaseResponseDto<String>> createQuestion(int questionNum, String selfIntroductionContent) throws Exception {
+    public ResponseEntity<BaseResponseDto<String>> createQuestion(int questionNum, String selfIntroductionContent, String job, List<String> additionalQuestions, List<Integer> additionalQuestionsSequence) throws Exception {
 
         String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" + apiKey;
 
         RestTemplate template = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
-        String promptWithNum = String.format(prompt,questionNum);
+        String promptWithNum = String.format(prompt,job,questionNum);
         String requestBody=createRequestBody(promptWithNum, selfIntroductionContent);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -107,9 +108,37 @@ public class QuestionService {
             System.out.println(response);
 
             String[] parsedQuestions=response.split("\n");
-            String[] rawQuestions=Arrays.stream(parsedQuestions)
+            /*String[] rawQuestions=Arrays.stream(parsedQuestions)
                     .map(q->q.replaceAll("\\d+\\.","").trim())
-                    .toArray(String[]::new);
+                    .toArray(String[]::new);*/
+            List<String> rawQuestions = Arrays.stream(parsedQuestions)
+                    .map(q -> q.replaceAll("\\d+\\.", "").trim())
+                    .collect(Collectors.toList());
+
+            Iterator<Integer> sequenceIterator = additionalQuestionsSequence.iterator();
+            for (String question : additionalQuestions) {
+                if (sequenceIterator.hasNext()) {
+                    try {
+                        int index = sequenceIterator.next();
+                        if (index >= 0 && index <= rawQuestions.size()) { // 삽입할 위치가 유효한 범위 내에 있는지 확인
+                            rawQuestions.add(index, question);
+                        } else {
+                            throw new IndexOutOfBoundsException("Invalid index: " + index);
+                        }
+                    } catch (IndexOutOfBoundsException e) {
+                        //System.err.println("Error: " + e.getMessage());
+                        // 유효하지 않은 인덱스로 인한 에러 처리 로직 추가 가능
+                        return ResponseEntity.ok(
+                                new  BaseResponseDto<String>(
+                                        "fail",
+                                        e.getMessage(),
+                                        ""
+                                )
+                        );
+                    }
+                }
+            }
+            System.out.println(rawQuestions);
 
             // Initialize a list to store JSON objects representing questions with text and audio data
             //[{text, audio}, {text, audio}, ....]

@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
 import java.util.Map;
 //컨트롤러에 tag
 @RestController
@@ -29,9 +30,12 @@ public class QuestionController {
 
         int questionNum= request.getQuestionNum();
         String selfIntroductionContent = request.getContent();
+        String job = request.getJob();
+        List<String> additionalQuestions = request.getAdditionalQuestions();
+        List<Integer> additionalQuestionsSequence = request.getAdditionalQuestionsSequence();
 
         try {
-            return questionService.createQuestion(questionNum,selfIntroductionContent);
+            return questionService.createQuestion(questionNum,selfIntroductionContent, job, additionalQuestions, additionalQuestionsSequence);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
