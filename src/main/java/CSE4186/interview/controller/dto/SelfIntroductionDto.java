@@ -3,6 +3,7 @@ package CSE4186.interview.controller.dto;
 import CSE4186.interview.entity.SelfIntroduction;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,10 +19,9 @@ public class SelfIntroductionDto {
     @AllArgsConstructor
     @Schema(name = "selfIntroductionCreateRequest", description = "자소서 생성 DTO")
     public static class Request{
-        private String title;
-        @NotBlank
-        private Long id;
-        private String content;
+        @NotNull private String title;
+        @NotNull private Long userId;
+        @NotNull private String content;
     }
 
 
