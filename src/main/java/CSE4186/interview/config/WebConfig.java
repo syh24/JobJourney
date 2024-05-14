@@ -18,10 +18,17 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOrigins("http://localhost:9000", "https://accounts.google.com")
-                .allowedMethods("GET","POST","PUT","PATCH","POST","DELETE","OPTIONS")
+                .allowedOrigins("http://localhost:9000")
+                .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
                 .exposedHeaders("Authorization")
+                .allowCredentials(true);
+
+        registry.addMapping("/members/callback")
+                .allowedOrigins("http://localhost:9000") // 허용할 오리진
+                .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS") // 허용할 HTTP 메서드
+                .allowedHeaders("*") // 허용할 요청 헤더
+                .exposedHeaders("*")
                 .allowCredentials(true);
     }
 }
