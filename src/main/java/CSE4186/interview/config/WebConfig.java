@@ -19,7 +19,7 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowedOrigins("http://localhost:9000")
                 .allowedMethods("GET", "POST", "DELETE", "PUT")
                 .allowedHeaders("*")
-                .exposedHeaders("*")
+                .exposedHeaders("Authorization")
                 .allowCredentials(true);
     }
 }
