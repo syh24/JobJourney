@@ -14,19 +14,16 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.NoSuchElementException;
-
 
 @Service
 @RequiredArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 public class PostService {
 
     private final PostRepository postRepository;
     private final UserRepository userRepository;
 
-    @Transactional(readOnly = true)
+    @Transactional
     public Page<Post> findPostsByCondition(Pageable pageable, String q, String condition) {
         int page = pageable.getPageNumber() - 1;
 
@@ -37,6 +34,7 @@ public class PostService {
         return postRepository.findAll(PageRequest.of(page, pageable.getPageSize(), Sort.by(Sort.Direction.DESC, "createdAt")));
     }
 
+    @Transactional
     public Post addPost(PostDto.createRequest request) {
         User findUser = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new NotFoundException("해당 유저가 존재하지 않습니다."));
@@ -48,6 +46,7 @@ public class PostService {
         );
     }
 
+    @Transactional
     public void deletePost(Long id) {
         Post post = postRepository.findById(id).orElseThrow(() ->
                 new NotFoundException("해당 게시글이 존재하지 않습니다. id=" + id));
@@ -55,6 +54,7 @@ public class PostService {
         postRepository.delete(post);
     }
 
+    @Transactional
     public void updatePost(Long id, PostDto.updateRequest request) {
         Post post = postRepository.findById(id).orElseThrow(() ->
                 new NotFoundException("해당 게시글이 존재하지 않습니다. id=" + id));
