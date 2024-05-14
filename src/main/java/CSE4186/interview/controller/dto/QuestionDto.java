@@ -17,6 +17,7 @@ public class QuestionDto {
     @Schema(name = "questionCreateRequest", description = "질문 생성 DTO")
     public static class Request{
         private int questionNum;
-        private String content;
+        private String selfIntroductionContent;
+        private String dept;
     }
 }

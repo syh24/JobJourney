@@ -28,10 +28,11 @@ public class QuestionController {
     public ResponseEntity<BaseResponseDto<String>> createQuestionWithGemini(@RequestBody QuestionDto.Request request) {
 
         int questionNum= request.getQuestionNum();;
-        String selfIntroductionContent = request.getContent();
+        String selfIntroductionContent = request.getSelfIntroductionContent();
+        String dept= request.getDept();;
 
         try {
-            return questionService.createQuestion(questionNum,selfIntroductionContent);
+            return questionService.createQuestion(questionNum,dept,selfIntroductionContent);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
