@@ -35,11 +35,14 @@ public class SelfIntroductionDto {
         private String title;
         private String content;
         private String createdAt;
+        private String updatedAt;
 
         public Response(SelfIntroduction selfIntroduction){
-            id= selfIntroduction.getId();;
-            content= selfIntroduction.getContent();;
-            createdAt=selfIntroduction.getCreatedAt();
+            this.id= selfIntroduction.getId();
+            this.title = selfIntroduction.getTitle();
+            this.content= selfIntroduction.getContent();
+            this.createdAt = String.valueOf(selfIntroduction.getCreatedAt());
+            this.updatedAt = String.valueOf(selfIntroduction.getUpdatedAt());
         }
 
     }
