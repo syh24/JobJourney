@@ -64,7 +64,7 @@ public class LoginController {
         return ResponseEntity.ok(
                 new BaseResponseDto<>(
                         "success",
-                        exceptionCode.equals(null) ? "" : exceptionCode,
+                        exceptionCode == null ? "" : exceptionCode,
                         ""
                 ));
     }
