@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
 
 //dto에 schema
 public class QuestionDto {
@@ -18,5 +19,8 @@ public class QuestionDto {
     public static class Request{
         private int questionNum;
         private String content;
+        private String job;
+        private List<String> additionalQuestions;
+        private List<Integer> additionalQuestionsSequence;
     }
 }
