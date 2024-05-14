@@ -20,12 +20,13 @@ public class SelfIntroductionService {
     public List<SelfIntroduction> findAllSelfIntroductions(Long userId) {
         return selfIntroductionRepository.findAllByUser_Id(userId);
     }
-
-    public void save(Long id, String content) {
+    //유저아이디,
+    public void save(Long id, String title, String content) {
         User user=userRepository.findById(id).orElseThrow();
         selfIntroductionRepository.save(
                 SelfIntroduction.builder()
                         .user(user)
+                        .title(title)
                         .content(content)
                         .build()
         );

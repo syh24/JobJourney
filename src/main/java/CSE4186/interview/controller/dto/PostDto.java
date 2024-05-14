@@ -1,13 +1,13 @@
 package CSE4186.interview.controller.dto;
 
 import CSE4186.interview.entity.Post;
-import CSE4186.interview.entity.User;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -15,23 +15,24 @@ public class PostDto {
 
     @Data
     @AllArgsConstructor
-    @NoArgsConstructor
-    @Builder
     @Schema(name = "postCreateRequest", description = "게시글 생성 DTO")
     public static class createRequest {
+        @NotNull
         private String title;
+        @NotNull
         private String content;
-        @NotBlank
+        @NotNull
         private Long userId;
     }
 
     @Data
     @AllArgsConstructor
-    @NoArgsConstructor
-    @Builder
     @Schema(name = "postUpdateRequest", description = "게시글 수정 DTO")
     public static class updateRequest {
+
+        @NotNull
         private String title;
+        @NotNull
         private String content;
     }
 
@@ -42,12 +43,15 @@ public class PostDto {
         private final Long id;
         private final String title;
         private final String content;
+        private final Integer like;
+        private final Integer dislike;
+        private final Integer viewCount;
         private final String createdAt;
         private final String updatedAt;
         private final Long userId;
         private final List<CommentDto.Response> comments;
 
-        public  Response(Post post) {
+        public Response(Post post) {
             this.id = post.getId();
             this.title = post.getTitle();
             this.content = post.getContent();
@@ -55,7 +59,19 @@ public class PostDto {
             this.updatedAt = String.valueOf(post.getUpdatedAt());
             this.userId = post.getUser().getId();
             this.comments = post.getComments().stream().map(CommentDto.Response::new).collect(Collectors.toList());
+            this.like = post.getLikeCount();
+            this.dislike = post.getDislikeCount();
+            this.viewCount = post.getViewCount();
         }
+    }
+
+    @Data
+    @RequiredArgsConstructor
+    @Schema(name = "postListResponse", description = "게시글 전체 list 응답 DTO")
+    public static class postListResponse {
+        @NotNull
+        private final List<PostDto.Response> list;
+        private final int pageCount;
     }
 
     @Getter

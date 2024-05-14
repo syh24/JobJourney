@@ -5,6 +5,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -39,6 +40,18 @@ public class Post extends BaseTimeEntity {
     @Column(columnDefinition = "TEXT")
     private String content;
 
+    @ColumnDefault("0")
+    @Column(name = "view_count",nullable = false)
+    private Integer viewCount = 0;
+
+    @ColumnDefault("0")
+    @Column(name = "like_count",nullable = false)
+    private Integer likeCount = 0;
+
+    @ColumnDefault("0")
+    @Column(name = "dislike_count",nullable = false)
+    private Integer dislikeCount = 0;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
@@ -51,4 +64,16 @@ public class Post extends BaseTimeEntity {
         this.title = title;
         this.content = content;
     }
+
+    public void addViewCount() {
+        this.viewCount += 1;
+    }
+
+    public void addLikeCount() { this.likeCount += 1; }
+
+    public void subLikeCount() { this.likeCount -= 1; }
+
+    public void addDislikeCount() { this.dislikeCount += 1; }
+
+    public void subDislikeCount() { this.dislikeCount -= 1; }
 }

@@ -5,6 +5,7 @@ import CSE4186.interview.controller.dto.PostDto;
 import CSE4186.interview.entity.Comment;
 import CSE4186.interview.entity.Post;
 import CSE4186.interview.entity.User;
+import CSE4186.interview.exception.NotFoundException;
 import CSE4186.interview.repository.CommentRepository;
 import CSE4186.interview.repository.PostRepository;
 import CSE4186.interview.repository.UserRepository;
@@ -27,10 +28,10 @@ public class CommentService {
 
     public Comment addComment(createRequest request, Long postId) {
         User findUser = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new NoSuchElementException("no user"));
+                .orElseThrow(() -> new NotFoundException("해당 유저가 존재하지 않습니다."));
 
         Post findPost = postRepository.findById(postId)
-                .orElseThrow(() -> new NoSuchElementException("no post"));
+                .orElseThrow(() -> new NotFoundException("해당 게시글이 존재하지 않습니다."));
 
 
         return commentRepository.save(Comment.builder()
@@ -43,14 +44,14 @@ public class CommentService {
 
     public void updateComment(updateRequest request) {
         Comment comment = commentRepository.findById(request.getId()).orElseThrow(() ->
-                new IllegalArgumentException("해당 댓글이 존재하지 않습니다. id=" + request.getId()));
+                new NotFoundException("해당 댓글이 존재하지 않습니다."));
 
         comment.updateComment(request.getContent());
     }
 
     public void deleteComment(Long id) {
         Comment comment = commentRepository.findById(id).orElseThrow(() ->
-                new IllegalArgumentException("해당 댓글이 존재하지 않습니다. id=" + id));
+                new NotFoundException("해당 댓글이 존재하지 않습니다."));
 
         commentRepository.delete(comment);
     }
