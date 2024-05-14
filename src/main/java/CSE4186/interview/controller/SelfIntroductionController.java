@@ -1,10 +1,12 @@
 package CSE4186.interview.controller;
 
 import CSE4186.interview.controller.dto.SelfIntroductionDto;
+import CSE4186.interview.entity.SelfIntroduction;
 import CSE4186.interview.service.SelfIntroductionService;
 import CSE4186.interview.utils.ApiUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,10 +31,10 @@ public class SelfIntroductionController {
         return ApiUtil.success(response);
     }
 
-    @PostMapping("/save/{id}")
+    @PostMapping("/save")
     @Operation(summary = "Save selfIntroductions", description = "자소서를 저장")
-    public ApiUtil.ApiSuccessResult<Long> saveSelfIntroductionList(SelfIntroductionDto.Request request){
-        selfIntroductionService.save(request.getId(), request.getTitle(), request.getContent());
-        return ApiUtil.success(request.getId());
+    public ApiUtil.ApiSuccessResult<Long> saveSelfIntroductionList(@Valid @RequestBody SelfIntroductionDto.Request request){
+        SelfIntroduction selfIntroduction = selfIntroductionService.save(request.getUserId(), request.getTitle(), request.getContent());
+        return ApiUtil.success(selfIntroduction.getId());
     }
 }
