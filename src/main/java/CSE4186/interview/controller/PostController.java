@@ -6,14 +6,18 @@ import CSE4186.interview.entity.Comment;
 import CSE4186.interview.entity.Post;
 import CSE4186.interview.service.CommentService;
 import CSE4186.interview.service.PostService;
+import CSE4186.interview.service.UserService;
 import CSE4186.interview.utils.ApiUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,6 +31,7 @@ public class PostController {
 
     private final PostService postService;
     private final CommentService commentService;
+    private final UserService userService;
 
     @GetMapping("/list")
     @Operation(summary = "Get All Posts", description = "모든 게시글을 조회")
@@ -45,9 +50,15 @@ public class PostController {
     }
     @GetMapping("/{id}")
     @Operation(summary = "Get Post", description = "게시글 상세")
-    public ApiUtil.ApiSuccessResult<PostDto.Response> getPost(@PathVariable(name = "id") Long id) {
+    public ApiUtil.ApiSuccessResult<PostDto.Response> getPost(
+            @PathVariable(name = "id") Long id,
+            @AuthenticationPrincipal User loginUser
+    ) {
+        Long userId = Long.valueOf(loginUser.getUsername());
         Post post = postService.findPost(id);
-        return ApiUtil.success(new PostDto.Response(post));
+        String checkLikeOrDislike = userService.checkLikeOrDislike(userId);
+
+        return ApiUtil.success(new PostDto.Response(post, checkLikeOrDislike));
     }
 
     @PostMapping

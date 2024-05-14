@@ -49,6 +49,7 @@ public class PostDto {
         private final String createdAt;
         private final String updatedAt;
         private final Long userId;
+        private String checkLikeOrDislike;
         private final List<CommentDto.Response> comments;
 
         public Response(Post post) {
@@ -62,6 +63,20 @@ public class PostDto {
             this.like = post.getLikeCount();
             this.dislike = post.getDislikeCount();
             this.viewCount = post.getViewCount();
+        }
+
+        public Response(Post post, String checkLikeOrDislike) {
+            this.id = post.getId();
+            this.title = post.getTitle();
+            this.content = post.getContent();
+            this.createdAt = String.valueOf(post.getCreatedAt());
+            this.updatedAt = String.valueOf(post.getUpdatedAt());
+            this.userId = post.getUser().getId();
+            this.comments = post.getComments().stream().map(CommentDto.Response::new).collect(Collectors.toList());
+            this.like = post.getLikeCount();
+            this.dislike = post.getDislikeCount();
+            this.viewCount = post.getViewCount();
+            this.checkLikeOrDislike = checkLikeOrDislike;
         }
     }
 

@@ -28,7 +28,7 @@ public class QuestionController {
     @Operation(summary = "Create Question", description = "Gemini를 사용하여 질문 생성")
     public ResponseEntity<BaseResponseDto<String>> createQuestionWithGemini(@RequestBody QuestionDto.Request request) {
 
-        int questionNum= request.getQuestionNum();;
+        int questionNum= request.getQuestionNum();
         String selfIntroductionContent = request.getContent();
         String job = request.getJob();
         List<String> additionalQuestions = request.getAdditionalQuestions();
