@@ -8,10 +8,14 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static CSE4186.interview.entity.QSelfIntroduction.selfIntroduction;
 
@@ -24,13 +28,17 @@ public class SelfIntroductionController {
 
     private final SelfIntroductionService selfIntroductionService;
 
-    @GetMapping("/list/{id}")
+    @GetMapping("/list")
     @Operation(summary = "Get selfIntroductions", description = "모든 자소서를 조회")
-    public ApiUtil.ApiSuccessResult<List<SelfIntroductionDto.Response>> getSelfIntroductionList(@PathVariable(name = "id") Long id){
-        List<SelfIntroductionDto.Response> response=selfIntroductionService.findAllSelfIntroductions(id)
-                .stream().map(SelfIntroductionDto.Response::new)
-                .collect(Collectors.toList());
-        return ApiUtil.success(response);
+    public ApiUtil.ApiSuccessResult<SelfIntroductionDto.selfIntroductionListResponse> getSelfIntroductionList(
+            @AuthenticationPrincipal User loginUser,
+            @PageableDefault(page = 1, size = 10) Pageable pageable
+    ) {
+        Long userId = Long.valueOf(loginUser.getUsername());
+        Page<SelfIntroduction> pageSelfIntroduction = selfIntroductionService.findAllSelfIntroductions(pageable, userId);
+        List<SelfIntroductionDto.Response> selfIntroductionList = pageSelfIntroduction.stream().map(SelfIntroductionDto.Response::new)
+                .toList();
+        return ApiUtil.success(new SelfIntroductionDto.selfIntroductionListResponse(selfIntroductionList, pageSelfIntroduction.getTotalPages()));
     }
 
     @PostMapping("/save")

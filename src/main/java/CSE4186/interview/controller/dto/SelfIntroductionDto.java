@@ -4,12 +4,10 @@ import CSE4186.interview.entity.SelfIntroduction;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class SelfIntroductionDto {
 
@@ -40,11 +38,19 @@ public class SelfIntroductionDto {
         public Response(SelfIntroduction selfIntroduction){
             this.id= selfIntroduction.getId();
             this.title = selfIntroduction.getTitle();
-            this.content= selfIntroduction.getContent();
+            this.content= selfIntroduction.getContent().replaceAll(System.lineSeparator(), "<br>");
             this.createdAt = String.valueOf(selfIntroduction.getCreatedAt());
             this.updatedAt = String.valueOf(selfIntroduction.getUpdatedAt());
         }
+    }
 
+    @Data
+    @RequiredArgsConstructor
+    @Schema(name = "selfIntroductionListResponse", description = "자소서 전체 list 응답 DTO")
+    public static class selfIntroductionListResponse {
+        @NotNull
+        private final List<SelfIntroductionDto.Response> list;
+        private final int pageCount;
     }
 
 
