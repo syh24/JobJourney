@@ -8,6 +8,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,8 +26,9 @@ public class SelfIntroductionController {
 
     @GetMapping("/list")
     @Operation(summary = "Get selfIntroductions", description = "모든 자소서를 조회")
-    public ApiUtil.ApiSuccessResult<List<SelfIntroductionDto.Response>> getSelfIntroductionList(@RequestParam(name = "userId") Long userId){
-        List<SelfIntroductionDto.Response> response=selfIntroductionService.findAllSelfIntroductions(userId)
+    public ApiUtil.ApiSuccessResult<List<SelfIntroductionDto.Response>> getSelfIntroductionList(@AuthenticationPrincipal User loginUser) {
+        Long userId = Long.valueOf(loginUser.getUsername());
+        List<SelfIntroductionDto.Response> response = selfIntroductionService.findAllSelfIntroductions(userId)
                 .stream().map(SelfIntroductionDto.Response::new)
                 .collect(Collectors.toList());
         return ApiUtil.success(response);
