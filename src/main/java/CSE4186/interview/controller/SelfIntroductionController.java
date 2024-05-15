@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static CSE4186.interview.entity.QSelfIntroduction.selfIntroduction;
+
 // 면접 기능 관련
 @RestController
 @RequiredArgsConstructor
@@ -34,6 +36,7 @@ public class SelfIntroductionController {
     @PostMapping("/save")
     @Operation(summary = "Save selfIntroductions", description = "자소서를 저장")
     public ApiUtil.ApiSuccessResult<Long> saveSelfIntroductionList(@Valid @RequestBody SelfIntroductionDto.Request request){
+        System.out.println("request.getContent() = " + request.getContent().replace(System.lineSeparator(), ""));
         SelfIntroduction selfIntroduction = selfIntroductionService.save(request.getUserId(), request.getTitle(), request.getContent());
         return ApiUtil.success(selfIntroduction.getId());
     }
