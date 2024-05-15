@@ -22,10 +22,10 @@ public class SelfIntroductionController {
 
     private final SelfIntroductionService selfIntroductionService;
 
-    @GetMapping("/list/{id}")
+    @GetMapping("/list")
     @Operation(summary = "Get selfIntroductions", description = "모든 자소서를 조회")
-    public ApiUtil.ApiSuccessResult<List<SelfIntroductionDto.Response>> getSelfIntroductionList(@PathVariable(name = "id") Long id){
-        List<SelfIntroductionDto.Response> response=selfIntroductionService.findAllSelfIntroductions(id)
+    public ApiUtil.ApiSuccessResult<List<SelfIntroductionDto.Response>> getSelfIntroductionList(@RequestParam(name = "userId") Long userId){
+        List<SelfIntroductionDto.Response> response=selfIntroductionService.findAllSelfIntroductions(userId)
                 .stream().map(SelfIntroductionDto.Response::new)
                 .collect(Collectors.toList());
         return ApiUtil.success(response);

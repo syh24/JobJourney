@@ -40,7 +40,7 @@ public class SelfIntroductionDto {
         public Response(SelfIntroduction selfIntroduction){
             this.id= selfIntroduction.getId();
             this.title = selfIntroduction.getTitle();
-            this.content= selfIntroduction.getContent();
+            this.content= selfIntroduction.getContent().replaceAll(System.lineSeparator(), "<br>");
             this.createdAt = String.valueOf(selfIntroduction.getCreatedAt());
             this.updatedAt = String.valueOf(selfIntroduction.getUpdatedAt());
         }
