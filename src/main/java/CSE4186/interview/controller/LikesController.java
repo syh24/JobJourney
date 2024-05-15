@@ -21,7 +21,6 @@ public class LikesController {
             @Valid @RequestBody LikesDto.creteRequest request,
             @PathVariable(name = "id") Long postId
     ) {
-        likeService.addLike(request, postId);
-        return ApiUtil.success("좋아요");
+        return ApiUtil.success(likeService.addLike(request, postId));
     }
 }
