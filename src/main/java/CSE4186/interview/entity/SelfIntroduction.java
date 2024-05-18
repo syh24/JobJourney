@@ -9,11 +9,16 @@ import java.time.LocalDateTime;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-@Builder
 public class SelfIntroduction extends BaseTimeEntity {
+
+    @Builder
+    public SelfIntroduction(String title, String content, User user) {
+        this.title = title;
+        this.content = content;
+        this.user = user;
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,6 +27,7 @@ public class SelfIntroduction extends BaseTimeEntity {
 
     private String title;
 
+    @Column(columnDefinition = "TEXT")
     private String content;
 
     @ManyToOne(fetch = FetchType.LAZY)
