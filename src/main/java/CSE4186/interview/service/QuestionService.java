@@ -113,80 +113,68 @@ public class QuestionService {
                 String.class);
         String result = responseEntity.getBody();
 
+
+        Map<String, Object> jsonMap;
         try{
-            Map<String, Object> jsonMap = objectMapper.readValue(result, new TypeReference<Map<String, Object>>() {});
-            Map<String, Object> candidates= (Map<String, Object>)((List<Object>)jsonMap.get("candidates")).get(0);
-            List<Map<String, Object>> parts=(List<Map<String,Object>>)((Map<String,Object>) candidates.get("content")).get("parts");
-            String response = (String)parts.get(0).get("text");
+            jsonMap = objectMapper.readValue(result, new TypeReference<Map<String, Object>>() {});
+        }catch(JsonProcessingException e){
+            e.printStackTrace();
+            throw new RuntimeException();
+        }
 
-            String[] parsedQuestions=response.split("\n");
+        Map<String, Object> candidates= (Map<String, Object>)((List<Object>)jsonMap.get("candidates")).get(0);
+        List<Map<String, Object>> parts=(List<Map<String,Object>>)((Map<String,Object>) candidates.get("content")).get("parts");
+        String response = (String)parts.get(0).get("text");
 
-            List<String> rawQuestions = Arrays.stream(parsedQuestions)
-                    .map(q -> q.replaceAll("\\d+\\.", "").trim())
-                    .collect(Collectors.toList());
+        String[] parsedQuestions=response.split("\n");
 
-            Iterator<Integer> sequenceIterator = additionalQuestionsSequence.iterator();
-            for (String question : additionalQuestions) {
-                if (sequenceIterator.hasNext()) {
-                    int index = sequenceIterator.next();
-                    if (index >= 0 && index <= rawQuestions.size()) { // 삽입할 위치가 유효한 범위 내에 있는지 확인
-                        rawQuestions.add(index, question);
-                    } else {
-                        throw new IndexOutOfBoundsException("Invalid index: " + index);
-                    }
+        List<String> rawQuestions = Arrays.stream(parsedQuestions)
+                .map(q -> q.replaceAll("\\d+\\.", "").trim())
+                .collect(Collectors.toList());
+
+        Iterator<Integer> sequenceIterator = additionalQuestionsSequence.iterator();
+        for (String question : additionalQuestions) {
+            if (sequenceIterator.hasNext()) {
+                int index = sequenceIterator.next();
+                if (index >= 0 && index <= rawQuestions.size()) { // 삽입할 위치가 유효한 범위 내에 있는지 확인
+                    rawQuestions.add(index, question);
+                } else {
+                    throw new IndexOutOfBoundsException("Invalid index: " + index);
                 }
             }
+        }
 
-            // Initialize a list to store JSON objects representing questions with text and audio data
-            //[{text, audio}, {text, audio}, ....]
-            List<Map<String, Object>> questionAudioPairs = new ArrayList<>();
+        // Initialize a list to store JSON objects representing questions with text and audio data
+        //[{text, audio}, {text, audio}, ....]
+        List<Map<String, Object>> questionAudioPairs = new ArrayList<>();
 
-            int i = 0;
-            // Iterate over the raw questions
-            for (String rawQuestion : rawQuestions) {
+        int i = 0;
+        // Iterate over the raw questions
+        for (String rawQuestion : rawQuestions) {
 
-                byte[] audioData = textToSpeechService.convertTextToSpeech(rawQuestion);
-                //Convert audio data to base64 string
-                String audioBase64 = Base64.getEncoder().encodeToString(audioData);
+            byte[] audioData = textToSpeechService.convertTextToSpeech(rawQuestion);
+            //Convert audio data to base64 string
+            String audioBase64 = Base64.getEncoder().encodeToString(audioData);
 
-                // Create a map to store question with text and audio data
-                Map<String, Object> questionAudioPair = new HashMap<>();
-                questionAudioPair.put("question", rawQuestion);
-                questionAudioPair.put("audio", audioBase64);
-                questionAudioPairs.add(questionAudioPair);
-            }
+            // Create a map to store question with text and audio data
+            Map<String, Object> questionAudioPair = new HashMap<>();
+            questionAudioPair.put("question", rawQuestion);
+            questionAudioPair.put("audio", audioBase64);
+            questionAudioPairs.add(questionAudioPair);
+        }
 
-            ObjectMapper objectMapper = new ObjectMapper();
+        ObjectMapper objectMapper = new ObjectMapper();
 
-            try {
-                String jsonOutput = objectMapper.writeValueAsString(questionAudioPairs);
-                return ResponseEntity.ok(
-                        new BaseResponseDto<String>(
-                                "success",
-                                "",
-                                jsonOutput
-                        )
-                );
-            } catch (JsonProcessingException e) {
-                /*return ResponseEntity.ok(
-                        new  BaseResponseDto<String>(
-                                "fail",
-                                "tojson error",
-                                ""
-                        )
-                );*/
-                e.printStackTrace();
-                throw new RuntimeException();
-            }
-        } catch (Exception e){
-
-            /*return ResponseEntity.ok(
-                new  BaseResponseDto<String>(
-                        "fail",
-                        "questioncreate error",
-                        ""
-                )
-            );*/
+        try {
+            String jsonOutput = objectMapper.writeValueAsString(questionAudioPairs);
+            return ResponseEntity.ok(
+                    new BaseResponseDto<String>(
+                            "success",
+                            "",
+                            jsonOutput
+                    )
+            );
+        } catch (JsonProcessingException e) {
             e.printStackTrace();
             throw new RuntimeException();
         }
