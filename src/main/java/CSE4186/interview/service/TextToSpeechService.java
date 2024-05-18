@@ -57,20 +57,4 @@ public class TextToSpeechService {
 
         return audioBytes;
     }
-
-    public static void saveBase64AsMp3(String base64Audio, String filePath) {
-        try (FileOutputStream fos = new FileOutputStream(filePath)) {
-            // Decode base64 string to byte array
-            //
-            byte[] audioBytes = Base64.getDecoder().decode(base64Audio);
-
-            // Write the byte array to an MP3 file
-            fos.write(audioBytes);
-            System.out.println("MP3 file saved at: " + filePath);
-        } catch (IOException e) {
-            e.printStackTrace();
-            // Handle the exception appropriately
-        }
-    }
-
 }

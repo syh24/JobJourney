@@ -84,7 +84,6 @@ public class QuestionService {
     public ResponseEntity<BaseResponseDto<String>> createQuestion(int questionNum, String selfIntroductionContent, String job, List<String> additionalQuestions, List<Integer> additionalQuestionsSequence) throws Exception {
 
         String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" + apiKey;
-        String filePath = "C:\\Users\\LEE\\Desktop\\interview_voice\\example%d.mp3";
 
         RestTemplate template = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
         String promptWithNum = String.format(prompt,job,questionNum);
@@ -151,8 +150,7 @@ public class QuestionService {
                 byte[] audioData = textToSpeechService.convertTextToSpeech(rawQuestion);
                 //Convert audio data to base64 string
                 String audioBase64 = Base64.getEncoder().encodeToString(audioData);
-                String filePathWithNum = String.format(filePath, i++);
-                textToSpeechService.saveBase64AsMp3(audioBase64, filePathWithNum);
+
                 // Create a map to store question with text and audio data
                 Map<String, Object> questionAudioPair = new HashMap<>();
                 questionAudioPair.put("question", rawQuestion);
