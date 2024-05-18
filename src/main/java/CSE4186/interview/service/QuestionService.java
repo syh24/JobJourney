@@ -81,7 +81,6 @@ public class QuestionService {
         }
     }
 
-
     public ResponseEntity<BaseResponseDto<String>> createQuestion(int questionNum, String selfIntroductionContent, String job, List<String> additionalQuestions, List<Integer> additionalQuestionsSequence) throws Exception {
 
         String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" + apiKey;
@@ -144,6 +143,7 @@ public class QuestionService {
             //[{text, audio}, {text, audio}, ....]
             List<Map<String, Object>> questionAudioPairs = new ArrayList<>();
 
+            int i = 0;
             // Iterate over the raw questions
             for (String rawQuestion : rawQuestions) {
 

@@ -12,6 +12,8 @@ import org.springframework.web.client.RestTemplate;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.io.FileOutputStream;
+import java.util.Base64;
 
 @Service
 public class TextToSpeechService {
@@ -44,8 +46,15 @@ public class TextToSpeechService {
         requestMap.put("audioConfig", audioConfigMap);
 
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestMap, headers);
-        ResponseEntity<byte[]> response = restTemplate.exchange(GOOGLE_TTS_API_URL, HttpMethod.POST, entity, byte[].class);
+        ResponseEntity<Map> response = restTemplate.exchange(GOOGLE_TTS_API_URL, HttpMethod.POST, entity, Map.class);
 
-        return response.getBody();
+        // Get the Base64-encoded audio content from the response
+        Map<String, String> responseBody = response.getBody();
+        String audioContent = responseBody.get("audioContent");
+
+        // Decode the Base64-encoded audio content to byte[]
+        byte[] audioBytes = java.util.Base64.getDecoder().decode(audioContent);
+
+        return audioBytes;
     }
 }
