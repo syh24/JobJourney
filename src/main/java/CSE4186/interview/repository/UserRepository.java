@@ -13,9 +13,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByName(String name);
 
     @Query("SELECT CASE" +
-            " WHEN (SELECT COUNT(l) FROM Likes l WHERE l.user.id = :id) > 0 THEN 'like' " +
-            " WHEN (SELECT COUNT(d) FROM Dislike d WHERE d.user.id = :id) > 0 THEN 'dislike' " +
-            " ELSE 'none' END " +
-            "FROM User u WHERE u.id = :id")
-    String findUserByLikesAndDislike(Long id);
+            " WHEN (SELECT COUNT(l) FROM Likes l WHERE l.user.id = :userId and l.post.id = :postId) > 0 THEN 'like' " +
+            " WHEN (SELECT COUNT(d) FROM Dislike d WHERE d.user.id = :userId and d.post.id = :postId) > 0 THEN 'dislike' " +
+            " ELSE 'none' END ")
+    String findUserByLikesAndDislike(Long postId, Long userId);
 }

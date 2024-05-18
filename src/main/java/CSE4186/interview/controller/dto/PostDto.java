@@ -55,7 +55,7 @@ public class PostDto {
         public Response(Post post) {
             this.id = post.getId();
             this.title = post.getTitle();
-            this.content = post.getContent();
+            this.content = post.getContent().replaceAll(System.lineSeparator(), "<br>");;
             this.createdAt = String.valueOf(post.getCreatedAt());
             this.updatedAt = String.valueOf(post.getUpdatedAt());
             this.userId = post.getUser().getId();
@@ -68,7 +68,7 @@ public class PostDto {
         public Response(Post post, String checkLikeOrDislike) {
             this.id = post.getId();
             this.title = post.getTitle();
-            this.content = post.getContent();
+            this.content = post.getContent().replaceAll(System.lineSeparator(), "<br>");;
             this.createdAt = String.valueOf(post.getCreatedAt());
             this.updatedAt = String.valueOf(post.getUpdatedAt());
             this.userId = post.getUser().getId();
