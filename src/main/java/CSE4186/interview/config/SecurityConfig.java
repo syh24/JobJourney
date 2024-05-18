@@ -69,13 +69,6 @@ public class SecurityConfig {
                                 .anyRequest().hasAnyRole("USER")
                 )
 
-                .oauth2Login(oauth2 ->
-                        oauth2
-                                .authorizationEndpoint(a->{
-                                    a.baseUri("/login/oauth2");
-                                })
-                )
-
                 .addFilterBefore(new JwtFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new LoginFilter(tokenProvider,customAuthenticationManager,objectMapper), UsernamePasswordAuthenticationFilter.class);
         return http.build();
