@@ -12,6 +12,8 @@ import org.springframework.web.client.RestTemplate;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.io.FileOutputStream;
+import java.util.Base64;
 
 @Service
 public class TextToSpeechService {
@@ -44,8 +46,31 @@ public class TextToSpeechService {
         requestMap.put("audioConfig", audioConfigMap);
 
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestMap, headers);
-        ResponseEntity<byte[]> response = restTemplate.exchange(GOOGLE_TTS_API_URL, HttpMethod.POST, entity, byte[].class);
+        ResponseEntity<Map> response = restTemplate.exchange(GOOGLE_TTS_API_URL, HttpMethod.POST, entity, Map.class);
 
-        return response.getBody();
+        // Get the Base64-encoded audio content from the response
+        Map<String, String> responseBody = response.getBody();
+        String audioContent = responseBody.get("audioContent");
+
+        // Decode the Base64-encoded audio content to byte[]
+        byte[] audioBytes = java.util.Base64.getDecoder().decode(audioContent);
+
+        return audioBytes;
     }
+
+    public static void saveBase64AsMp3(String base64Audio, String filePath) {
+        try (FileOutputStream fos = new FileOutputStream(filePath)) {
+            // Decode base64 string to byte array
+            //
+            byte[] audioBytes = Base64.getDecoder().decode(base64Audio);
+
+            // Write the byte array to an MP3 file
+            fos.write(audioBytes);
+            System.out.println("MP3 file saved at: " + filePath);
+        } catch (IOException e) {
+            e.printStackTrace();
+            // Handle the exception appropriately
+        }
+    }
+
 }
