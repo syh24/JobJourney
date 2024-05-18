@@ -18,7 +18,7 @@ public class QuestionDto {
     @Schema(name = "questionCreateRequest", description = "질문 생성 DTO")
     public static class Request{
         private int questionNum;
-        private String content;
+        private Long selfIntroductionId;
         private String job;
         private List<String> additionalQuestions;
         private List<Integer> additionalQuestionsSequence;
