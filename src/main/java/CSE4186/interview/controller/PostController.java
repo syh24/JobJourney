@@ -56,7 +56,7 @@ public class PostController {
     ) {
         Long userId = Long.valueOf(loginUser.getUsername());
         Post post = postService.findPost(id);
-        String checkLikeOrDislike = userService.checkLikeOrDislike(userId);
+        String checkLikeOrDislike = userService.checkLikeOrDislike(id, userId);
 
         return ApiUtil.success(new PostDto.Response(post, checkLikeOrDislike));
     }

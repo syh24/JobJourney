@@ -26,7 +26,7 @@ public class LikesService {
     private final PostRepository postRepository;
 
 
-    public void addLike(LikesDto.creteRequest request, Long postId) {
+    public String addLike(LikesDto.creteRequest request, Long postId) {
         User findUser = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new NotFoundException("해당 유저가 존재하지 않습니다."));
 
@@ -38,6 +38,7 @@ public class LikesService {
         if (findLike.isPresent()) {
             likeRepository.delete(findLike.get());
             post.subLikeCount();
+            return "좋아요 취소";
         } else {
             dislikeRepository.findAllByPostAndUser(post.getId(), findUser.getId()).ifPresent(d -> {
                 throw new IllegalStateException("이미 싫어요를 눌렀습니다.");
@@ -47,6 +48,7 @@ public class LikesService {
                     .post(post)
                     .build());
             post.addLikeCount();
+            return "좋아요 성공";
         }
     }
 
