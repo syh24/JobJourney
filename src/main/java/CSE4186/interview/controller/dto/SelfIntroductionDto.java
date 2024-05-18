@@ -2,11 +2,9 @@ package CSE4186.interview.controller.dto;
 
 import CSE4186.interview.entity.SelfIntroduction;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 public class SelfIntroductionDto {

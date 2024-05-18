@@ -34,7 +34,4 @@ public class UserDTO {
     public static class oauth2LoginRequest{
         private String code;
     }
-
-
-
 }
