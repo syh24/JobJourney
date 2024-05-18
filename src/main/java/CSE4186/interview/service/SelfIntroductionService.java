@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
@@ -23,6 +24,7 @@ public class SelfIntroductionService {
     //유저아이디,
     public void save(Long id, String title, String content) {
         User user=userRepository.findById(id).orElseThrow();
+        //System.out.println(title);
         selfIntroductionRepository.save(
                 SelfIntroduction.builder()
                         .user(user)
@@ -30,5 +32,14 @@ public class SelfIntroductionService {
                         .content(content)
                         .build()
         );
+    }
+
+    public String findSelfIntroductionById(Long selfIntroductionId) {
+        Optional<SelfIntroduction> selfIntroduction = selfIntroductionRepository.findById(selfIntroductionId);
+        if (selfIntroduction.isPresent()) {
+            return selfIntroduction.get().getContent();
+        } else {
+            throw new NoSuchElementException("SelfIntroduction not found with id " + selfIntroductionId);
+        }
     }
 }

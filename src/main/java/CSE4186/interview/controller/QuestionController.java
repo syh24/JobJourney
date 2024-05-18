@@ -4,6 +4,7 @@ import CSE4186.interview.controller.dto.BaseResponseDto;
 import CSE4186.interview.controller.dto.QuestionDto;
 import CSE4186.interview.controller.dto.SelfIntroductionDto;
 import CSE4186.interview.service.QuestionService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -27,18 +28,6 @@ public class QuestionController {
     @PostMapping("/question/create")
     @Operation(summary = "Create Question", description = "Gemini를 사용하여 질문 생성")
     public ResponseEntity<BaseResponseDto<String>> createQuestionWithGemini(@RequestBody QuestionDto.Request request) {
-
-        int questionNum= request.getQuestionNum();
-        String selfIntroductionContent = request.getContent();
-        String job = request.getJob();
-        List<String> additionalQuestions = request.getAdditionalQuestions();
-        List<Integer> additionalQuestionsSequence = request.getAdditionalQuestionsSequence();
-
-        try {
-            return questionService.createQuestion(questionNum,selfIntroductionContent, job, additionalQuestions, additionalQuestionsSequence);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        return questionService.createQuestion(request);
     }
-
 }
