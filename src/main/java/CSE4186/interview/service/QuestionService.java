@@ -98,8 +98,6 @@ public class QuestionService {
 
         String selfIntroductionContent = selfIntroductionService.findSelfIntroductionById(selfIntroductionId);
 
-        //System.out.println(selfIntroductionContent);
-
         RestTemplate template = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
         String promptWithNum = String.format(prompt,job,questionNum);
         String requestBody=createRequestBody(promptWithNum, selfIntroductionContent);
