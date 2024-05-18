@@ -59,7 +59,7 @@ public class UserService {
         }
     }
 
-    public String checkLikeOrDislike(Long id) {
-        return userRepository.findUserByLikesAndDislike(id);
+    public String checkLikeOrDislike(Long postId, Long id) {
+        return userRepository.findUserByLikesAndDislike(postId, id);
     }
 }

@@ -2,13 +2,10 @@ package CSE4186.interview.controller.dto;
 
 import CSE4186.interview.entity.SelfIntroduction;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
 
-import java.time.LocalDateTime;
+import java.util.List;
 
 public class SelfIntroductionDto {
 
@@ -18,10 +15,9 @@ public class SelfIntroductionDto {
     @AllArgsConstructor
     @Schema(name = "selfIntroductionCreateRequest", description = "자소서 생성 DTO")
     public static class Request{
-        private String title;
-        @NotBlank
-        private Long id;
-        private String content;
+        @NotNull private String title;
+        @NotNull private Long userId;
+        @NotNull private String content;
     }
 
 
@@ -35,13 +31,24 @@ public class SelfIntroductionDto {
         private String title;
         private String content;
         private String createdAt;
+        private String updatedAt;
 
         public Response(SelfIntroduction selfIntroduction){
-            id= selfIntroduction.getId();;
-            content= selfIntroduction.getContent();;
-            createdAt=selfIntroduction.getCreatedAt();
+            this.id= selfIntroduction.getId();
+            this.title = selfIntroduction.getTitle();
+            this.content= selfIntroduction.getContent().replaceAll(System.lineSeparator(), "<br>");
+            this.createdAt = String.valueOf(selfIntroduction.getCreatedAt());
+            this.updatedAt = String.valueOf(selfIntroduction.getUpdatedAt());
         }
+    }
 
+    @Data
+    @RequiredArgsConstructor
+    @Schema(name = "selfIntroductionListResponse", description = "자소서 전체 list 응답 DTO")
+    public static class selfIntroductionListResponse {
+        @NotNull
+        private final List<SelfIntroductionDto.Response> list;
+        private final int pageCount;
     }
 
 
