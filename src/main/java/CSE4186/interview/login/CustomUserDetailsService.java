@@ -1,6 +1,7 @@
 package CSE4186.interview.login;
 
 import CSE4186.interview.entity.User;
+import CSE4186.interview.exception.NotFoundException;
 import CSE4186.interview.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
@@ -26,7 +27,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         return userRepository.findByEmail(email)
                 .map(user->createUser(email,user))
-                .orElseThrow(()->new UsernameNotFoundException("wrong email"));
+                .orElseThrow(()->new NotFoundException("wrong email"));
     }
 
     private org.springframework.security.core.userdetails.User createUser(String email, User user) {

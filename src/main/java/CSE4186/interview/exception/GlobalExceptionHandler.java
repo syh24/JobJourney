@@ -2,6 +2,7 @@ package CSE4186.interview.exception;
 
 
 import CSE4186.interview.utils.ApiUtil;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -55,9 +56,4 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return ResponseEntity.status(HttpServletResponse.SC_INTERNAL_SERVER_ERROR).body(ApiUtil.error(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "알 수 없는 오류 발생"));
     }
 
-    @ExceptionHandler(ServletException.class)
-    protected ResponseEntity<Object> handleForbidden(Exception e){
-        logger.error(e.getMessage(),e);
-        return ResponseEntity.status(HttpServletResponse.SC_FORBIDDEN).body(ApiUtil.error(HttpServletResponse.SC_FORBIDDEN,"403에러"));
-    }
 }

@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,6 +28,7 @@ import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
+@Transactional
 @Tag(name = "Login", description = "Login API")
 public class LoginController {
 
@@ -56,21 +58,15 @@ public class LoginController {
         return ApiUtil.success(userIdMap);
     }
 
-    //유효한 jwt 토큰인지 검사
     @GetMapping("/token/check")
     @Operation(summary="JWT validity check", description = "jwt 토큰 유효성 체크")
-    public ResponseEntity<BaseResponseDto<String>> tokenValidityCheck(HttpServletRequest request){
-        String exceptionCode = (String) request.getAttribute("exception");
-        return ResponseEntity.ok(
-                new BaseResponseDto<>(
-                        "success",
-                        exceptionCode == null ? "" : exceptionCode,
-                        ""
-                ));
+    public ApiUtil.ApiSuccessResult<String> tokenValidityCheck(HttpServletRequest request){
+        return ApiUtil.success("");
     }
 
     @PostMapping("oauth2/google")
-    BaseResponseDto<Map<String,String>> getOauth2Token(@RequestBody UserDTO.oauth2LoginRequest oauth2LoginRequest, HttpServletResponse httpServletResponse) throws JsonProcessingException {
+    @Operation(summary="google login", description = "구글에 로그인하여 받은 코드를 넘겨 로그인")
+    public ApiUtil.ApiSuccessResult<Map<String,String>> getOauth2Token(@RequestBody UserDTO.oauth2LoginRequest oauth2LoginRequest, HttpServletResponse httpServletResponse) throws JsonProcessingException {
 
         //1. 코드를 받는다.
         String code= oauth2LoginRequest.getCode();
@@ -79,8 +75,6 @@ public class LoginController {
         String token= OAuth2UserService.requestGoogleToken(code);
 
         //3. 토큰을 통해 구글 서버에서 계정 정보를 가져와 로그인한다.
-        BaseResponseDto<Map<String,String>> response= OAuth2UserService.requestGoogleAccountAndLogin(token, httpServletResponse);
-
-        return response;
+        return ApiUtil.success(OAuth2UserService.requestGoogleAccountAndLogin(token, httpServletResponse));
     }
 }

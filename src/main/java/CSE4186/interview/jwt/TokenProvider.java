@@ -97,8 +97,8 @@ public class TokenProvider implements InitializingBean {
     }
 
     public boolean validateToken(String token, HttpServletRequest httpServletRequest) {
-            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
-            return true;
+        Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+        return true;
     }
 
     public boolean checkRefreshToken(String refreshToken) {
