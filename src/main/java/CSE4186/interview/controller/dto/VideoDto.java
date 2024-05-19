@@ -23,6 +23,7 @@ public class VideoDto {
     @Data
     @Schema(name = "videoResponse", description = "비디오 응답 DTO")
     public static class Response {
+        private final Long id;
         private final String title;
         private final String link;
         private final Long userId;
@@ -30,6 +31,7 @@ public class VideoDto {
         private final String updatedAt;
 
         public Response(Video video) {
+            this.id = video.getId();
             this.title = video.getTitle();
             this.link = video.getLink();
             this.userId = video.getUser().getId();
