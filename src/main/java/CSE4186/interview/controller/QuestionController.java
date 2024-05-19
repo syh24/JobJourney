@@ -4,6 +4,7 @@ import CSE4186.interview.controller.dto.BaseResponseDto;
 import CSE4186.interview.controller.dto.QuestionDto;
 import CSE4186.interview.controller.dto.SelfIntroductionDto;
 import CSE4186.interview.service.QuestionService;
+import CSE4186.interview.utils.ApiUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
 import java.util.Map;
 //컨트롤러에 tag
 @RestController
@@ -25,17 +27,13 @@ public class QuestionController {
 
     @PostMapping("/question/create")
     @Operation(summary = "Create Question", description = "Gemini를 사용하여 질문 생성")
-    public ResponseEntity<BaseResponseDto<String>> createQuestionWithGemini(@RequestBody QuestionDto.Request request) {
+    public ApiUtil.ApiSuccessResult<Map<String, List<Map<String,String>>>> createQuestionWithGemini(@RequestBody QuestionDto.Request request) {
 
         int questionNum= request.getQuestionNum();;
         String selfIntroductionContent = request.getSelfIntroductionContent();
         String dept= request.getDept();;
 
-        try {
-            return questionService.createQuestion(questionNum,dept,selfIntroductionContent);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        return ApiUtil.success(questionService.createQuestion(questionNum,dept,selfIntroductionContent));
     }
 
 }

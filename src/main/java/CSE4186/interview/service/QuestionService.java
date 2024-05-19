@@ -4,6 +4,8 @@ import CSE4186.interview.controller.dto.BaseResponseDto;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.api.Http;
+import io.swagger.v3.core.util.Json;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -12,16 +14,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
 import java.util.stream.IntStream;
 
 @Service
+@Transactional
 public class QuestionService {
-
-    //라이브러리 사용해서 json 파싱하기
-    //기본 json 파일 만들어두고 text 부분만 수정하기
 
     private final String apiKey;
     private final ObjectMapper objectMapper;
@@ -79,83 +80,88 @@ public class QuestionService {
         }
     }
 
-
-    public ResponseEntity<BaseResponseDto<String>> createQuestion(int questionNum, String dept, String selfIntroductionContent) throws Exception {
-        String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" + apiKey;
-
-        RestTemplate template = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
+    private void setPrompt(Integer questionNum, String dept, String selfIntroductionContent){
         prompt_head=String.format(prompt_head,questionNum,dept);
         prompt=prompt_head+prompt_body+selfIntroductionContent+prompt_tail;
+    }
 
-        String requestBody=createRequestBody(selfIntroductionContent);
+    private HttpEntity<String> setHeader(String requestBody){
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-
         HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
+        return requestEntity;
+    }
 
+    private String getTextContent(String response) {
+        Map<String, Object> jsonMap = null;
+        try {
+            jsonMap = objectMapper.readValue(response, new TypeReference<Map<String, Object>>() {});
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        Map<String, Object> candidates= (Map<String, Object>)((List<Object>)jsonMap.get("candidates")).get(0);
+        List<Map<String, Object>> parts=(List<Map<String,Object>>)((Map<String,Object>) candidates.get("content")).get("parts");
+        String textContent = (String)parts.get(0).get("text");
+        return textContent;
+    }
+
+    private Map<String,List<Map<String,String>>> getQuestions(String textContent){
+
+        //1. 질문을 \n 기준으로 파싱
+        String[] questionsParsedByLine=textContent.split("\n");
+
+        //2. 질문을 <숫자.> 기준으로 파싱하고 <숫자.>은 삭제
+        String[] rawQuestions=Arrays.stream(questionsParsedByLine)
+                .map(q->q.replaceAll("\\d+\\.","").trim())
+                .toArray(String[]::new);
+
+        //3. List에 <"번호":질문> 형식으로 저장
+        List<Map<String,String>> questionsTaggedByNumber=new ArrayList<>();
+        IntStream.range(0, rawQuestions.length)
+                .forEach(index->{
+                    Map<String,String> taggedQuestionMap=new HashMap<>();
+                    taggedQuestionMap.put(Integer.toString(index),rawQuestions[index]);
+                    questionsTaggedByNumber.add(taggedQuestionMap);
+                });
+
+        //4. Map에 <"questions":질문 list> 형식으로 저장하여 리턴
+        Map<String, List<Map<String,String>>> questionToJson = new HashMap<>();
+        questionToJson.put("questions",questionsTaggedByNumber);
+        return questionToJson;
+    }
+
+
+    public Map<String,List<Map<String,String>>> createQuestion(int questionNum, String dept, String selfIntroductionContent){
+        String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" + apiKey;
+        RestTemplate template = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
+
+        //1. 프롬프트 세팅
+        setPrompt(questionNum,dept,selfIntroductionContent);
+
+        //2. requestBody 만들기
+        String requestBody=createRequestBody(selfIntroductionContent);
+
+        //3. 헤더 세팅
+        HttpEntity<String> requestEntity = setHeader(requestBody);
+
+        //4. rest 통신
         ResponseEntity<String> responseEntity = template.exchange(
                 url,
                 HttpMethod.POST,
                 requestEntity,
                 String.class);
-        String result = responseEntity.getBody();
-        try{
-            Map<String, Object> jsonMap = objectMapper.readValue(result, new TypeReference<Map<String, Object>>() {});
-            Map<String, Object> candidates= (Map<String, Object>)((List<Object>)jsonMap.get("candidates")).get(0);
-            List<Map<String, Object>> parts=(List<Map<String,Object>>)((Map<String,Object>) candidates.get("content")).get("parts");
-            String response = (String)parts.get(0).get("text");
-            System.out.println(response);
+        String response = responseEntity.getBody();
 
-            String[] parsedQuestions=response.split("\n");
-            String[] rawQuestions=Arrays.stream(parsedQuestions)
-                    .map(q->q.replaceAll("\\d+\\.","").trim())
-                    .toArray(String[]::new);
+        //5. response에서 gemini 답변 부분만 가져오기
+        String textContent=getTextContent(response);
 
-            List<Map<String,String>> taggedQuestions=new ArrayList<>();
-            IntStream.range(0, rawQuestions.length)
-                    .forEach(index->{
-                        Map<String,String> taggedQuestionMap=new HashMap<>();
-                        taggedQuestionMap.put(Integer.toString(index),rawQuestions[index]);
-                        taggedQuestions.add(taggedQuestionMap);
-                    });
+        //6. 답변 속 질문을 파싱하여 JSON 형태로 저장한 후 리턴
+        Map<String, List<Map<String,String>>> questionToJson=getQuestions(textContent);
 
-            Map<String, List<Map<String,String>>> questionToJson = new HashMap<>();
-            questionToJson.put("questions",taggedQuestions);
-
-            try {
-                String jsonResponseString = objectMapper.writeValueAsString(questionToJson);
-                return ResponseEntity.ok(
-                        new BaseResponseDto<String>(
-                                "success",
-                            "",
-                                    jsonResponseString
-                        )
-                );
-            } catch (JsonProcessingException e) {
-                return ResponseEntity.ok(
-                        new  BaseResponseDto<String>(
-                                "fail",
-                                "",
-                                ""
-                        )
-                );
-            }
-
-        } catch (Exception e){
-            e.printStackTrace();
-            return ResponseEntity.ok(
-                    new  BaseResponseDto<String>(
-                            "fail",
-                            "",
-                            ""
-                    )
-            );
-        }
-
+        return questionToJson;
     }
 
-    public String createRequestBody(String selfIntroductionContent) throws Exception {
-
+    public String createRequestBody(String selfIntroductionContent){
         String requirements = prompt + "\n" + selfIntroductionContent;
 
         ApiRequestBody apiRequestBody = ApiRequestBody.builder()
@@ -188,8 +194,12 @@ public class QuestionService {
         return convertToJson(apiRequestBody);
     }
 
-    public String convertToJson(ApiRequestBody apiRequestBody) throws Exception{
-        return objectMapper.writeValueAsString(apiRequestBody);
+    public String convertToJson(ApiRequestBody apiRequestBody){
+        try {
+            return objectMapper.writeValueAsString(apiRequestBody);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }
