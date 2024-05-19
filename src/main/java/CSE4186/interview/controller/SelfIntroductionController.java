@@ -30,7 +30,7 @@ public class SelfIntroductionController {
 
     @GetMapping("/list")
     @Operation(summary = "Get selfIntroductions", description = "모든 자소서를 조회")
-    public ApiUtil.ApiSuccessResult<SelfIntroductionDto.selfIntroductionListResponse> getSelfIntroductionList(
+    public ApiUtil.ApiSuccessResult<SelfIntroductionDto.SelfIntroductionListResponse> getSelfIntroductionList(
             @AuthenticationPrincipal User loginUser,
             @PageableDefault(page = 1, size = 10) Pageable pageable
     ) {
@@ -38,14 +38,13 @@ public class SelfIntroductionController {
         Page<SelfIntroduction> pageSelfIntroduction = selfIntroductionService.findAllSelfIntroductions(pageable, userId);
         List<SelfIntroductionDto.Response> selfIntroductionList = pageSelfIntroduction.stream().map(SelfIntroductionDto.Response::new)
                 .toList();
-        return ApiUtil.success(new SelfIntroductionDto.selfIntroductionListResponse(selfIntroductionList, pageSelfIntroduction.getTotalPages()));
+        return ApiUtil.success(new SelfIntroductionDto.SelfIntroductionListResponse(selfIntroductionList, pageSelfIntroduction.getTotalPages()));
     }
 
     @PostMapping("/save")
     @Operation(summary = "Save selfIntroductions", description = "자소서를 저장")
     public ApiUtil.ApiSuccessResult<Long> saveSelfIntroductionList(@Valid @RequestBody SelfIntroductionDto.Request request){
-        System.out.println("request.getContent() = " + request.getContent().replace(System.lineSeparator(), ""));
-        SelfIntroduction selfIntroduction = selfIntroductionService.save(request.getUserId(), request.getTitle(), request.getContent());
+        SelfIntroduction selfIntroduction = selfIntroductionService.save(request);
         return ApiUtil.success(selfIntroduction.getId());
     }
 }
