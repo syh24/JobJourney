@@ -3,6 +3,7 @@ package CSE4186.interview.config;
 import CSE4186.interview.jwt.JwtFilter;
 import CSE4186.interview.jwt.TokenProvider;
 import CSE4186.interview.login.CustomAuthenticationManager;
+import CSE4186.interview.login.FilterExceptionHandler;
 import CSE4186.interview.login.LoginFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
@@ -54,8 +55,6 @@ public class SecurityConfig {
                         return config;
                     }
                 }))
-//                .sessionManagement(session->
-//                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
                                 .requestMatchers("/").permitAll()
@@ -69,6 +68,7 @@ public class SecurityConfig {
                                 .anyRequest().hasAnyRole("USER")
                 )
 
+                .addFilterBefore(new FilterExceptionHandler(objectMapper),UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new JwtFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new LoginFilter(tokenProvider,customAuthenticationManager,objectMapper), UsernamePasswordAuthenticationFilter.class);
         return http.build();
