@@ -1,24 +1,30 @@
 package CSE4186.interview.service;
 
+import CSE4186.interview.controller.dto.SelfIntroductionDto;
+import CSE4186.interview.entity.Post;
 import CSE4186.interview.entity.SelfIntroduction;
+import CSE4186.interview.entity.SelfIntroductionDetail;
 import CSE4186.interview.entity.User;
 import CSE4186.interview.exception.NotFoundException;
+import CSE4186.interview.repository.SelfIntroductionDetailRepository;
 import CSE4186.interview.repository.SelfIntroductionRepository;
 import CSE4186.interview.repository.UserRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class SelfIntroductionService {
 
     private final SelfIntroductionRepository selfIntroductionRepository;
+    private final SelfIntroductionDetailRepository selfIntroductionDetailRepository;
     private final UserRepository userRepository;
 
     public Page<SelfIntroduction> findAllSelfIntroductions(Pageable pageable, Long userId) {
@@ -27,13 +33,25 @@ public class SelfIntroductionService {
         return selfIntroductionRepository.findAllByUser(PageRequest.of(page, pageable.getPageSize(), Sort.by(Sort.Direction.DESC, "createdAt")), user);
     }
 
-    public SelfIntroduction save(Long id, String title, String content) {
-        User user = userRepository.findById(id).orElseThrow(() -> new NotFoundException("해당 유저가 존재하지 않습니다."));
-        return selfIntroductionRepository.save(
+    @Transactional
+    public SelfIntroduction save(SelfIntroductionDto.Request request) {
+        User user = userRepository.findById(request.getUserId()).orElseThrow(() -> new NotFoundException("해당 유저가 존재하지 않습니다."));
+        SelfIntroduction selfIntroduction = selfIntroductionRepository.save(
                 SelfIntroduction.builder()
                         .user(user)
-                        .title(title)
-                        .content(content)
+                        .title(request.getTitle())
                         .build());
+
+        for (SelfIntroductionDto.SelfIntroductionDetailRequest selfIntroductionDetail : request.getDetailList()) {
+            selfIntroductionDetailRepository.save(SelfIntroductionDetail
+                    .builder()
+                    .title(selfIntroductionDetail.getTitle())
+                    .content(selfIntroductionDetail.getContent())
+                    .type(selfIntroductionDetail.getType())
+                    .selfIntroduction(selfIntroduction)
+                    .build());
+        }
+
+        return selfIntroduction;
     }
 }
