@@ -1,7 +1,7 @@
 package CSE4186.interview.login;
 
 import CSE4186.interview.jwt.JwtExceptionCode;
-import CSE4186.interview.utils.FilterUtil;
+import CSE4186.interview.utils.ApiUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -42,7 +42,7 @@ public class FilterExceptionHandler extends OncePerRequestFilter {
     private void setErrorResponse(HttpServletResponse response, JwtExceptionCode code){
         response.setStatus(HttpStatus.OK.value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        FilterUtil.FilterErrorResult<String> error=FilterUtil.error(code.getCode(),code.getMessage());
+        ApiUtil.ApiErrorResult<String> error= ApiUtil.error(code.getCode(),code.getMessage());
 
         try{
             response.getWriter().write(objectMapper.writeValueAsString(error));
