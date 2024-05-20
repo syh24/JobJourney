@@ -60,6 +60,10 @@ public class Post extends BaseTimeEntity {
     @OrderBy("id asc")
     private List<Comment> comments = new ArrayList<>();
 
+    @OneToMany(mappedBy = "post", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
+    @OrderBy("id asc")
+    private List<PostVideo> postVideo = new ArrayList<>();
+
     public void updatePost(String title, String content) {
         this.title = title;
         this.content = content;
