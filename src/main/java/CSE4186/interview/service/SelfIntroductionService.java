@@ -1,7 +1,6 @@
 package CSE4186.interview.service;
 
 import CSE4186.interview.controller.dto.SelfIntroductionDto;
-import CSE4186.interview.entity.Post;
 import CSE4186.interview.entity.SelfIntroduction;
 import CSE4186.interview.entity.SelfIntroductionDetail;
 import CSE4186.interview.entity.User;
@@ -9,7 +8,6 @@ import CSE4186.interview.exception.NotFoundException;
 import CSE4186.interview.repository.SelfIntroductionDetailRepository;
 import CSE4186.interview.repository.SelfIntroductionRepository;
 import CSE4186.interview.repository.UserRepository;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -34,7 +32,7 @@ public class SelfIntroductionService {
     }
 
     @Transactional
-    public SelfIntroduction save(SelfIntroductionDto.Request request) {
+    public SelfIntroduction save(SelfIntroductionDto.CreateRequest request) {
         User user = userRepository.findById(request.getUserId()).orElseThrow(() -> new NotFoundException("해당 유저가 존재하지 않습니다."));
         SelfIntroduction selfIntroduction = selfIntroductionRepository.save(
                 SelfIntroduction.builder()
@@ -53,5 +51,25 @@ public class SelfIntroductionService {
         }
 
         return selfIntroduction;
+    }
+
+    @Transactional
+    public Long updateSelfIntroduction(SelfIntroductionDto.UpdateRequest request, Long id) {
+        SelfIntroduction selfIntroduction = selfIntroductionRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("해당 자소서가 존재하지 않습니다."));
+        selfIntroduction.changeTitle(request.getTitle());
+        selfIntroductionDetailRepository.deleteBySelfIntroduction(selfIntroduction);
+
+        for (SelfIntroductionDto.SelfIntroductionDetailRequest selfIntroductionDetail : request.getDetailList()) {
+            selfIntroductionDetailRepository.save(SelfIntroductionDetail
+                    .builder()
+                    .title(selfIntroductionDetail.getTitle())
+                    .content(selfIntroductionDetail.getContent())
+                    .type(selfIntroductionDetail.getType())
+                    .selfIntroduction(selfIntroduction)
+                    .build());
+        }
+
+        return selfIntroduction.getId();
     }
 }

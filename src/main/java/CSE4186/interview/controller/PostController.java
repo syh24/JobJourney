@@ -1,5 +1,6 @@
 package CSE4186.interview.controller;
 
+import CSE4186.interview.annotation.LoginUser;
 import CSE4186.interview.controller.dto.CommentDto;
 import CSE4186.interview.controller.dto.PostDto;
 import CSE4186.interview.entity.Comment;
@@ -16,7 +17,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
 
@@ -52,7 +52,7 @@ public class PostController {
     @Operation(summary = "Get Post", description = "게시글 상세")
     public ApiUtil.ApiSuccessResult<PostDto.Response> getPost(
             @PathVariable(name = "id") Long id,
-            @AuthenticationPrincipal User loginUser
+            @LoginUser User loginUser
     ) {
         Long userId = Long.valueOf(loginUser.getUsername());
         Post post = postService.findPost(id);
