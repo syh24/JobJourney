@@ -72,4 +72,11 @@ public class SelfIntroductionService {
 
         return selfIntroduction.getId();
     }
+
+    @Transactional
+    public void deleteSelfIntroduction(Long id) {
+        SelfIntroduction selfIntroduction = selfIntroductionRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("해당 자소서가 존재하지 않습니다."));
+        selfIntroductionRepository.delete(selfIntroduction);
+    }
 }

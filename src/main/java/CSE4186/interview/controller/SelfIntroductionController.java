@@ -17,8 +17,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import static CSE4186.interview.entity.QSelfIntroduction.selfIntroduction;
-
 // 면접 기능 관련
 @RestController
 @RequiredArgsConstructor
@@ -49,11 +47,20 @@ public class SelfIntroductionController {
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Save selfIntroductions", description = "자소서 수정")
+    @Operation(summary = "Update selfIntroductions", description = "자소서 수정")
     public ApiUtil.ApiSuccessResult<Long> updateSelfIntroduction(
             @Valid @RequestBody SelfIntroductionDto.UpdateRequest request,
             @PathVariable(name = "id") Long id
             ){
         return ApiUtil.success(selfIntroductionService.updateSelfIntroduction(request, id));
+    }
+
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Delete selfIntroductions", description = "자소서 삭제")
+    public ApiUtil.ApiSuccessResult<String> deleteSelfIntroduction(
+            @PathVariable(name = "id") Long id
+    ){
+        selfIntroductionService.deleteSelfIntroduction(id);
+        return ApiUtil.success("삭제되었습니다.");
     }
 }
