@@ -17,24 +17,24 @@ jobs:
     steps:
       - name: master 브랜치로 이동
         uses: actions/checkout@v4
-        with:
-          ref: master
+
       - name: JDK 21 설치
         uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'oracle'
-      - uses: actions/checkout@v4
-      - run: touch ./src/main/resources/application.properties
-      - run: echo "${{secrets.APPLICATION}}" > ./src/main/resources/application.properties
-      - uses: actions/upload-artifact@v4
-        with:
-          name: application.properties
-          path: ./src/main/resources/application.properties
-      - name: gradlew에 실행 권한 부여
-        run: chmod +x ./gradlew
-      - name: 프로젝트 빌드
-        run: ./gradlew clean build -x test
+
+      - name: Make application.properties
+        run: |
+          cd ./src/main/resources
+          touch ./application.properties
+          echo "${{ secrets.PROPERTIES }}" > ./application.properties
+        shell: bash
+
+      - name: Build with Gradle
+        run: |
+          chmod +x ./gradlew
+          ./gradlew clean build -x test
 
       - name: Docker build & push to docker repo
         run: |
