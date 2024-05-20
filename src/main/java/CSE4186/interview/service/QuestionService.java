@@ -1,21 +1,17 @@
 package CSE4186.interview.service;
 
 import CSE4186.interview.controller.dto.QuestionDto;
-import CSE4186.interview.service.TextToSpeechService;
-import CSE4186.interview.controller.dto.BaseResponseDto;
-import CSE4186.interview.utils.ApiUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.client.RestTemplate;
 
@@ -23,6 +19,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class QuestionService {
 
     //라이브러리 사용해서 json 파싱하기
@@ -86,7 +83,7 @@ public class QuestionService {
         }
     }
 
-    public ResponseEntity<BaseResponseDto<String>> createQuestion(@RequestBody QuestionDto.Request request) {
+    public String createQuestion(@RequestBody QuestionDto.Request request) {
 
         String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" + apiKey;
 
@@ -167,13 +164,8 @@ public class QuestionService {
 
         try {
             String jsonOutput = objectMapper.writeValueAsString(questionAudioPairs);
-            return ResponseEntity.ok(
-                    new BaseResponseDto<String>(
-                            "success",
-                            "",
-                            jsonOutput
-                    )
-            );
+            //return new QuestionDto.Response(jsonOutput);
+            return jsonOutput;
         } catch (JsonProcessingException e) {
             e.printStackTrace();
             throw new RuntimeException();
