@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class SelfIntroductionService {
@@ -78,5 +79,11 @@ public class SelfIntroductionService {
         SelfIntroduction selfIntroduction = selfIntroductionRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("해당 자소서가 존재하지 않습니다."));
         selfIntroductionRepository.delete(selfIntroduction);
+    }
+
+    public String findSelfIntroductionById(Long selfIntroductionId) {
+        Optional<SelfIntroduction> selfIntroduction = Optional.ofNullable(selfIntroductionRepository.findById(selfIntroductionId)
+                .orElseThrow(() -> new NotFoundException("해당 유저가 존재하지 않습니다.")));
+        return selfIntroduction.get().getContent();
     }
 }
