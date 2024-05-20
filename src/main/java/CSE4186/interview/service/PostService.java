@@ -77,6 +77,17 @@ public class PostService {
         Post post = postRepository.findById(id).orElseThrow(() ->
                 new NotFoundException("해당 게시글이 존재하지 않습니다. id=" + id));
         post.updatePost(request.getTitle(), request.getContent());
+        postVideoRepository.deleteByPost(post);
+
+        for (Long videoId : request.getVideoIdList()) {
+            Video video = videoRepository.findById(videoId)
+                    .orElseThrow(() -> new NotFoundException("해당 비디오가 존재하지 않습니다."));
+
+            postVideoRepository.save(PostVideo.builder()
+                    .video(video)
+                    .post(post)
+                    .build());
+        }
     }
 
     public Post findPost(Long id) {
