@@ -19,9 +19,7 @@ public class ReviewDto {
     public ReviewDto(String jsonString) {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
-            System.out.println("jsonString = " + jsonString);
             ReviewDto reviewDto = objectMapper.readValue(jsonString, ReviewDto.class);
-            System.out.println("reviewDto = " + reviewDto);
             this.verbal = reviewDto.getVerbal();
             this.nonVerbal = reviewDto.getNonVerbal();
             this.review = reviewDto.getReview();

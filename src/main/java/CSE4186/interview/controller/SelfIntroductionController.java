@@ -29,7 +29,7 @@ public class SelfIntroductionController {
     private final SelfIntroductionService selfIntroductionService;
 
     @GetMapping("/list")
-    @Operation(summary = "Get selfIntroductions", description = "모든 자소서를 조회")
+    @Operation(summary = "Get selfIntroductions", description = "모든 자소서 조회")
     public ApiUtil.ApiSuccessResult<SelfIntroductionDto.SelfIntroductionListResponse> getSelfIntroductionList(
             @LoginUser User loginUser,
             @PageableDefault(page = 1, size = 10) Pageable pageable
@@ -42,9 +42,18 @@ public class SelfIntroductionController {
     }
 
     @PostMapping("/save")
-    @Operation(summary = "Save selfIntroductions", description = "자소서를 저장")
-    public ApiUtil.ApiSuccessResult<Long> saveSelfIntroductionList(@Valid @RequestBody SelfIntroductionDto.Request request){
+    @Operation(summary = "Save selfIntroductions", description = "자소서 저장")
+    public ApiUtil.ApiSuccessResult<Long> saveSelfIntroductionList(@Valid @RequestBody SelfIntroductionDto.CreateRequest request){
         SelfIntroduction selfIntroduction = selfIntroductionService.save(request);
         return ApiUtil.success(selfIntroduction.getId());
+    }
+
+    @PutMapping("/{id}")
+    @Operation(summary = "Save selfIntroductions", description = "자소서 수정")
+    public ApiUtil.ApiSuccessResult<Long> updateSelfIntroduction(
+            @Valid @RequestBody SelfIntroductionDto.UpdateRequest request,
+            @PathVariable(name = "id") Long id
+            ){
+        return ApiUtil.success(selfIntroductionService.updateSelfIntroduction(request, id));
     }
 }

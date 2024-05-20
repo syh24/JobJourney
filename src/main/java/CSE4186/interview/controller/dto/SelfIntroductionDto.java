@@ -14,7 +14,17 @@ public class SelfIntroductionDto {
     @NoArgsConstructor
     @AllArgsConstructor
     @Schema(name = "selfIntroductionCreateRequest", description = "자소서 생성 DTO")
-    public static class Request{
+    public static class CreateRequest{
+        @NotNull private String title;
+        @NotNull private Long userId;
+        @NotNull private List<SelfIntroductionDetailRequest> detailList;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Schema(name = "selfIntroductionUpdateRequest", description = "자소서 수정 DTO")
+    public static class UpdateRequest{
         @NotNull private String title;
         @NotNull private Long userId;
         @NotNull private List<SelfIntroductionDetailRequest> detailList;
