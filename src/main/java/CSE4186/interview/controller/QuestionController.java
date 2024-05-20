@@ -1,22 +1,15 @@
 package CSE4186.interview.controller;
 
-import CSE4186.interview.controller.dto.BaseResponseDto;
 import CSE4186.interview.controller.dto.QuestionDto;
-import CSE4186.interview.controller.dto.SelfIntroductionDto;
 import CSE4186.interview.service.QuestionService;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import CSE4186.interview.utils.ApiUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import reactor.core.publisher.Mono;
 
-import java.util.List;
-import java.util.Map;
 //컨트롤러에 tag
 @RestController
 @RequiredArgsConstructor
@@ -27,7 +20,10 @@ public class QuestionController {
 
     @PostMapping("/question/create")
     @Operation(summary = "Create Question", description = "Gemini를 사용하여 질문 생성")
-    public ResponseEntity<BaseResponseDto<String>> createQuestionWithGemini(@RequestBody QuestionDto.Request request) {
-        return questionService.createQuestion(request);
+    public ApiUtil.ApiSuccessResult<QuestionDto.Response> createQuestionWithGemini(@RequestBody QuestionDto.Request request) {
+        String jsonOutput = questionService.createQuestion(request);
+        QuestionDto.Response response = new QuestionDto.Response(jsonOutput);
+        return ApiUtil.success(response);
+        //return ApiUtil.success(questionService.createQuestion(request));
     }
 }

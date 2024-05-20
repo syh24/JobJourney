@@ -1,5 +1,6 @@
 package CSE4186.interview.controller.dto;
 
+import CSE4186.interview.entity.Comment;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,5 +23,16 @@ public class QuestionDto {
         private String job;
         private List<String> additionalQuestions;
         private List<Integer> additionalQuestionsSequence;
+    }
+
+    @Builder
+    @NoArgsConstructor
+    @Data
+    @Schema(name = "questionCreateResponse", description = "질문 응답 DTO")
+    public static class Response {
+        private String content;
+        public Response(String Content) {
+            this.content = Content;
+        }
     }
 }

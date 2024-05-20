@@ -11,12 +11,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class SelfIntroductionService {
 
@@ -40,11 +40,8 @@ public class SelfIntroductionService {
     }
 
     public String findSelfIntroductionById(Long selfIntroductionId) {
-        Optional<SelfIntroduction> selfIntroduction = selfIntroductionRepository.findById(selfIntroductionId);
-        if (selfIntroduction.isPresent()) {
-            return selfIntroduction.get().getContent();
-        } else {
-            throw new NoSuchElementException("SelfIntroduction not found with id " + selfIntroductionId);
-        }
+        Optional<SelfIntroduction> selfIntroduction = Optional.ofNullable(selfIntroductionRepository.findById(selfIntroductionId)
+                .orElseThrow(() -> new NotFoundException("해당 유저가 존재하지 않습니다.")));
+        return selfIntroduction.get().getContent();
     }
 }
