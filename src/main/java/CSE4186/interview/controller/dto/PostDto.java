@@ -37,6 +37,8 @@ public class PostDto {
         private String title;
         @NotNull
         private String content;
+        @NotNull
+        private List<Long> videoIdList;
     }
 
     @RequiredArgsConstructor
