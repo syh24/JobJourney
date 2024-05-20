@@ -1,5 +1,6 @@
 package CSE4186.interview.controller;
 
+import CSE4186.interview.annotation.LoginUser;
 import CSE4186.interview.controller.dto.SelfIntroductionDto;
 import CSE4186.interview.entity.SelfIntroduction;
 import CSE4186.interview.service.SelfIntroductionService;
@@ -11,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,7 +31,7 @@ public class SelfIntroductionController {
     @GetMapping("/list")
     @Operation(summary = "Get selfIntroductions", description = "모든 자소서를 조회")
     public ApiUtil.ApiSuccessResult<SelfIntroductionDto.SelfIntroductionListResponse> getSelfIntroductionList(
-            @AuthenticationPrincipal User loginUser,
+            @LoginUser User loginUser,
             @PageableDefault(page = 1, size = 10) Pageable pageable
     ) {
         Long userId = Long.valueOf(loginUser.getUsername());
