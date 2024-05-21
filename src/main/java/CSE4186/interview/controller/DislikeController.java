@@ -22,7 +22,6 @@ public class DislikeController {
             @Valid @RequestBody DislikeDto.creteRequest request,
             @PathVariable(name = "id") Long postId
     ) {
-        dislikeService.addDislike(request, postId);
-        return ApiUtil.success("싫어요");
+        return ApiUtil.success(dislikeService.addDislike(request, postId));
     }
 }

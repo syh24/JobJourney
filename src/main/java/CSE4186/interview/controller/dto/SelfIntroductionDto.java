@@ -1,47 +1,62 @@
 package CSE4186.interview.controller.dto;
 
 import CSE4186.interview.entity.SelfIntroduction;
+import CSE4186.interview.entity.SelfIntroductionDetail;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
 
-import java.time.LocalDateTime;
+import java.util.List;
 
 public class SelfIntroductionDto {
 
     @Data
-    @Builder
     @NoArgsConstructor
     @AllArgsConstructor
     @Schema(name = "selfIntroductionCreateRequest", description = "자소서 생성 DTO")
     public static class Request{
-        private String title;
-        @NotBlank
-        private Long id;
-        private String content;
+        @NotNull private String title;
+        @NotNull private Long userId;
+        @NotNull private List<SelfIntroductionDetailRequest> detailList;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Schema(name = "selfIntroductionDetailRequest", description = "자소서 detail DTO")
+    public static class SelfIntroductionDetailRequest{
+        @NotNull private String title;
+        @NotNull private String content;
+        @NotNull private String type;
     }
 
 
     @Data
-    @Builder
-    @NoArgsConstructor
     @AllArgsConstructor
     @Schema(name = "selfIntroductionRequest", description = "자소서 응답 DTO")
     public static class Response {
         private Long id;
         private String title;
-        private String content;
         private String createdAt;
+        private String updatedAt;
+        private List<SelfIntroductionDetailDto.Response> detailList;
 
         public Response(SelfIntroduction selfIntroduction){
-            id= selfIntroduction.getId();;
-            content= selfIntroduction.getContent();;
-            createdAt=selfIntroduction.getCreatedAt();
+            this.id= selfIntroduction.getId();
+            this.title = selfIntroduction.getTitle();
+            this.createdAt = String.valueOf(selfIntroduction.getCreatedAt());
+            this.updatedAt = String.valueOf(selfIntroduction.getUpdatedAt());
+            this.detailList = selfIntroduction.getSelfIntroductionDetailList().stream().map(SelfIntroductionDetailDto.Response::new).toList();
         }
+    }
 
+    @Data
+    @RequiredArgsConstructor
+    @Schema(name = "selfIntroductionListResponse", description = "자소서 전체 list 응답 DTO")
+    public static class SelfIntroductionListResponse {
+        @NotNull
+        private final List<SelfIntroductionDto.Response> list;
+        private final int pageCount;
     }
 
 

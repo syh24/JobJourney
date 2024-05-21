@@ -10,11 +10,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class UserService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -25,6 +27,7 @@ public class UserService {
                 .orElseThrow(() -> new NotFoundException("해당 유저가 존재하지 않습니다."));
     }
 
+    @Transactional
     public void join(UserDTO.joinRequest request) {
         String encodedPassword=bCryptPasswordEncoder.encode(request.getPassword());
         User newUser=new User(request.getName(), request.getEmail(), encodedPassword, Role.USER);
@@ -42,7 +45,6 @@ public class UserService {
         return objectMapper.writeValueAsString(userIdMap);
     }
 
-
     public Boolean isDuplicatedNameOrEmail(String name, String email) {
         return userRepository.findByName(name).isPresent() || userRepository.findByEmail(email).isPresent();
     }
@@ -55,5 +57,9 @@ public class UserService {
         if (user.getSuspensionStatus()) {
             throw new IllegalStateException("해당 계정은 정지된 계정입니다.");
         }
+    }
+
+    public String checkLikeOrDislike(Long postId, Long id) {
+        return userRepository.findUserByLikesAndDislike(postId, id);
     }
 }

@@ -6,14 +6,20 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-@Builder
 public class SelfIntroduction extends BaseTimeEntity {
+
+    @Builder
+    public SelfIntroduction(String title, User user) {
+        this.title = title;
+        this.user = user;
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,7 +28,9 @@ public class SelfIntroduction extends BaseTimeEntity {
 
     private String title;
 
-    private String content;
+    @OneToMany(mappedBy = "selfIntroduction", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
+    @OrderBy("id asc")
+    private List<SelfIntroductionDetail> selfIntroductionDetailList = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")

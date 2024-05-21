@@ -1,6 +1,7 @@
 package CSE4186.interview.controller.dto;
 
 import CSE4186.interview.entity.Post;
+import CSE4186.interview.entity.PostVideo;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -23,6 +24,8 @@ public class PostDto {
         private String content;
         @NotNull
         private Long userId;
+        @NotNull
+        private List<Long> videoIdList;
     }
 
     @Data
@@ -49,12 +52,28 @@ public class PostDto {
         private final String createdAt;
         private final String updatedAt;
         private final Long userId;
+        private String checkLikeOrDislike;
         private final List<CommentDto.Response> comments;
+        private final List<PostVideoDto.Response> videoList;
 
         public Response(Post post) {
             this.id = post.getId();
             this.title = post.getTitle();
-            this.content = post.getContent();
+            this.content = post.getContent().replaceAll(System.lineSeparator(), "<br>");;
+            this.createdAt = String.valueOf(post.getCreatedAt());
+            this.updatedAt = String.valueOf(post.getUpdatedAt());
+            this.userId = post.getUser().getId();
+            this.comments = post.getComments().stream().map(CommentDto.Response::new).toList();
+            this.like = post.getLikeCount();
+            this.dislike = post.getDislikeCount();
+            this.viewCount = post.getViewCount();
+            this.videoList = post.getPostVideo().stream().map(PostVideoDto.Response::new).toList();
+        }
+
+        public Response(Post post, String checkLikeOrDislike) {
+            this.id = post.getId();
+            this.title = post.getTitle();
+            this.content = post.getContent().replaceAll(System.lineSeparator(), "<br>");;
             this.createdAt = String.valueOf(post.getCreatedAt());
             this.updatedAt = String.valueOf(post.getUpdatedAt());
             this.userId = post.getUser().getId();
@@ -62,6 +81,8 @@ public class PostDto {
             this.like = post.getLikeCount();
             this.dislike = post.getDislikeCount();
             this.viewCount = post.getViewCount();
+            this.checkLikeOrDislike = checkLikeOrDislike;
+            this.videoList = post.getPostVideo().stream().map(PostVideoDto.Response::new).toList();
         }
     }
 
