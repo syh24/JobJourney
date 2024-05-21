@@ -1,15 +1,15 @@
 package CSE4186.interview.service;
 
-import CSE4186.interview.controller.dto.BaseResponseDto;
+import CSE4186.interview.entity.SelfIntroduction;
+import CSE4186.interview.entity.SelfIntroductionDetail;
+import CSE4186.interview.exception.NotFoundException;
+import CSE4186.interview.repository.SelfIntroductionDetailRepository;
+import CSE4186.interview.repository.SelfIntroductionRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.api.Http;
-import io.swagger.v3.core.util.Json;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
@@ -26,14 +26,51 @@ public class QuestionService {
 
     private final String apiKey;
     private final ObjectMapper objectMapper;
+    private final SelfIntroductionDetailRepository selfIntroductionDetailRepository;
+    private final SelfIntroductionRepository selfIntroductionRepository;
+    private List<Map<String,String>> message;
+    private List<Map<String,String>> questionList;
+    private RestTemplate template;
     private String prompt;
-    private String prompt_head="###상황 설정### 너는 지금부터 취업준비생을 위한 가상 면접관이 돼주어야 해. 구체적으로 3명의 역할을 수행해줬으면 좋겠어. 우선 인사담당자의 관점에서 내 자기소개서에 대해 질문을 해줘. 그리고 %s 부서의 담당자로, 실무진의 관점에서 질문해줘. 마지막은 회사의 임원진이야. 회사에 애착을 가지고 오랜 기간 근무한 임원진의 관점에서 질문을 해줘. ###답변 형식### 총 15개의 질문을 생성하고, 면접관마다 비슷한 개수의 질문을 만들어줘.각 질문마다 번호를 붙여줘. 그리고 모든 질문들은 줄바꿈으로 구분해줘. 이 때 어느 면접관이 질문인지 구분하지 않아야 돼. 이게 정말 중요해. 답변 예시는 아래와 같아. 1. 하기 싫은 업무를 맡게 된다면 어떻게 할 것인가요? 2. 이 활동을 통해 어떤 경험과 목표를 달성하고 싶은가요?\n\n";
-    private final String prompt_body="###입력값### 이제 내 자소서를 보내줄게. 자기소개서는 문항과 답변으로 이루어져 있어.\n";
-    private final String prompt_tail="\n\n###답변 형식### 너의 가장 중요한 역할은 답변 형식을 잘 맞추는거야. 너는 질문을 카테고리화 할 필요 없어. 어느 면접관의 질문인지 나눌 필요 없어. 질문에 대한 설명이나 답변에 대한 설명도 필요 없어. 오로지 15줄의 질문만 답하면 돼. 이게 정말 중요해. 오직 1~15번의 질문 외에는 아무런 답변도 추가하면 안돼.";
+    private String url;
+    private String system_content_tech="###Role###\n You need to write a script for a development team leader who will conduct an interview." +
+            "Your role consists of two tasks: 1. Classify the given self-introduction into achievements and activities the applicant has undertaken" +
+            "and the lessons the applicant has learned during the process." +
+            "2. Provide %d questions to verify the authenticity of the 'achievements (activities)' " +
+            "and %d questions to assess the applicant's 'technical understanding' based on the 'lessons learned'." +
+            "\n\n###Note### \n Do not output the results of task 1. For task 2, number each question and separate them with line breaks." +
+            "Do not categorize each question into \"action\" or \"lessons learned\". This is a script to be read to the applicant, " +
+            "so no additional comments should be added.\n\n" +
 
-    public QuestionService(@Value("${google.api-key}") String secret, ObjectMapper objectMapper){
+            "###Example Response###\n" +
+            "<행위 질문>\n" +
+            "1. 질문 1\n" +
+            "2. 질문 2\n" +
+            "<Lessons Learned Questions>\n" +
+            "3. 질문 3\n" +
+            "4. 질문 4\n";
+    private String system_content_personality="###Role###\n You need to write a script for a development team leader who will conduct an interview." +
+            "Your role consists of two tasks: 1. Classify the given self-introduction into achievements and activities the applicant has undertaken" +
+            "and the lessons the applicant has learned during the process." +
+            "2. Provide %d questions to verify the authenticity of the 'achievements (activities)' " +
+            "and %d questions to assess the applicant's 'technical understanding' based on the 'lessons learned'." +
+            "\n\n###Note### \n Do not output the results of task 1. For task 2, number each question and separate them with line breaks." +
+            "Do not categorize each question into \"action\" or \"lessons learned\". This is a script to be read to the applicant, " +
+            "so no additional comments should be added.\n\n" +
+
+            "###Example Response###\n" +
+            "<행위 질문>\n" +
+            "1. 질문 1\n" +
+            "2. 질문 2\n" +
+            "<Lessons Learned Questions>\n" +
+            "3. 질문 3\n" +
+            "4. 질문 4\n";
+
+    public QuestionService(@Value("${google.api-key}") String secret, ObjectMapper objectMapper, SelfIntroductionDetailRepository selfIntroductionDetailRepository, SelfIntroductionRepository selfIntroductionRepository){
         apiKey=secret;
         this.objectMapper = objectMapper;
+        this.selfIntroductionDetailRepository = selfIntroductionDetailRepository;
+        this.selfIntroductionRepository = selfIntroductionRepository;
     }
 
     @Builder
@@ -80,9 +117,31 @@ public class QuestionService {
         }
     }
 
-    private void setPrompt(Integer questionNum, String dept, String selfIntroductionContent){
-        prompt_head=String.format(prompt_head,questionNum,dept);
-        prompt=prompt_head+prompt_body+selfIntroductionContent+prompt_tail;
+    private void setPrompt(Integer questionNum, String dept, String type, String selfIntroductionContent){
+        String messageToJson;
+        String system_content=type.matches("tech")?system_content_tech:system_content_personality;
+
+        //1. system의 chat을 만든다
+        Map<String,String>system=new HashMap<>();
+        system.put("role","system");
+        system.put("content",system_content);
+        message.add(system);
+
+        //2. user의 chat을 만든다
+        Map<String,String>user=new HashMap<>();
+        user.put("role","user");
+        user.put("content",selfIntroductionContent);
+        message.add(system);
+
+        //3. message를 JSON으로 변환하여 prompt에 추가한다.
+        try {
+            messageToJson=objectMapper.writeValueAsString(message);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+
+        prompt="messages="+messageToJson;
+        System.out.println(prompt);
     }
 
     private HttpEntity<String> setHeader(String requestBody){
@@ -105,13 +164,14 @@ public class QuestionService {
         return textContent;
     }
 
-    private Map<String,List<Map<String,String>>> getQuestions(String textContent){
+    private void getQuestions(String textContent){
 
         //1. 질문을 \n 기준으로 파싱
         String[] questionsParsedByLine=textContent.split("\n");
 
         //2. 질문을 <숫자.> 기준으로 파싱하고 <숫자.>은 삭제
         String[] rawQuestions=Arrays.stream(questionsParsedByLine)
+                .filter(q->q.matches("\\d+\\..*"))
                 .map(q->q.replaceAll("\\d+\\.","").trim())
                 .toArray(String[]::new);
 
@@ -122,21 +182,23 @@ public class QuestionService {
                     Map<String,String> taggedQuestionMap=new HashMap<>();
                     taggedQuestionMap.put(Integer.toString(index),rawQuestions[index]);
                     questionsTaggedByNumber.add(taggedQuestionMap);
+                    System.out.println(rawQuestions[index]);
                 });
 
-        //4. Map에 <"questions":질문 list> 형식으로 저장하여 리턴
-        Map<String, List<Map<String,String>>> questionToJson = new HashMap<>();
-        questionToJson.put("questions",questionsTaggedByNumber);
-        return questionToJson;
+        //4. questionList에 생성된 질문 담아 리턴
+        questionList.addAll(questionsTaggedByNumber);
     }
 
+    private List<SelfIntroductionDetail> getSelfIntroductionDetails(int selfIntroductionId){
+        SelfIntroduction selfIntroduction=selfIntroductionRepository.findById(Long.valueOf(selfIntroductionId))
+                .orElseThrow(()->new NotFoundException("해당 게시글이 존재하지 않습니다. id=" + selfIntroductionId));
+        return selfIntroduction.getSelfIntroductionDetailList();
+    }
 
-    public Map<String,List<Map<String,String>>> createQuestion(int questionNum, String dept, String selfIntroductionContent){
-        String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" + apiKey;
-        RestTemplate template = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
+    private void createQuestionForEachSelfIntroductionDetails(int questionNum, String dept, String type, String selfIntroductionContent){
 
         //1. 프롬프트 세팅
-        setPrompt(questionNum,dept,selfIntroductionContent);
+        setPrompt(questionNum,dept,type,selfIntroductionContent);
 
         //2. requestBody 만들기
         String requestBody=createRequestBody(selfIntroductionContent);
@@ -155,9 +217,24 @@ public class QuestionService {
         //5. response에서 gemini 답변 부분만 가져오기
         String textContent=getTextContent(response);
 
-        //6. 답변 속 질문을 파싱하여 JSON 형태로 저장한 후 리턴
-        Map<String, List<Map<String,String>>> questionToJson=getQuestions(textContent);
+        //6. 답변 속 질문을 파싱하여 List 형태로 저장
+        getQuestions(textContent);
+    }
 
+
+    public Map<String,List<Map<String,String>>> createQuestion(int questionNum, String dept, int selfIntroductionId){
+        url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" + apiKey;
+        template = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
+
+        // selfIntroduction에 포함된 selfIntroductionDetails를 가져옴
+        List<SelfIntroductionDetail> selfIntroductionDetails=getSelfIntroductionDetails(selfIntroductionId);
+        selfIntroductionDetails.forEach(s->{
+            createQuestionForEachSelfIntroductionDetails(questionNum, dept, s.getType(), s.getContent());
+        });
+
+        // 생성된 모든 질문들을 JSON 형태로 저장한 후 리턴
+        Map<String, List<Map<String,String>>> questionToJson=new HashMap<>();
+        questionToJson.put("questions",questionList);
         return questionToJson;
     }
 
@@ -183,7 +260,7 @@ public class QuestionService {
                 )
                 .generationConfig(ApiRequestBody.GenerationConfig.builder()
                         .stopSequences(Collections.emptyList())
-                        .temperature(1.0f)
+                        .temperature(1.5f)
                         .maxOutputTokens(800)
                         .topP(0.8f)
                         .topK(10)

@@ -30,10 +30,10 @@ public class QuestionController {
     public ApiUtil.ApiSuccessResult<Map<String, List<Map<String,String>>>> createQuestionWithGemini(@RequestBody QuestionDto.Request request) {
 
         int questionNum= request.getQuestionNum();;
-        String selfIntroductionContent = request.getSelfIntroductionContent();
+        int selfIntroductionId = request.getSelfIntroductionId();
         String dept= request.getDept();;
 
-        return ApiUtil.success(questionService.createQuestion(questionNum,dept,selfIntroductionContent));
+        return ApiUtil.success(questionService.createQuestion(questionNum,dept,selfIntroductionId));
     }
 
 }
