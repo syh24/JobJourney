@@ -37,8 +37,10 @@ public class VideoService {
         return video.getId();
     }
 
-    public Page<Video> findAllVideo(Pageable pageable) {
+    public Page<Video> findAllVideoByUser(Pageable pageable, Long userId) {
+        User findUser = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("해당 유저가 존재하지 않습니다."));
         int page = pageable.getPageNumber() - 1;
-        return videoRepository.findAll(PageRequest.of(page, pageable.getPageSize(), Sort.by(Sort.Direction.DESC, "createdAt")));
+        return videoRepository.findAllByUser(PageRequest.of(page, pageable.getPageSize(), Sort.by(Sort.Direction.DESC, "createdAt")), findUser);
     }
 }
