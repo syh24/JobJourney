@@ -67,6 +67,12 @@ public class Post extends BaseTimeEntity {
     @OrderBy("id asc")
     private List<PostVideo> postVideo = new ArrayList<>();
 
+    @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
+    private List<Likes> likes = new ArrayList<>();
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
+    private List<Dislike> dislikes = new ArrayList<>();
+
     public void updatePost(String title, String content, JobField jobField) {
         this.title = title;
         this.content = content;
