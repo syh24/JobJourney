@@ -51,7 +51,7 @@ public class Post extends BaseTimeEntity {
     @Column(name = "dislike_count",nullable = false)
     private Integer dislikeCount = 0;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "job_field_id")
     private JobField jobField;
 
