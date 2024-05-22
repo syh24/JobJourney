@@ -11,7 +11,6 @@ import CSE4186.interview.service.UserService;
 import CSE4186.interview.utils.ApiUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -21,7 +20,6 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -35,7 +33,7 @@ public class PostController {
 
     @GetMapping("/list")
     @Operation(summary = "Get All Posts", description = "모든 게시글을 조회")
-    public ApiUtil.ApiSuccessResult<PostDto.postListResponse> getAllPosts(
+    public ApiUtil.ApiSuccessResult<PostDto.PostListResponse> getAllPosts(
             @PageableDefault(page = 1, size = 10) Pageable pageable,
             @RequestParam(value = "q", defaultValue = "") String q,
             @RequestParam(value = "searchBy", defaultValue = "") String searchBy
@@ -46,7 +44,7 @@ public class PostController {
                 .stream().map(PostDto.Response::new)
                 .toList();
 
-        return ApiUtil.success(new PostDto.postListResponse(response, postsByCondition.getTotalPages()));
+        return ApiUtil.success(new PostDto.PostListResponse(response, postsByCondition.getTotalPages()));
     }
     @GetMapping("/{id}")
     @Operation(summary = "Get Post", description = "게시글 상세")
@@ -63,16 +61,16 @@ public class PostController {
 
     @PostMapping
     @Operation(summary = "Add Post", description = "게시글 생성")
-    public ApiUtil.ApiSuccessResult<PostDto.Response> addPost(@Valid @RequestBody PostDto.createRequest request) {
+    public ApiUtil.ApiSuccessResult<PostDto.Response> addPost(@Valid @RequestBody PostDto.CreateRequest request) {
         Post post = postService.addPost(request);
         return ApiUtil.success(new PostDto.Response(post));
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Update Post", description = "게시글 수정")
-    public ApiUtil.ApiSuccessResult<PostDto.updateResponse> updatePost(@PathVariable Long id, @Valid @RequestBody PostDto.updateRequest request) {
+    public ApiUtil.ApiSuccessResult<PostDto.UpdateResponse> updatePost(@PathVariable Long id, @Valid @RequestBody PostDto.UpdateRequest request) {
         postService.updatePost(id, request);
-        return ApiUtil.success(new PostDto.updateResponse(id));
+        return ApiUtil.success(new PostDto.UpdateResponse(id));
     }
 
     @DeleteMapping("/{id}")
@@ -84,7 +82,7 @@ public class PostController {
 
     @PostMapping("/{id}/comment")
     @Operation(summary = "Add Comment", description = "댓글 생성")
-    public ApiUtil.ApiSuccessResult<CommentDto.Response> addPost(@Valid @RequestBody CommentDto.createRequest request,
+    public ApiUtil.ApiSuccessResult<CommentDto.Response> addPost(@Valid @RequestBody CommentDto.CreateRequest request,
                                                                  @PathVariable(name = "id") Long id) {
         Comment comment = commentService.addComment(request, id);
         return ApiUtil.success(new CommentDto.Response(comment));
@@ -92,14 +90,14 @@ public class PostController {
 
     @PutMapping("/{id}/comment")
     @Operation(summary = "Update Comment", description = "댓글 수정")
-    public ApiUtil.ApiSuccessResult<CommentDto.updateResponse> updateComment(@Valid @RequestBody CommentDto.updateRequest request) {
+    public ApiUtil.ApiSuccessResult<CommentDto.UpdateResponse> updateComment(@Valid @RequestBody CommentDto.UpdateRequest request) {
         commentService.updateComment(request);
-        return ApiUtil.success(new CommentDto.updateResponse(request.getId()));
+        return ApiUtil.success(new CommentDto.UpdateResponse(request.getId()));
     }
 
     @DeleteMapping("/{id}/comment")
     @Operation(summary = "Delete Comment", description = "댓글 삭제")
-    public ApiUtil.ApiSuccessResult<String> deleteComment(@Valid @RequestBody CommentDto.deleteRequest request) {
+    public ApiUtil.ApiSuccessResult<String> deleteComment(@Valid @RequestBody CommentDto.DeleteRequest request) {
         commentService.deleteComment(request.getId());
         return ApiUtil.success("댓글이 삭제되었습니다.");
     }
