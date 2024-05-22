@@ -27,20 +27,20 @@ public class VideoController {
 
     @PostMapping
     @Operation(summary = "Add Video", description = "비디오 생성")
-    public ApiUtil.ApiSuccessResult<Long> addVideo(@Valid @RequestBody VideoDto.createRequest request) {
+    public ApiUtil.ApiSuccessResult<Long> addVideo(@Valid @RequestBody VideoDto.CreateRequest request) {
         Long videoId = videoService.addVideo(request);
         return ApiUtil.success(videoId);
     }
 
     @GetMapping("/list")
     @Operation(summary = "Get All Videos", description = "모든 비디오를 조회")
-    public ApiUtil.ApiSuccessResult<VideoDto.videoListResponse> getAllVideo(
+    public ApiUtil.ApiSuccessResult<VideoDto.VideoListResponse> getAllVideo(
             @LoginUser User loginUser,
             @PageableDefault(page = 1, size = 10) Pageable pageable
     ) {
         Long userId = Long.valueOf(loginUser.getUsername());
         Page<Video> findVideos = videoService.findAllVideoByUser(pageable, userId);
         List<VideoDto.Response> videoList = findVideos.stream().map(VideoDto.Response::new).toList();
-        return ApiUtil.success(new VideoDto.videoListResponse(videoList, findVideos.getTotalPages()));
+        return ApiUtil.success(new VideoDto.VideoListResponse(videoList, findVideos.getTotalPages()));
     }
 }

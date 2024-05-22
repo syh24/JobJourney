@@ -35,14 +35,14 @@ public class LoginController {
 
     @PostMapping("/join")
     @Operation(summary = "Join User", description = "회원가입")
-    public ApiUtil.ApiSuccessResult<String> join(@Valid @RequestBody UserDTO.joinRequest request){
+    public ApiUtil.ApiSuccessResult<String> join(@Valid @RequestBody UserDTO.JoinRequest request){
         userService.join(request);
         return ApiUtil.success("회원가입이 완료되었습니다.");
     }
 
     @PostMapping("/join/check")
     @Operation(summary = "checkNameAndEmail", description = "네임, 이메일 중복 체크")
-    public ApiUtil.ApiSuccessResult<Boolean> check(@Valid @RequestBody UserDTO.joinRequest request){
+    public ApiUtil.ApiSuccessResult<Boolean> check(@Valid @RequestBody UserDTO.JoinRequest request){
         return ApiUtil.success(userService.isDuplicatedNameOrEmail(request.getName(), request.getEmail()));
     }
 
@@ -70,7 +70,7 @@ public class LoginController {
     }
 
     @PostMapping("oauth2/google")
-    BaseResponseDto<Map<String,String>> getOauth2Token(@RequestBody UserDTO.oauth2LoginRequest oauth2LoginRequest, HttpServletResponse httpServletResponse) throws JsonProcessingException {
+    BaseResponseDto<Map<String,String>> getOauth2Token(@RequestBody UserDTO.Oauth2LoginRequest oauth2LoginRequest, HttpServletResponse httpServletResponse) throws JsonProcessingException {
 
         //1. 코드를 받는다.
         String code= oauth2LoginRequest.getCode();

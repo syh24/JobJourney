@@ -1,7 +1,6 @@
 package CSE4186.interview.controller;
 
 import CSE4186.interview.controller.dto.DislikeDto;
-import CSE4186.interview.controller.dto.LikesDto;
 import CSE4186.interview.service.DislikeService;
 import CSE4186.interview.utils.ApiUtil;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -19,7 +18,7 @@ public class DislikeController {
 
     @PostMapping
     public ApiUtil.ApiSuccessResult<String> addDislike(
-            @Valid @RequestBody DislikeDto.creteRequest request,
+            @Valid @RequestBody DislikeDto.CreteRequest request,
             @PathVariable(name = "id") Long postId
     ) {
         return ApiUtil.success(dislikeService.addDislike(request, postId));

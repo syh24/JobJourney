@@ -1,11 +1,7 @@
 package CSE4186.interview.controller.dto;
 
 import CSE4186.interview.entity.Post;
-import CSE4186.interview.entity.PostVideo;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
@@ -17,7 +13,7 @@ public class PostDto {
     @Data
     @AllArgsConstructor
     @Schema(name = "postCreateRequest", description = "게시글 생성 DTO")
-    public static class createRequest {
+    public static class CreateRequest {
         @NotNull
         private String title;
         @NotNull
@@ -25,18 +21,22 @@ public class PostDto {
         @NotNull
         private Long userId;
         @NotNull
+        private Long jobFieldId;
+        @NotNull
         private List<Long> videoIdList;
     }
 
     @Data
     @AllArgsConstructor
     @Schema(name = "postUpdateRequest", description = "게시글 수정 DTO")
-    public static class updateRequest {
+    public static class UpdateRequest {
 
         @NotNull
         private String title;
         @NotNull
         private String content;
+        @NotNull
+        private Long jobFieldId;
         @NotNull
         private List<Long> videoIdList;
     }
@@ -53,7 +53,9 @@ public class PostDto {
         private final Integer viewCount;
         private final String createdAt;
         private final String updatedAt;
+        private final String jobField;
         private final Long userId;
+        private final String userName;
         private String checkLikeOrDislike;
         private final List<CommentDto.Response> comments;
         private final List<PostVideoDto.Response> videoList;
@@ -65,6 +67,8 @@ public class PostDto {
             this.createdAt = String.valueOf(post.getCreatedAt());
             this.updatedAt = String.valueOf(post.getUpdatedAt());
             this.userId = post.getUser().getId();
+            this.userName = post.getUser().getName();
+            this.jobField = post.getJobField().getField();
             this.comments = post.getComments().stream().map(CommentDto.Response::new).toList();
             this.like = post.getLikeCount();
             this.dislike = post.getDislikeCount();
@@ -79,6 +83,8 @@ public class PostDto {
             this.createdAt = String.valueOf(post.getCreatedAt());
             this.updatedAt = String.valueOf(post.getUpdatedAt());
             this.userId = post.getUser().getId();
+            this.userName = post.getUser().getName();
+            this.jobField = post.getJobField().getField();
             this.comments = post.getComments().stream().map(CommentDto.Response::new).collect(Collectors.toList());
             this.like = post.getLikeCount();
             this.dislike = post.getDislikeCount();
@@ -91,7 +97,7 @@ public class PostDto {
     @Data
     @RequiredArgsConstructor
     @Schema(name = "postListResponse", description = "게시글 전체 list 응답 DTO")
-    public static class postListResponse {
+    public static class PostListResponse {
         @NotNull
         private final List<PostDto.Response> list;
         private final int pageCount;
@@ -99,10 +105,10 @@ public class PostDto {
 
     @Getter
     @Schema(name = "postUpdateResponse", description = "게시글 수정 DTO")
-    public static class updateResponse {
+    public static class UpdateResponse {
         private final Long id;
 
-        public updateResponse(Long id) {
+        public UpdateResponse(Long id) {
             this.id = id;
         }
     }

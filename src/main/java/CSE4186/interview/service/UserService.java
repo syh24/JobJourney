@@ -28,7 +28,7 @@ public class UserService {
     }
 
     @Transactional
-    public void join(UserDTO.joinRequest request) {
+    public void join(UserDTO.JoinRequest request) {
         String encodedPassword=bCryptPasswordEncoder.encode(request.getPassword());
         User newUser=new User(request.getName(), request.getEmail(), encodedPassword, Role.USER);
         userRepository.save(newUser);

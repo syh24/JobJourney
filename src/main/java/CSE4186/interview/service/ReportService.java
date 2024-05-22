@@ -25,7 +25,7 @@ public class ReportService {
     private final ReportRepository reportRepository;
 
     @Transactional
-    public Long addReport(ReportDto.createRequest request) {
+    public Long addReport(ReportDto.CreateRequest request) {
         User findUser = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new NotFoundException("해당 유저가 존재하지 않습니다."));
 

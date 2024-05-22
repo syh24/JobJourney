@@ -1,10 +1,6 @@
 package CSE4186.interview.controller.dto;
 
 import CSE4186.interview.entity.Comment;
-import CSE4186.interview.entity.Post;
-import CSE4186.interview.entity.User;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -15,7 +11,7 @@ public class CommentDto {
     @AllArgsConstructor
     @NoArgsConstructor
     @Schema(name = "commentCreateRequest", description = "댓글 생성 DTO")
-    public static class createRequest {
+    public static class CreateRequest {
         @NotNull private String content;
         @NotNull private Long userId;
     }
@@ -24,7 +20,7 @@ public class CommentDto {
     @AllArgsConstructor
     @NoArgsConstructor
     @Schema(name = "commentUpdateRequest", description = "댓글 수정 DTO")
-    public static class updateRequest {
+    public static class UpdateRequest {
         @NotNull
         private Long id;
         @NotNull
@@ -35,7 +31,7 @@ public class CommentDto {
     @AllArgsConstructor
     @NoArgsConstructor
     @Schema(name = "commentDeleteRequest", description = "댓글 삭제 DTO")
-    public static class deleteRequest {
+    public static class DeleteRequest {
         private Long id;
     }
 
@@ -63,10 +59,10 @@ public class CommentDto {
 
     @Getter
     @Schema(name = "commentUpdateResponse", description = "댓글 수정 DTO")
-    public static class updateResponse {
+    public static class UpdateResponse {
         private final Long id;
 
-        public updateResponse(Long id) {
+        public UpdateResponse(Long id) {
             this.id = id;
         }
     }
