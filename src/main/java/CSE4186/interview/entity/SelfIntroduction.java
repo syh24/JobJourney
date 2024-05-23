@@ -36,4 +36,7 @@ public class SelfIntroduction extends BaseTimeEntity {
     @JoinColumn(name = "user_id")
     private User user;
 
+    public void changeTitle(String title) {
+        this.title = title;
+    }
 }

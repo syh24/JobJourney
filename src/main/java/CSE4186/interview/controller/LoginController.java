@@ -1,6 +1,7 @@
 package CSE4186.interview.controller;
 
 
+import CSE4186.interview.annotation.LoginUser;
 import CSE4186.interview.controller.dto.BaseResponseDto;
 import CSE4186.interview.controller.dto.UserDTO;
 import CSE4186.interview.login.Oauth2UserService;
@@ -15,7 +16,6 @@ import jakarta.validation.Valid;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -50,7 +50,7 @@ public class LoginController {
 
     @PostMapping("/login")
     @Operation(summary = "Login", description = "로그인")
-    public ApiUtil.ApiSuccessResult<Map<String, String>> login(@AuthenticationPrincipal User loginUser) throws Exception {
+    public ApiUtil.ApiSuccessResult<Map<String, String>> login(@LoginUser User loginUser) throws Exception {
         userService.checkAccountStatus(loginUser.getUsername());
 
         Map<String, String> userIdMap = new HashMap<>();
