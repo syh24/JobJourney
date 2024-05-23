@@ -2,6 +2,8 @@ package CSE4186.interview.exception;
 
 
 import CSE4186.interview.utils.ApiUtil;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -11,8 +13,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+
+import javax.naming.AuthenticationException;
 
 @Slf4j
 @RestControllerAdvice
@@ -50,4 +55,5 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         logger.error(e.getMessage(), e);
         return ResponseEntity.status(HttpServletResponse.SC_INTERNAL_SERVER_ERROR).body(ApiUtil.error(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "알 수 없는 오류 발생"));
     }
+
 }
