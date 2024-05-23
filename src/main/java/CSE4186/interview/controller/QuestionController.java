@@ -29,11 +29,20 @@ public class QuestionController {
     @Operation(summary = "Create Question", description = "Gemini를 사용하여 질문 생성")
     public ApiUtil.ApiSuccessResult<Map<String, List<Map<String,String>>>> createQuestionWithGemini(@RequestBody QuestionDto.Request request) {
 
-        int questionNum= request.getQuestionNum();;
+        int questionNum= request.getQuestionNum();
         int selfIntroductionId = request.getSelfIntroductionId();
-        String dept= request.getDept();;
+        String dept= request.getDept();
 
         return ApiUtil.success(questionService.createQuestion(questionNum,dept,selfIntroductionId));
+    }
+
+    @PostMapping("/question/followUp")
+    @Operation(summary = "Create Follow-Up Question",description = "꼬리 질문 생성")
+    public ApiUtil.ApiSuccessResult<Map<String,Object>> createFollowUpQuestionWithGemini(@RequestBody QuestionDto.followUpRequest request){
+        int turn= request.getTurn();
+        int selfIntroductionId= request.getSelfIntroductionId();
+        List<Map<String,String>> prevChats=request.getQuestions();
+        return ApiUtil.success(questionService.createFollowUpQuestion(turn,selfIntroductionId,prevChats));
     }
 
 }
