@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
 
@@ -41,8 +42,8 @@ public class SelfIntroductionController {
 
     @PostMapping("/save")
     @Operation(summary = "Save selfIntroductions", description = "자소서 저장")
-    public ApiUtil.ApiSuccessResult<Long> saveSelfIntroductionList(@Valid @RequestBody SelfIntroductionDto.CreateRequest request){
-        SelfIntroduction selfIntroduction = selfIntroductionService.save(request);
+    public ApiUtil.ApiSuccessResult<Long> saveSelfIntroductionList(@Valid @RequestBody SelfIntroductionDto.CreateRequest request, @AuthenticationPrincipal User loginUser){
+        SelfIntroduction selfIntroduction = selfIntroductionService.save(request, loginUser.getUsername());
         return ApiUtil.success(selfIntroduction.getId());
     }
 
