@@ -18,7 +18,7 @@ public class LikesController {
 
     @PostMapping
     public ApiUtil.ApiSuccessResult<String> addLike(
-            @Valid @RequestBody LikesDto.creteRequest request,
+            @Valid @RequestBody LikesDto.CreteRequest request,
             @PathVariable(name = "id") Long postId
     ) {
         return ApiUtil.success(likeService.addLike(request, postId));

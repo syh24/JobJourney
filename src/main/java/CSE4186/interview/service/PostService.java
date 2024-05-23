@@ -6,10 +6,7 @@ import CSE4186.interview.entity.PostVideo;
 import CSE4186.interview.entity.User;
 import CSE4186.interview.entity.Video;
 import CSE4186.interview.exception.NotFoundException;
-import CSE4186.interview.repository.PostRepository;
-import CSE4186.interview.repository.PostVideoRepository;
-import CSE4186.interview.repository.UserRepository;
-import CSE4186.interview.repository.VideoRepository;
+import CSE4186.interview.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -21,15 +18,16 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
+@Transactional
 public class PostService {
 
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final VideoRepository videoRepository;
     private final PostVideoRepository postVideoRepository;
+    private final JobFieldRepository jobFieldRepository;
 
-    @Transactional
+    @Transactional(readOnly = true)
     public Page<Post> findPostsByCondition(Pageable pageable, String q, String condition) {
         int page = pageable.getPageNumber() - 1;
 
@@ -40,8 +38,7 @@ public class PostService {
         return postRepository.findAll(PageRequest.of(page, pageable.getPageSize(), Sort.by(Sort.Direction.DESC, "createdAt")));
     }
 
-    @Transactional
-    public Post addPost(PostDto.createRequest request) {
+    public Post addPost(PostDto.CreateRequest request) {
         User findUser = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new NotFoundException("해당 유저가 존재하지 않습니다."));
 
@@ -49,6 +46,7 @@ public class PostService {
                 .user(findUser)
                 .title(request.getTitle())
                 .content(request.getContent())
+                .jobField(jobFieldRepository.findById(request.getJobFieldId()).get())
                 .build());
 
         for (Long videoId : request.getVideoIdList()) {
@@ -64,7 +62,6 @@ public class PostService {
         return post;
     }
 
-    @Transactional
     public void deletePost(Long id) {
         Post post = postRepository.findById(id).orElseThrow(() ->
                 new NotFoundException("해당 게시글이 존재하지 않습니다. id=" + id));
@@ -72,11 +69,10 @@ public class PostService {
         postRepository.delete(post);
     }
 
-    @Transactional
-    public void updatePost(Long id, PostDto.updateRequest request) {
+    public void updatePost(Long id, PostDto.UpdateRequest request) {
         Post post = postRepository.findById(id).orElseThrow(() ->
                 new NotFoundException("해당 게시글이 존재하지 않습니다. id=" + id));
-        post.updatePost(request.getTitle(), request.getContent());
+        post.updatePost(request.getTitle(), request.getContent(), jobFieldRepository.findById(request.getJobFieldId()).get());
         postVideoRepository.deleteByPost(post);
 
         for (Long videoId : request.getVideoIdList()) {

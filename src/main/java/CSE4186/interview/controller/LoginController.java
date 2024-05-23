@@ -17,7 +17,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.User;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,7 +27,6 @@ import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
-@Transactional
 @Tag(name = "Login", description = "Login API")
 public class LoginController {
 
@@ -37,14 +35,14 @@ public class LoginController {
 
     @PostMapping("/join")
     @Operation(summary = "Join User", description = "회원가입")
-    public ApiUtil.ApiSuccessResult<String> join(@Valid @RequestBody UserDTO.joinRequest request){
+    public ApiUtil.ApiSuccessResult<String> join(@Valid @RequestBody UserDTO.JoinRequest request){
         userService.join(request);
         return ApiUtil.success("회원가입이 완료되었습니다.");
     }
 
     @PostMapping("/join/check")
     @Operation(summary = "checkNameAndEmail", description = "네임, 이메일 중복 체크")
-    public ApiUtil.ApiSuccessResult<Boolean> check(@Valid @RequestBody UserDTO.joinRequest request){
+    public ApiUtil.ApiSuccessResult<Boolean> check(@Valid @RequestBody UserDTO.JoinRequest request){
         return ApiUtil.success(userService.isDuplicatedNameOrEmail(request.getName(), request.getEmail()));
     }
 
@@ -58,6 +56,7 @@ public class LoginController {
         return ApiUtil.success(userIdMap);
     }
 
+    //유효한 jwt 토큰인지 검사
     @GetMapping("/token/check")
     @Operation(summary="JWT validity check", description = "jwt 토큰 유효성 체크")
     public ApiUtil.ApiSuccessResult<String> tokenValidityCheck(HttpServletRequest request){
@@ -66,15 +65,12 @@ public class LoginController {
 
     @PostMapping("oauth2/google")
     @Operation(summary="google login", description = "구글에 로그인하여 받은 코드를 넘겨 로그인")
-    public ApiUtil.ApiSuccessResult<Map<String,String>> getOauth2Token(@RequestBody UserDTO.oauth2LoginRequest oauth2LoginRequest, HttpServletResponse httpServletResponse) throws JsonProcessingException {
-
+    public ApiUtil.ApiSuccessResult<Map<String,String>> getOauth2Token(@RequestBody UserDTO.Oauth2LoginRequest oauth2LoginRequest, HttpServletResponse httpServletResponse) throws JsonProcessingException {
         //1. 코드를 받는다.
         String code= oauth2LoginRequest.getCode();
-
         //2. 코드를 사용해 토큰을 받아온다.
         String token= OAuth2UserService.requestGoogleToken(code);
 
-        //3. 토큰을 통해 구글 서버에서 계정 정보를 가져와 로그인한다.
         return ApiUtil.success(OAuth2UserService.requestGoogleAccountAndLogin(token, httpServletResponse));
     }
 }

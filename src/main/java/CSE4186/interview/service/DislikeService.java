@@ -9,7 +9,6 @@ import CSE4186.interview.repository.DislikeRepository;
 import CSE4186.interview.repository.LikesRepository;
 import CSE4186.interview.repository.PostRepository;
 import CSE4186.interview.repository.UserRepository;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,7 +25,7 @@ public class DislikeService {
     private final UserRepository userRepository;
     private final PostRepository postRepository;
 
-    public String addDislike(DislikeDto.creteRequest request, Long postId) {
+    public String addDislike(DislikeDto.CreteRequest request, Long postId) {
         User findUser = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new NotFoundException("해당 유저가 존재하지 않습니다."));
 
