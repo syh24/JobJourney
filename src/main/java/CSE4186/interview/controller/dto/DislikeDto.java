@@ -12,7 +12,7 @@ public class DislikeDto {
     @AllArgsConstructor
     @NoArgsConstructor
     @Schema(name = "dislikeCreateRequest", description = "싫어요 DTO")
-    public static class creteRequest {
+    public static class CreteRequest {
         @NotNull
         private Long userId;
     }

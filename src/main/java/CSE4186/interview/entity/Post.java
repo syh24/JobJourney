@@ -1,16 +1,14 @@
 package CSE4186.interview.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,11 +20,12 @@ public class Post extends BaseTimeEntity {
 
 
     @Builder
-    public Post(Long id, String title, String content, User user) {
+    public Post(Long id, String title, String content, User user, JobField jobField) {
         this.id = id;
         this.title = title;
         this.content = content;
         this.user = user;
+        this.jobField = jobField;
     }
 
     @Id
@@ -53,6 +52,10 @@ public class Post extends BaseTimeEntity {
     private Integer dislikeCount = 0;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "job_field_id")
+    private JobField jobField;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 
@@ -64,9 +67,20 @@ public class Post extends BaseTimeEntity {
     @OrderBy("id asc")
     private List<PostVideo> postVideo = new ArrayList<>();
 
-    public void updatePost(String title, String content) {
+    @OneToMany(mappedBy = "post", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
+    @OrderBy("id asc")
+    private List<Report> reports = new ArrayList<>();
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
+    private List<Likes> likes = new ArrayList<>();
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
+    private List<Dislike> dislikes = new ArrayList<>();
+
+    public void updatePost(String title, String content, JobField jobField) {
         this.title = title;
         this.content = content;
+        this.jobField = jobField;
     }
 
     public void addViewCount() {

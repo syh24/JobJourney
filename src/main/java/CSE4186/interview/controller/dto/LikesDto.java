@@ -11,7 +11,7 @@ public class LikesDto {
     @AllArgsConstructor
     @NoArgsConstructor
     @Schema(name = "likeCreateRequest", description = "좋아요 DTO")
-    public static class creteRequest {
+    public static class CreteRequest {
         @NotNull private Long userId;
     }
 }

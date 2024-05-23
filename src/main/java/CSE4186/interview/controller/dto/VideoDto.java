@@ -12,7 +12,7 @@ public class VideoDto {
     @Data
     @AllArgsConstructor
     @Schema(name = "videoCreateRequest", description = "비디오 생성 DTO")
-    public static class createRequest {
+    public static class CreateRequest {
         private String title;
         private String link;
         @NotBlank
@@ -43,7 +43,7 @@ public class VideoDto {
     @Data
     @AllArgsConstructor
     @Schema(name = "videoListResponse", description = "비디오 전체 list 응답 DTO")
-    public static class videoListResponse {
+    public static class VideoListResponse {
         private List<Response> list;
         private int pageCount;
     }

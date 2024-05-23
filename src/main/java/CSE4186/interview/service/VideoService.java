@@ -23,7 +23,7 @@ public class VideoService {
     private final VideoRepository videoRepository;
 
     @Transactional
-    public Long addVideo(VideoDto.createRequest request) {
+    public Long addVideo(VideoDto.CreateRequest request) {
         User findUser = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new NotFoundException("해당 유저가 존재하지 않습니다."));
 
