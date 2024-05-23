@@ -101,7 +101,7 @@ public class Oauth2UserService {
         logger.info("token : "+token);
         return token;
     }
-    public BaseResponseDto<Map<String,String>> requestGoogleAccountAndLogin(String token, HttpServletResponse httpServletResponse) {
+    public Map<String,String> requestGoogleAccountAndLogin(String token, HttpServletResponse httpServletResponse) {
 
         //1. 구글에 email 요청
         String url = "https://www.googleapis.com/userinfo/v2/me";
@@ -162,11 +162,7 @@ public class Oauth2UserService {
             Map<String,String> userIdMap=new HashMap<>();
             userIdMap.put("userId", String.valueOf(user.getId()));
             //리턴
-            return new BaseResponseDto<Map<String,String>>(
-                    "success",
-                    "",
-                    userIdMap
-            );
+            return userIdMap;
 
         } catch (JsonMappingException e) {
             throw new RuntimeException(e);
