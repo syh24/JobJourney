@@ -35,8 +35,8 @@ public class SelfIntroductionService {
     }
 
     @Transactional
-    public SelfIntroduction save(SelfIntroductionDto.Request request) {
-        User user = userRepository.findById(request.getUserId()).orElseThrow(() -> new NotFoundException("해당 유저가 존재하지 않습니다."));
+    public SelfIntroduction save(SelfIntroductionDto.Request request, String userId) {
+        User user = userRepository.findById(Long.valueOf(userId)).orElseThrow(() -> new NotFoundException("해당 유저가 존재하지 않습니다."));
         List<SelfIntroductionDto.SelfIntroductionDetailRequest> selfIntroductionDetailDtoList=request.getDetailList();
         SelfIntroduction selfIntroduction = selfIntroductionRepository.save(
                 SelfIntroduction.builder()

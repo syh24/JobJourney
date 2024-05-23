@@ -43,8 +43,8 @@ public class SelfIntroductionController {
 
     @PostMapping("/save")
     @Operation(summary = "Save selfIntroductions", description = "자소서를 저장")
-    public ApiUtil.ApiSuccessResult<Long> saveSelfIntroductionList(@Valid @RequestBody SelfIntroductionDto.Request request){
-        SelfIntroduction selfIntroduction = selfIntroductionService.save(request);
+    public ApiUtil.ApiSuccessResult<Long> saveSelfIntroductionList(@Valid @RequestBody SelfIntroductionDto.Request request, @AuthenticationPrincipal User loginUser){
+        SelfIntroduction selfIntroduction = selfIntroductionService.save(request,loginUser.getUsername());
         return ApiUtil.success(selfIntroduction.getId());
     }
 }
