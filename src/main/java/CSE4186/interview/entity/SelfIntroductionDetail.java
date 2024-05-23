@@ -29,6 +29,7 @@ public class SelfIntroductionDetail {
     private String content;
 
     private String type;
+    //기술항목,인성항목,기타
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "self_introduction_id")

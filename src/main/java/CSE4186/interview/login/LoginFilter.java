@@ -29,8 +29,10 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
             throws AuthenticationException {
+        logger.info("hi");
         try (InputStream is=request.getInputStream()){
             ObjectMapper objectMapper=new ObjectMapper();
+            logger.info("login filter running...");
             JsonNode jsonNode=objectMapper.readTree(is);
             String username=jsonNode.get("email").asText();
             String password=jsonNode.get("password").asText();
@@ -43,6 +45,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
             SecurityContextHolder.getContext().setAuthentication(authentication);
             return authentication;
         } catch (IOException e) {
+            logger.info("here");
             throw new AuthenticationServiceException("JSON 입력 형식 오류");
         }
     }

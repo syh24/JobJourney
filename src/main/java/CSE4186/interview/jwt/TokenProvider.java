@@ -64,7 +64,6 @@ public class TokenProvider implements InitializingBean {
 
     public String createAccessToken(Authentication authentication) {
         return createToken(authentication,60*60*1000); //60 min
-        //return createToken(authentication,60*1000); //60 min
     }
 
     public String createRefreshToken(Authentication authentication, String prevRefreshToken) {
@@ -97,29 +96,9 @@ public class TokenProvider implements InitializingBean {
         return new UsernamePasswordAuthenticationToken(principal, token, authorities);
     }
 
-    public boolean validateToken(String token, HttpServletRequest httpServletRequest) throws IOException {
-        logger.debug("TokenProvider-validateToken");
-        try {
-            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
-            return true;
-        } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
-            logger.info("잘못된 JWT 서명입니다.");
-            httpServletRequest.setAttribute("exception", JwtExceptionCode.WRONG_TOKEN.getMessage());
-            System.out.println("1 JWT");
-        } catch (ExpiredJwtException e) {
-            logger.info("2 JWT");
-            httpServletRequest.setAttribute("exception", JwtExceptionCode.EXPIRED_TOKEN.getMessage());
-            System.out.println("만료된 JWT 토큰입니다");
-        } catch (UnsupportedJwtException e) {
-            logger.info("지원되지 않는 JWT 토큰입니다");
-            httpServletRequest.setAttribute("exception", JwtExceptionCode.UNSUPPORTED_TOKEN.getMessage());
-            System.out.println("3 JWT");
-        } catch (IllegalArgumentException e) {
-            logger.info("JWT 토큰이 잘못되었습니다");
-            httpServletRequest.setAttribute("exception", JwtExceptionCode.ILLEGAL_TOKEN.getMessage());
-            System.out.println("4 JWT");
-        }
-        return false;
+    public boolean validateToken(String token, HttpServletRequest httpServletRequest) {
+        Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+        return true;
     }
 
     public boolean checkRefreshToken(String refreshToken) {
@@ -137,6 +116,5 @@ public class TokenProvider implements InitializingBean {
 
         //2. redisDB에 저장된 refreshToken과 현 refreshToken을 비교한다.
         return tokenRefreshService.match(refreshToken,email);
-
     }
 }

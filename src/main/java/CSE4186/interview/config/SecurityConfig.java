@@ -3,6 +3,7 @@ package CSE4186.interview.config;
 import CSE4186.interview.jwt.JwtFilter;
 import CSE4186.interview.jwt.TokenProvider;
 import CSE4186.interview.login.CustomAuthenticationManager;
+import CSE4186.interview.login.FilterExceptionHandler;
 import CSE4186.interview.login.LoginFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
@@ -41,8 +42,19 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrfConfig -> csrfConfig.disable())
-//                .sessionManagement(session->
-//                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .cors(corsCustomizer -> corsCustomizer.configurationSource(new CorsConfigurationSource() {
+                    @Override
+                    public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
+                        CorsConfiguration config = new CorsConfiguration();
+                        config.setAllowedOrigins(Collections.singletonList("http://localhost:9000"));
+                        config.setAllowedMethods(Collections.singletonList("*"));
+                        config.setAllowCredentials(true);
+                        config.setExposedHeaders(List.of("Authorization"));
+                        config.setAllowedHeaders(Collections.singletonList("*"));
+                        config.setMaxAge(3600L); //1시간
+                        return config;
+                    }
+                }))
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
                                 .requestMatchers("/").permitAll()
@@ -56,13 +68,7 @@ public class SecurityConfig {
                                 .anyRequest().hasAnyRole("USER")
                 )
 
-                .oauth2Login(oauth2 ->
-                        oauth2
-                                .authorizationEndpoint(a->{
-                                    a.baseUri("/login/oauth2");
-                                })
-                )
-
+                .addFilterBefore(new FilterExceptionHandler(objectMapper),UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new JwtFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new LoginFilter(tokenProvider,customAuthenticationManager,objectMapper), UsernamePasswordAuthenticationFilter.class);
         return http.build();
