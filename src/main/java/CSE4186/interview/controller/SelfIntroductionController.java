@@ -1,5 +1,6 @@
 package CSE4186.interview.controller;
 
+import CSE4186.interview.annotation.LoginUser;
 import CSE4186.interview.controller.dto.SelfIntroductionDto;
 import CSE4186.interview.entity.SelfIntroduction;
 import CSE4186.interview.service.SelfIntroductionService;
@@ -17,8 +18,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import static CSE4186.interview.entity.QSelfIntroduction.selfIntroduction;
-
 // 면접 기능 관련
 @RestController
 @RequiredArgsConstructor
@@ -29,9 +28,9 @@ public class SelfIntroductionController {
     private final SelfIntroductionService selfIntroductionService;
 
     @GetMapping("/list")
-    @Operation(summary = "Get selfIntroductions", description = "모든 자소서를 조회")
+    @Operation(summary = "Get selfIntroductions", description = "모든 자소서 조회")
     public ApiUtil.ApiSuccessResult<SelfIntroductionDto.SelfIntroductionListResponse> getSelfIntroductionList(
-            @AuthenticationPrincipal User loginUser,
+            @LoginUser User loginUser,
             @PageableDefault(page = 1, size = 10) Pageable pageable
     ) {
         Long userId = Long.valueOf(loginUser.getUsername());
@@ -42,9 +41,27 @@ public class SelfIntroductionController {
     }
 
     @PostMapping("/save")
-    @Operation(summary = "Save selfIntroductions", description = "자소서를 저장")
-    public ApiUtil.ApiSuccessResult<Long> saveSelfIntroductionList(@Valid @RequestBody SelfIntroductionDto.Request request, @AuthenticationPrincipal User loginUser){
-        SelfIntroduction selfIntroduction = selfIntroductionService.save(request,loginUser.getUsername());
+    @Operation(summary = "Save selfIntroductions", description = "자소서 저장")
+    public ApiUtil.ApiSuccessResult<Long> saveSelfIntroductionList(@Valid @RequestBody SelfIntroductionDto.CreateRequest request, @AuthenticationPrincipal User loginUser){
+        SelfIntroduction selfIntroduction = selfIntroductionService.save(request, loginUser.getUsername());
         return ApiUtil.success(selfIntroduction.getId());
+    }
+
+    @PutMapping("/{id}")
+    @Operation(summary = "Update selfIntroductions", description = "자소서 수정")
+    public ApiUtil.ApiSuccessResult<Long> updateSelfIntroduction(
+            @Valid @RequestBody SelfIntroductionDto.UpdateRequest request,
+            @PathVariable(name = "id") Long id
+            ){
+        return ApiUtil.success(selfIntroductionService.updateSelfIntroduction(request, id));
+    }
+
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Delete selfIntroductions", description = "자소서 삭제")
+    public ApiUtil.ApiSuccessResult<String> deleteSelfIntroduction(
+            @PathVariable(name = "id") Long id
+    ){
+        selfIntroductionService.deleteSelfIntroduction(id);
+        return ApiUtil.success("삭제되었습니다.");
     }
 }
