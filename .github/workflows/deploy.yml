@@ -4,13 +4,6 @@ on:
   push:
     branches:
       - master
-      - 20191597-2
-
-env:
-  AWS_REGION: ap-northeast-2
-  AWS_S3_BUCKET: cse4186
-  AWS_CODE_DEPLOY_APPLICATION: deploy-interview-app
-  AWS_CODE_DEPLOY_GROUP: deploy-interview-group
 
 jobs:
   build-with-gradle:
