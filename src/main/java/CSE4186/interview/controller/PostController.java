@@ -10,6 +10,9 @@ import CSE4186.interview.service.PostService;
 import CSE4186.interview.service.UserService;
 import CSE4186.interview.utils.ApiUtil;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +35,22 @@ public class PostController {
     private final UserService userService;
 
     @GetMapping("/list")
-    @Operation(summary = "Get All Posts", description = "모든 게시글을 조회")
+    @Operation(summary = "Get All Posts", description = "모든 게시글을 조회",
+            parameters = {
+                    @Parameter(
+                            name = "q",
+                            description = "검색어",
+                            in = ParameterIn.QUERY,
+                            schema = @Schema(type = "string", example = "직무 여러개 검색 -> BE,FE,AP")
+                    ),
+                    @Parameter(
+                            name = "searchBy",
+                            description = "검색 설정",
+                            in = ParameterIn.QUERY,
+                            schema = @Schema(type = "string", example = "username, title, field")
+                    ),
+            }
+    )
     public ApiUtil.ApiSuccessResult<PostDto.PostListResponse> getAllPosts(
             @PageableDefault(page = 1, size = 10) Pageable pageable,
             @RequestParam(value = "q", defaultValue = "") String q,
