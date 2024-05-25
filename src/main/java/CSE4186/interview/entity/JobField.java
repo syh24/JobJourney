@@ -18,4 +18,6 @@ public class JobField {
 
     private String field;
 
+    private String symbol;
+
 }
