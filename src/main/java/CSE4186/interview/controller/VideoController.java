@@ -43,4 +43,10 @@ public class VideoController {
         List<VideoDto.Response> videoList = findVideos.stream().map(VideoDto.Response::new).toList();
         return ApiUtil.success(new VideoDto.VideoListResponse(videoList, findVideos.getTotalPages()));
     }
+
+    @DeleteMapping("/{id}")
+    public ApiUtil.ApiSuccessResult<String> deleteVideo(@PathVariable(name = "id") Long id) {
+        videoService.deleteVideo(id);
+        return ApiUtil.success("비디오 삭제 성공");
+    }
 }
