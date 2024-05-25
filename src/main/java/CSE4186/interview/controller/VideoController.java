@@ -45,6 +45,7 @@ public class VideoController {
     }
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "Delete Video", description = "비디오 삭제")
     public ApiUtil.ApiSuccessResult<String> deleteVideo(@PathVariable(name = "id") Long id) {
         videoService.deleteVideo(id);
         return ApiUtil.success("비디오 삭제 성공");
