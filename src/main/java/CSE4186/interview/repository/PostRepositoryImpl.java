@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static CSE4186.interview.entity.QPost.post;
@@ -25,7 +26,8 @@ public class PostRepositoryImpl implements PostRepositoryCustom{
                 selectFrom(post)
                 .leftJoin(post.user, user)
                 .where(usernameContain(q, condition),
-                        postTitleContain(q, condition))
+                        postTitleContain(q, condition),
+                        postFieldContain(q, condition))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .orderBy(post.createdAt.desc())
@@ -51,6 +53,13 @@ public class PostRepositoryImpl implements PostRepositoryCustom{
     private BooleanExpression postTitleContain(String title, String condition) {
         if (condition.equals("title")) {
             return isEmpty(title) ? null : post.title.contains(title);
+        }
+        return null;
+    }
+
+    private BooleanExpression postFieldContain(String field, String condition) {
+        if (condition.equals("field")) {
+            return isEmpty(field) ? null : post.jobField.symbol.in(Arrays.asList(field.split(",")));
         }
         return null;
     }
