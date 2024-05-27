@@ -17,9 +17,8 @@ public class WebConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
                 .allowedOriginPatterns("http://localhost:9000",
-                        "https://ec2-54-180-118-228.ap-northeast-2.compute.amazonaws.com:9000",
-                        "http://ec2-54-180-118-228.ap-northeast-2.compute.amazonaws.com:9000",
-                        "http://ec2-54-180-118-228.ap-northeast-2.compute.amazonaws.com"
+                        "http://jobjourney.online",
+                        "https://jobjourney.online"
                         )
                 .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
