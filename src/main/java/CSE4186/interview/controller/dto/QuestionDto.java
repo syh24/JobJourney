@@ -32,6 +32,7 @@ public class QuestionDto {
     public static class followUpRequest{
         private int turn;
         private int selfIntroductionId;
+        private String dept;
         private List<Map<String,String>> questions;
     }
 }

@@ -41,8 +41,9 @@ public class QuestionController {
     public ApiUtil.ApiSuccessResult <Map<String,Object>> createFollowUpQuestionWithGemini(@RequestBody QuestionDto.followUpRequest request){
         int turn= request.getTurn();
         int selfIntroductionId= request.getSelfIntroductionId();
+        String dept=request.getDept();
         List<Map<String,String>> prevChats=request.getQuestions();
-        return ApiUtil.success(questionService.createFollowUpQuestion(turn,selfIntroductionId,prevChats));
+        return ApiUtil.success(questionService.createFollowUpQuestion(turn,dept,selfIntroductionId,prevChats));
     }
 
 }

@@ -1,8 +1,10 @@
 package CSE4186.interview.service;
 
+import CSE4186.interview.entity.Question;
 import CSE4186.interview.entity.SelfIntroduction;
 import CSE4186.interview.entity.SelfIntroductionDetail;
 import CSE4186.interview.exception.NotFoundException;
+import CSE4186.interview.repository.QuestionRepository;
 import CSE4186.interview.repository.SelfIntroductionDetailRepository;
 import CSE4186.interview.repository.SelfIntroductionRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -29,6 +31,7 @@ public class QuestionService {
     private final ObjectMapper objectMapper;
     private final SelfIntroductionDetailRepository selfIntroductionDetailRepository;
     private final SelfIntroductionRepository selfIntroductionRepository;
+    private final QuestionRepository questionRepository;
     private TextToSpeechService textToSpeechService;
     private List<Map<String,String>> message;
     private List<Map<Map<String,String>, Integer>> questionList;
@@ -36,7 +39,8 @@ public class QuestionService {
     private String prompt;
     private String url;
     private int followupNum;
-    private String system_content_tech="###Role###\n You need to write a script for a development team leader who will conduct an interview." +
+
+    private String system_content_tech="###Role###\n You need to write a script for a \"%s\" development team leader who will conduct an interview." +
             "Your role consists of two tasks: 1. Classify the given self-introduction into achievements and activities the applicant has undertaken" +
             "and the lessons the applicant has learned during the process." +
             "2. Provide %d questions to verify the authenticity of the 'achievements (activities)' " +
@@ -69,7 +73,7 @@ public class QuestionService {
             "3. 질문 3\n" +
             "4. 질문 4\n";
 
-    private String system_content_followUp="###Role###\nYou need to write a script for a team lead of a development team who is acting as an interviewer.\n" +
+    private String system_content_followUp="###Role###\nYou need to write a script for a team lead of a \"%s\" development team who is acting as an interviewer.\n" +
             "The team lead should continuously engage in conversation with the applicant.\n" +
             "Based on the context of the chat and the applicant's latest answer, the team lead should ask follow-up questions to assess the applicant's knowledge level. " +
             "The team lead can ask for detailed explanations about the technologies mentioned by the applicant or request the applicant to elaborate on advanced knowledge related to those technologies.\n\n"+
@@ -80,20 +84,21 @@ public class QuestionService {
             "You have to make questions in Korean.\n"+
             "I will now provide the conversation between you and the applicant.\n" +
             "You asked the first question, and your question is as follows:\n";
-    private String system_content_followUp_tail="\n###Role###\nPlease ask additional questions based on web development keywords in user's response.\n"+
+    private String system_content_followUp_tail="\n###Role###\nPlease ask additional questions based on %s development keywords in user's response.\n"+
             "You should give higher priority to the most recent user chat when generating new questions.\n"+
-            "You need to ask 3 questions to verify user's knowledge level. For example, you can ask user to explain web development keywords included in user's answer.\n"+
+            "You need to ask 3 questions to verify user's knowledge level. For example, you can ask user to explain %s development keywords included in user's answer.\n"+
             "###Note###\nnumber each question and separate them with line breaks.\n"+
             "###Example Response###\n"+
             "1. 질문 1\n"+
             "2. 질문 2\n"+
             "3. 질문 3\n";
 
-    public QuestionService(@Value("${google.api-key}") String secret, ObjectMapper objectMapper, SelfIntroductionDetailRepository selfIntroductionDetailRepository, SelfIntroductionRepository selfIntroductionRepository, TextToSpeechService textToSpeechService){
+    public QuestionService(@Value("${google.api-key}") String secret, ObjectMapper objectMapper, SelfIntroductionDetailRepository selfIntroductionDetailRepository, SelfIntroductionRepository selfIntroductionRepository, QuestionRepository questionRepository,  TextToSpeechService textToSpeechService){
         apiKey=secret;
         this.objectMapper = objectMapper;
         this.selfIntroductionDetailRepository = selfIntroductionDetailRepository;
         this.selfIntroductionRepository = selfIntroductionRepository;
+        this.questionRepository = questionRepository;
         this.textToSpeechService = textToSpeechService;
     }
 
@@ -150,7 +155,15 @@ public class QuestionService {
 
     private void setPrompt(Integer questionNum, String dept, String type, String selfIntroductionContent){
         String messageToJson;
-        String system_content=type.matches("tech")?system_content_tech:system_content_personality;
+        String system_content;
+
+        //0. 질문 type을 판단하여 tech일 경우 직무를 프롬프트에 추가해준다
+        if(type.matches("tech")) system_content=String.format(system_content_tech,dept,questionNum/2,questionNum-(questionNum/2));
+        else system_content=String.format(system_content_personality,questionNum/2,questionNum-(questionNum/2));
+        System.out.println("######prompt set######");
+        System.out.println(system_content);
+        System.out.println("######prompt set######");
+
         message=new ArrayList<>();
 
         //1. system의 chat을 만든다
@@ -172,13 +185,19 @@ public class QuestionService {
     }
 
     /*프롬프트 테스트용. 프론트에서 사용자의 답변을 텍스트로 변환해서 줬다고 가정. STT 적용되면 수정해야 함.*/
-    private void setPromptForFollowUp(int turn, List<Map<String,String>>prevChat){
+    private void setPromptForFollowUp(int turn, int selfIntroductionId, String dept, List<Map<String,String>>prevChat){
         String messageToJson;
+        String system_content;
+        String system_content_tail;
+        SelfIntroduction selfIntroduction=selfIntroductionRepository.findById(Long.valueOf(selfIntroductionId)).orElseThrow(()->new NotFoundException("해당하는 자소서를 찾을 수 없습니다."));
 
         //1. turn이 0이라면 시스템 프롬프트를 추가한다.
         if(turn==0){
+            //1.0 시스템 프롬프트 설정
+            system_content=String.format(system_content_followUp,dept);
+
             //1.1 [시스템 프롬프트+prevChat의 첫번째 system chat(최초의 질문)]을 하나의 system chat으로
-            createChat("system",system_content_followUp+prevChat.get(0).get("content"));
+            createChat("system",system_content+prevChat.get(0).get("content"));
 
             //1.2 prevChat의 첫번째 system chat과 마지막 user chat을 제외하고 message 배열에 추가.
             message.addAll(prevChat.subList(1, prevChat.size()-1));
@@ -186,13 +205,27 @@ public class QuestionService {
         //아닐 시 마지막 user chat을 제외하고 전부 message 배열에 추가한다.
         else{
             message.addAll(prevChat.subList(0,prevChat.size()-1));
+
+            // DB에 저장한다.
+            //1. 후보 꼬리 질문들 중 유저가 선택한 질문(유저의 응답 직전 시스템 질문)을 가져온다.
+            String questionContent=prevChat.get(prevChat.size()-2).get("content");
+
+            //2. 새로운 Question Entity를 생성한다.
+            Question question=Question.builder()
+                    .content(questionContent)
+                    .selfIntroduction(selfIntroduction)
+                    .build();
+
+            //3. DB에 question을 저장한다.
+            questionRepository.save(question);
         }
 
         //2. 마지막 user chat의 뒤에 유저 프롬프트를 추가한다.
         createChat("user",prevChat.get(prevChat.size()-1).get("content"));
 
         //3. 시스템의 프로므트를 다시 설정하여 chat에 추가
-        createChat("system",system_content_followUp_tail);
+        system_content_tail=String.format(system_content_followUp_tail,dept,dept);
+        createChat("system",system_content_tail);
 
         //4. message를 JSON으로 변환
         try {
@@ -235,6 +268,7 @@ public class QuestionService {
         System.out.println(textContent);
         //1. 질문을 \n 기준으로 파싱
         String[] questionsParsedByLine=textContent.split("\n");
+        for(int i=0; i<questionsParsedByLine.length; i++) System.out.println(questionsParsedByLine[i]);
 
         //2. 질문을 <숫자.> 기준으로 파싱하고 <숫자.>은 삭제
         String[] rawQuestions=Arrays.stream(questionsParsedByLine)
@@ -242,44 +276,70 @@ public class QuestionService {
                 .map(q->q.replaceAll("\\d+\\.","").trim())
                 .toArray(String[]::new);
 
-        //3. List에 <"번호":질문> 형식으로 저장
-        List<Map<Map<String,String>, Integer>> questionsTaggedByNumber=new ArrayList<>();
+        //3. List에 <<질문:tts>,turn> 형식으로 저장
+        List<Map<Map<String,String>, Integer>> textAudioTurnList=new ArrayList<>();
         IntStream.range(0, rawQuestions.length)
                 .forEach(index->{
-                    Map<String,String> taggedQuestionMap=new HashMap<>();
-                    //taggedQuestionMap.put(Integer.toString(index),rawQuestions[index]);
+                    Map<String,String> textAudioMap=new HashMap<>();
+
+                    //생성된 질문을 저장할 자료구조
                     Map<Map<String, String>, Integer> additionalQuestionTurnMap = new HashMap<>();
+
+                    //tts에서 오디오파일을 가져온다
                     byte[] audioData = textToSpeechService.convertTextToSpeech(rawQuestions[index]);
                     String audioBase64 = Base64.getEncoder().encodeToString(audioData);
-                    //taggedQuestionMap.put(rawQuestions[index], audioBase64);
-                    taggedQuestionMap.put("text", rawQuestions[index]);
-                    taggedQuestionMap.put("audio", audioBase64);
-                    if(type.equals("기술 항목") && followupNum<2) {
-                        additionalQuestionTurnMap.put(taggedQuestionMap, 3);
+
+                    // <질문, tts> 만들기
+                    textAudioMap.put("text", rawQuestions[index]);
+                    textAudioMap.put("audio", audioBase64);
+
+                    // 꼬리 질문은 "tech" 타입에서 2개만 생성
+                    // 꼬리 질문은 3으로 표시
+                    if(type.equals("tech") && followupNum<2) {
+                        additionalQuestionTurnMap.put(textAudioMap, 3);
                         followupNum++;
                     }
-                    else
-                        additionalQuestionTurnMap.put(taggedQuestionMap, 1);
-                    questionsTaggedByNumber.add(additionalQuestionTurnMap);
+                    // 일반 질문은 1으로 표시
+                    else additionalQuestionTurnMap.put(textAudioMap, 1);
+
+                    // <<질문, tts>, 횟수> 꼴을 리스트에 집어넣기
+                    textAudioTurnList.add(additionalQuestionTurnMap);
                 });
 
-        //4.1 올바른 형식인지 검사 - 빈 리스트인가? OR 원래 질문보다 적은 수가 생성되었는가? -> 재요청
-        if(questionsTaggedByNumber.size()==0 || questionsTaggedByNumber.size()<requiredQuestionNum) return false;
-        //4.2 올바른 형식인지 검사 - 질문 형식이 맞는가? -> 재요청
-        /*String firstQuestion=questionsTaggedByNumber.get(0).;
+        //4.0 올바른 형식인지 검사 - 빈 리스트인가?
+        if(textAudioTurnList.size()==0){
+            System.out.println("Zero questions");
+            return false;
+        }
+
+        //4.1 올바른 형식인지 검사 - 질문 형식이 맞는가? -> 재요청
+        Map<String,String> first_Question_Audio_PairMap=textAudioTurnList.get(0).keySet().iterator().next();
+        String firstQuestion=first_Question_Audio_PairMap.get("text");
         System.out.println("firstQuestion : "+firstQuestion);
-        if(!(firstQuestion.endsWith("?") || firstQuestion.equals("요.")||firstQuestion.equals("까"))){
+        if(!(firstQuestion.endsWith("?") || firstQuestion.endsWith("요.")||firstQuestion.endsWith("바랍니다.")||firstQuestion.endsWith("바랍니다"))){
             System.out.println("wrong format");
             return false;
-        }*/
-        //4.3 올바른 형식인지 검사 - 원래 질문보다 많은 수가 생성되었는가? -> 원래 개수만큼 선택 => (m개, m개)인데 (n개, n개)가 생성됨. (0~m-1)인덱스 선택. (n~n+m-1)인덱스 선택.
-        if(questionsTaggedByNumber.size()>requiredQuestionNum){
-            questionList.addAll(questionsTaggedByNumber.subList(0,requiredQuestionNum));
-            questionList.addAll(questionsTaggedByNumber.subList(questionsTaggedByNumber.size()/2,questionsTaggedByNumber.size()/2+requiredQuestionNum-1));
+        }
+
+        //4.2 올바른 형식인지 검사 - 원래 질문보다 적은 수가 생성되었는가? -> 재요청
+        if(textAudioTurnList.size()+questionList.size()<requiredQuestionNum) {
+            System.out.println("less questions");
+            questionList.addAll(textAudioTurnList);
+            return false;
+        }
+
+        //4.3 올바른 형식인지 검사 - 원래 질문보다 많은 수가 생성되었는가?
+        // -> 원래 개수만큼 선택 => (m개, m개)인데 (n개, n개)가 생성됨. (0~m)인덱스 선택. (n~n+m)인덱스 선택.
+        if(textAudioTurnList.size()+questionList.size()>requiredQuestionNum){
+            System.out.println("too much questions");
+            int need=requiredQuestionNum-questionList.size();
+            questionList.addAll(textAudioTurnList.subList(0,need));
             return true;
         }
+
         //5. questionList에 생성된 질문 담기
-        questionList.addAll(questionsTaggedByNumber);
+        questionList.addAll(textAudioTurnList);
+        System.out.println("proper questions");
         return true;
     }
 
@@ -306,6 +366,7 @@ public class QuestionService {
 
         // 잘못된 형식의 답변이 생성되면 재요청
         while(!isQuestionCreatedNormally && callNum<3) {
+            System.out.println("callNum : "+callNum);
             //4. rest 통신
             ResponseEntity<String> responseEntity = template.exchange(
                     url,
@@ -324,29 +385,40 @@ public class QuestionService {
     }
 
 
+
     public Map<String,List<Map<Map<String,String>, Integer>>> createQuestion(int requiredQuestionNum, String dept, int selfIntroductionId, List<String> additionalQuestions){
         int totalDetailNum, eachQuestionNum, remainQuestionNum;
+
         url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" + apiKey;
         template = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
         message=new ArrayList<>();
         questionList=new ArrayList<>();
+
+        // 꼬리 질문 개수
         followupNum = 0;
+
         // selfIntroduction에 포함된 selfIntroductionDetails를 가져옴
         List<SelfIntroductionDetail> selfIntroductionDetails=getSelfIntroductionDetails(selfIntroductionId);
 
+        // 문항 개수
         totalDetailNum = selfIntroductionDetails.size();
+        // 문항별 질문 개수
         eachQuestionNum = requiredQuestionNum / totalDetailNum;
+        // 마지막 문항 질문 = 문항별 질문 개수 + 나누고 남은 질문
         remainQuestionNum = requiredQuestionNum % totalDetailNum + eachQuestionNum;
 
-        //selfIntroductionDetails.forEach(s->{createQuestionForEachSelfIntroductionDetails(eachQuestionNum, dept, s.getType(), s.getContent());});
         int index = 0;
         for (SelfIntroductionDetail selfIntroductionDetail : selfIntroductionDetails) {
+            //마지막 문항은 남아있는 질문 개수만큼 할당
             if (index == totalDetailNum - 1)
                 createQuestionForEachSelfIntroductionDetails(remainQuestionNum, dept, selfIntroductionDetail.getType(), selfIntroductionDetail.getContent());
+                //이전 문항은 문항별 개수만큼 할당
             else
                 createQuestionForEachSelfIntroductionDetails(eachQuestionNum, dept, selfIntroductionDetail.getType(), selfIntroductionDetail.getContent());
             index++;
         }
+
+        //유저가 추가한 질문에 대해서도 저장
         additionalQuestions.forEach(s->{
             Map<String,String> additionalQuestionMap=new HashMap<>();
             byte[] audioData = textToSpeechService.convertTextToSpeech(s);
@@ -360,22 +432,46 @@ public class QuestionService {
         // 생성된 모든 질문들을 JSON 형태로 저장한 후 리턴
         Map<String, List<Map<Map<String,String>, Integer>>> questionToJson=new HashMap<>();
         questionToJson.put("questions",questionList);
+
+        //생성된 모든 질문들을 DB에 저장
+        saveAllQuestions(selfIntroductionId);
+
         return questionToJson;
     }
 
-    public Map<String,Object> createFollowUpQuestion(int turn, int selfIntroductionId, List<Map<String,String>>prevChat){
+    public Map<String,Object> createFollowUpQuestion(int turn, String dept, int selfIntroductionId, List<Map<String,String>>prevChat){
         url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" + apiKey;
         template = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
         questionList=new ArrayList<>();
         message=new ArrayList<>();
+        SelfIntroduction selfIntroduction;
         Boolean isQuestionCreatedNormally=false;
         int callNum=0;
 
         // 1. turn을 계산한다.
-        if(turn+1>2) return null;
+        if(turn+1>2) {
+            //마지막 꼬리질문에 대한 유저 응담
+            if(turn+1==3){
+                //0. selfIntroduction을 가져온다.
+                selfIntroduction=selfIntroductionRepository.findById(Long.valueOf(selfIntroductionId)).orElseThrow(()->new NotFoundException("해당하는 자소서를 찾을 수 없습니다."));
+
+                //1. 후보 꼬리 질문들 중 유저가 선택한 질문(유저의 응답 직전 시스템 질문)을 가져온다.
+                String questionContent=prevChat.get(prevChat.size()-2).get("content");
+
+                //2. 새로운 Question Entity를 생성한다.
+                Question question=Question.builder()
+                        .content(questionContent)
+                        .selfIntroduction(selfIntroduction)
+                        .build();
+
+                //3. DB에 question을 저장한다.
+                questionRepository.save(question);
+            }
+            return null;
+        }
 
         // 2. 이전 질문들과 새로운 요구사항을 붙여서 프롬프트를 생성한다.
-        setPromptForFollowUp(turn,prevChat);
+        setPromptForFollowUp(turn,selfIntroductionId,dept,prevChat);
 
         //3. requestBody 만들기
         String requestBody=createRequestBody();
@@ -446,6 +542,24 @@ public class QuestionService {
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void saveEachQuestion(){
+
+    }
+
+
+    private void saveAllQuestions(int selfIntroductionId){
+        SelfIntroduction selfIntroduction=selfIntroductionRepository.findById(Long.valueOf(selfIntroductionId)).orElseThrow(()->new NotFoundException("해당하는 자소서를 찾을 수 없습니다"));
+        IntStream.range(0, questionList.size())
+                .forEach(index->{
+                    Question question=Question
+                            .builder()
+                            .content(questionList.get(index).keySet().iterator().next().keySet().iterator().next())
+                            .selfIntroduction(selfIntroduction)
+                            .build();
+                    questionRepository.save(question);
+                });
     }
 
 }
