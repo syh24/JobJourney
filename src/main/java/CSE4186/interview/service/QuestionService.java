@@ -10,6 +10,7 @@ import CSE4186.interview.repository.SelfIntroductionRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import lombok.Builder;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,11 +32,14 @@ public class QuestionService {
     private final SelfIntroductionDetailRepository selfIntroductionDetailRepository;
     private final SelfIntroductionRepository selfIntroductionRepository;
     private final QuestionRepository questionRepository;
+    private TextToSpeechService textToSpeechService;
     private List<Map<String,String>> message;
-    private List<Map<String,String>> questionList;
+    private List<Map<Map<String,String>, Integer>> questionList;
     private RestTemplate template;
     private String prompt;
     private String url;
+    private int followupNum;
+
     private String system_content_tech="###Role###\n You need to write a script for a \"%s\" development team leader who will conduct an interview." +
             "Your role consists of two tasks: 1. Classify the given self-introduction into achievements and activities the applicant has undertaken" +
             "and the lessons the applicant has learned during the process." +
@@ -89,12 +93,13 @@ public class QuestionService {
             "2. 질문 2\n"+
             "3. 질문 3\n";
 
-    public QuestionService(@Value("${google.api-key}") String secret, ObjectMapper objectMapper, SelfIntroductionDetailRepository selfIntroductionDetailRepository, SelfIntroductionRepository selfIntroductionRepository, QuestionRepository questionRepository){
+    public QuestionService(@Value("${google.api-key}") String secret, ObjectMapper objectMapper, SelfIntroductionDetailRepository selfIntroductionDetailRepository, SelfIntroductionRepository selfIntroductionRepository, QuestionRepository questionRepository,  TextToSpeechService textToSpeechService){
         apiKey=secret;
         this.objectMapper = objectMapper;
         this.selfIntroductionDetailRepository = selfIntroductionDetailRepository;
         this.selfIntroductionRepository = selfIntroductionRepository;
         this.questionRepository = questionRepository;
+        this.textToSpeechService = textToSpeechService;
     }
 
     @Builder
@@ -259,7 +264,7 @@ public class QuestionService {
         return textContent;
     }
 
-    private Boolean getQuestions(Integer requiredQuestionNum, String textContent){
+    private Boolean getQuestions(Integer requiredQuestionNum, String textContent, String type){
         System.out.println(textContent);
         //1. 질문을 \n 기준으로 파싱
         String[] questionsParsedByLine=textContent.split("\n");
@@ -271,45 +276,69 @@ public class QuestionService {
                 .map(q->q.replaceAll("\\d+\\.","").trim())
                 .toArray(String[]::new);
 
-        //3. List에 <"번호":질문> 형식으로 저장
-        List<Map<String,String>> questionsTaggedByNumber=new ArrayList<>();
+        //3. List에 <<질문:tts>,turn> 형식으로 저장
+        List<Map<Map<String,String>, Integer>> textAudioTurnList=new ArrayList<>();
         IntStream.range(0, rawQuestions.length)
                 .forEach(index->{
-                    Map<String,String> taggedQuestionMap=new HashMap<>();
-                    taggedQuestionMap.put(Integer.toString(index+questionList.size()),rawQuestions[index]);
-                    questionsTaggedByNumber.add(taggedQuestionMap);
+                    Map<String,String> textAudioMap=new HashMap<>();
+
+                    //생성된 질문을 저장할 자료구조
+                    Map<Map<String, String>, Integer> additionalQuestionTurnMap = new HashMap<>();
+
+                    //tts에서 오디오파일을 가져온다
+                    byte[] audioData = textToSpeechService.convertTextToSpeech(rawQuestions[index]);
+                    String audioBase64 = Base64.getEncoder().encodeToString(audioData);
+
+                    // <질문, tts> 만들기
+                    textAudioMap.put("text", rawQuestions[index]);
+                    textAudioMap.put("audio", audioBase64);
+
+                    // 꼬리 질문은 "tech" 타입에서 2개만 생성
+                    // 꼬리 질문은 3으로 표시
+                    if(type.equals("tech") && followupNum<2) {
+                        additionalQuestionTurnMap.put(textAudioMap, 3);
+                        followupNum++;
+                    }
+                    // 일반 질문은 1으로 표시
+                    else additionalQuestionTurnMap.put(textAudioMap, 1);
+
+                    // <<질문, tts>, 횟수> 꼴을 리스트에 집어넣기
+                    textAudioTurnList.add(additionalQuestionTurnMap);
                 });
 
         //4.0 올바른 형식인지 검사 - 빈 리스트인가?
-        if(questionsTaggedByNumber.size()==0){
+        if(textAudioTurnList.size()==0){
             System.out.println("Zero questions");
             return false;
         }
 
         //4.1 올바른 형식인지 검사 - 질문 형식이 맞는가? -> 재요청
-        String firstQuestion=questionsTaggedByNumber.get(0).get(String.valueOf(questionList.size()));
-        if(!(firstQuestion.endsWith("?") || firstQuestion.endsWith("요.")||firstQuestion.endsWith("까")||firstQuestion.endsWith("바랍니다.")||firstQuestion.endsWith("바랍니다"))){
+        Map<String,String> first_Question_Audio_PairMap=textAudioTurnList.get(0).keySet().iterator().next();
+        String firstQuestion=first_Question_Audio_PairMap.keySet().iterator().next();
+        System.out.println("firstQuestion : "+firstQuestion);
+        if(!(firstQuestion.endsWith("?") || firstQuestion.endsWith("요.")||firstQuestion.endsWith("바랍니다.")||firstQuestion.endsWith("바랍니다"))){
             System.out.println("wrong format");
             return false;
         }
 
         //4.2 올바른 형식인지 검사 - 원래 질문보다 적은 수가 생성되었는가? -> 재요청
-        if(questionsTaggedByNumber.size()+questionList.size()<requiredQuestionNum) {
+        if(textAudioTurnList.size()+questionList.size()<requiredQuestionNum) {
             System.out.println("less questions");
-            questionList.addAll(questionsTaggedByNumber);
+            questionList.addAll(textAudioTurnList);
             return false;
         }
 
         //4.3 올바른 형식인지 검사 - 원래 질문보다 많은 수가 생성되었는가?
         // -> 원래 개수만큼 선택 => (m개, m개)인데 (n개, n개)가 생성됨. (0~m)인덱스 선택. (n~n+m)인덱스 선택.
-        if(questionsTaggedByNumber.size()+questionList.size()>requiredQuestionNum){
+        if(textAudioTurnList.size()+questionList.size()>requiredQuestionNum){
             System.out.println("too much questions");
             int need=requiredQuestionNum-questionList.size();
-            questionList.addAll(questionsTaggedByNumber.subList(0,need));
+            questionList.addAll(textAudioTurnList.subList(0,need));
             return true;
         }
+
         //5. questionList에 생성된 질문 담기
-        questionList.addAll(questionsTaggedByNumber);
+        questionList.addAll(textAudioTurnList);
         System.out.println("proper questions");
         return true;
     }
@@ -350,33 +379,58 @@ public class QuestionService {
             String textContent = getTextContent(response);
 
             //6. 답변 속 질문을 파싱하여 List 형태로 저장
-            isQuestionCreatedNormally=getQuestions(requiredQuestionNum, textContent);
+            isQuestionCreatedNormally=getQuestions(requiredQuestionNum, textContent, type);
             callNum+=1;
         }
     }
 
 
-    public Map<String,List<Map<String,String>>> createQuestion(int requiredQuestionNum, String dept, int selfIntroductionId, List<String> userAddQuestions){
+
+    public Map<String,List<Map<Map<String,String>, Integer>>> createQuestion(int requiredQuestionNum, String dept, int selfIntroductionId, List<String> additionalQuestions){
+        int totalDetailNum, eachQuestionNum, remainQuestionNum;
+
         url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" + apiKey;
         template = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
         message=new ArrayList<>();
         questionList=new ArrayList<>();
 
+        // 꼬리 질문 개수
+        followupNum = 0;
+
         // selfIntroduction에 포함된 selfIntroductionDetails를 가져옴
         List<SelfIntroductionDetail> selfIntroductionDetails=getSelfIntroductionDetails(selfIntroductionId);
-        selfIntroductionDetails.forEach(s->{createQuestionForEachSelfIntroductionDetails(requiredQuestionNum, dept, s.getType(), s.getContent());});
 
-        //유저가 추가한 질문에 대해서도 questionList에 저장
-        int questionListSize=questionList.size();
-        IntStream.range(0, userAddQuestions.size())
-                .forEach(index->{
-                    Map<String,String> newQuestion=new HashMap<>();
-                    newQuestion.put(String.valueOf(index+questionListSize),userAddQuestions.get(index));
-                    questionList.add(newQuestion);
-                });
+        // 문항 개수
+        totalDetailNum = selfIntroductionDetails.size();
+        // 문항별 질문 개수
+        eachQuestionNum = requiredQuestionNum / totalDetailNum;
+        // 마지막 문항 질문 = 문항별 질문 개수 + 나누고 남은 질문
+        remainQuestionNum = requiredQuestionNum % totalDetailNum + eachQuestionNum;
+
+        int index = 0;
+        for (SelfIntroductionDetail selfIntroductionDetail : selfIntroductionDetails) {
+            //마지막 문항은 남아있는 질문 개수만큼 할당
+            if (index == totalDetailNum - 1)
+                createQuestionForEachSelfIntroductionDetails(remainQuestionNum, dept, selfIntroductionDetail.getType(), selfIntroductionDetail.getContent());
+                //이전 문항은 문항별 개수만큼 할당
+            else
+                createQuestionForEachSelfIntroductionDetails(eachQuestionNum, dept, selfIntroductionDetail.getType(), selfIntroductionDetail.getContent());
+            index++;
+        }
+
+        //유저가 추가한 질문에 대해서도 저장
+        additionalQuestions.forEach(s->{
+            Map<String,String> additionalQuestionMap=new HashMap<>();
+            byte[] audioData = textToSpeechService.convertTextToSpeech(s);
+            String audioBase64 = Base64.getEncoder().encodeToString(audioData);
+            additionalQuestionMap.put(s, audioBase64);
+            Map<Map<String, String>, Integer> additionalQuestionTurnMap = new HashMap<>();
+            additionalQuestionTurnMap.put(additionalQuestionMap, 1);
+            questionList.add(additionalQuestionTurnMap);
+        });
 
         // 생성된 모든 질문들을 JSON 형태로 저장한 후 리턴
-        Map<String, List<Map<String,String>>> questionToJson=new HashMap<>();
+        Map<String, List<Map<Map<String,String>, Integer>>> questionToJson=new HashMap<>();
         questionToJson.put("questions",questionList);
 
         //생성된 모든 질문들을 DB에 저장
@@ -439,7 +493,7 @@ public class QuestionService {
             String textContent = getTextContent(response);
 
             //7. 질문 목록 파싱하여 리스트로 저장하기
-            isQuestionCreatedNormally=getQuestions(3, textContent);
+            isQuestionCreatedNormally=getQuestions(3, textContent, "");
             callNum+=1;
         }
 
@@ -494,13 +548,14 @@ public class QuestionService {
 
     }
 
+
     private void saveAllQuestions(int selfIntroductionId){
         SelfIntroduction selfIntroduction=selfIntroductionRepository.findById(Long.valueOf(selfIntroductionId)).orElseThrow(()->new NotFoundException("해당하는 자소서를 찾을 수 없습니다"));
         IntStream.range(0, questionList.size())
                 .forEach(index->{
                     Question question=Question
                             .builder()
-                            .content(questionList.get(index).get(String.valueOf(index)))
+                            .content(questionList.get(index).keySet().iterator().next().keySet().iterator().next())
                             .selfIntroduction(selfIntroduction)
                             .build();
                     questionRepository.save(question);
