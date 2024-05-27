@@ -54,7 +54,12 @@ public class SecurityConfig {
                                 .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                                 .anyRequest().hasAnyRole("USER")
                 )
-
+                .oauth2Login(oauth2 ->
+                        oauth2
+                                .authorizationEndpoint(a->{
+                                    a.baseUri("/login/oauth2");
+                                })
+                )
                 .addFilterBefore(new FilterExceptionHandler(objectMapper),UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new JwtFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new LoginFilter(tokenProvider,customAuthenticationManager,objectMapper), UsernamePasswordAuthenticationFilter.class);
