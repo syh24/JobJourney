@@ -351,7 +351,8 @@ public class QuestionService {
             Map<String,String> additionalQuestionMap=new HashMap<>();
             byte[] audioData = textToSpeechService.convertTextToSpeech(s);
             String audioBase64 = Base64.getEncoder().encodeToString(audioData);
-            additionalQuestionMap.put(s, audioBase64);
+            additionalQuestionMap.put("text", s);
+            additionalQuestionMap.put("audio", audioBase64);
             Map<Map<String, String>, Integer> additionalQuestionTurnMap = new HashMap<>();
             additionalQuestionTurnMap.put(additionalQuestionMap, 1);
             questionList.add(additionalQuestionTurnMap);
