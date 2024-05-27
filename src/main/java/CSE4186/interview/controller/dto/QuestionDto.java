@@ -21,7 +21,7 @@ public class QuestionDto {
         private int questionNum;
         private int selfIntroductionId;
         private String dept;
-        private List<String> userAddQuestions;
+        private List<String> additionalQuestions;
     }
 
     @Data
