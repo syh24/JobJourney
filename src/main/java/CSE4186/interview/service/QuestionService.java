@@ -1,8 +1,10 @@
 package CSE4186.interview.service;
 
+import CSE4186.interview.entity.Question;
 import CSE4186.interview.entity.SelfIntroduction;
 import CSE4186.interview.entity.SelfIntroductionDetail;
 import CSE4186.interview.exception.NotFoundException;
+import CSE4186.interview.repository.QuestionRepository;
 import CSE4186.interview.repository.SelfIntroductionDetailRepository;
 import CSE4186.interview.repository.SelfIntroductionRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -28,6 +30,7 @@ public class QuestionService {
     private final ObjectMapper objectMapper;
     private final SelfIntroductionDetailRepository selfIntroductionDetailRepository;
     private final SelfIntroductionRepository selfIntroductionRepository;
+    private final QuestionRepository questionRepository;
     private List<Map<String,String>> message;
     private List<Map<String,String>> questionList;
     private RestTemplate template;
@@ -86,11 +89,12 @@ public class QuestionService {
             "2. 질문 2\n"+
             "3. 질문 3\n";
 
-    public QuestionService(@Value("${google.api-key}") String secret, ObjectMapper objectMapper, SelfIntroductionDetailRepository selfIntroductionDetailRepository, SelfIntroductionRepository selfIntroductionRepository){
+    public QuestionService(@Value("${google.api-key}") String secret, ObjectMapper objectMapper, SelfIntroductionDetailRepository selfIntroductionDetailRepository, SelfIntroductionRepository selfIntroductionRepository, QuestionRepository questionRepository){
         apiKey=secret;
         this.objectMapper = objectMapper;
         this.selfIntroductionDetailRepository = selfIntroductionDetailRepository;
         this.selfIntroductionRepository = selfIntroductionRepository;
+        this.questionRepository = questionRepository;
     }
 
     @Builder
@@ -176,10 +180,11 @@ public class QuestionService {
     }
 
     /*프롬프트 테스트용. 프론트에서 사용자의 답변을 텍스트로 변환해서 줬다고 가정. STT 적용되면 수정해야 함.*/
-    private void setPromptForFollowUp(int turn, String dept, List<Map<String,String>>prevChat){
+    private void setPromptForFollowUp(int turn, int selfIntroductionId, String dept, List<Map<String,String>>prevChat){
         String messageToJson;
         String system_content;
         String system_content_tail;
+        SelfIntroduction selfIntroduction=selfIntroductionRepository.findById(Long.valueOf(selfIntroductionId)).orElseThrow(()->new NotFoundException("해당하는 자소서를 찾을 수 없습니다."));
 
         //1. turn이 0이라면 시스템 프롬프트를 추가한다.
         if(turn==0){
@@ -195,6 +200,19 @@ public class QuestionService {
         //아닐 시 마지막 user chat을 제외하고 전부 message 배열에 추가한다.
         else{
             message.addAll(prevChat.subList(0,prevChat.size()-1));
+
+            // DB에 저장한다.
+            //1. 후보 꼬리 질문들 중 유저가 선택한 질문(유저의 응답 직전 시스템 질문)을 가져온다.
+            String questionContent=prevChat.get(prevChat.size()-2).get("content");
+
+            //2. 새로운 Question Entity를 생성한다.
+            Question question=Question.builder()
+                    .content(questionContent)
+                    .selfIntroduction(selfIntroduction)
+                    .build();
+
+            //3. DB에 question을 저장한다.
+            questionRepository.save(question);
         }
 
         //2. 마지막 user chat의 뒤에 유저 프롬프트를 추가한다.
@@ -360,6 +378,10 @@ public class QuestionService {
         // 생성된 모든 질문들을 JSON 형태로 저장한 후 리턴
         Map<String, List<Map<String,String>>> questionToJson=new HashMap<>();
         questionToJson.put("questions",questionList);
+
+        //생성된 모든 질문들을 DB에 저장
+        saveAllQuestions(selfIntroductionId);
+
         return questionToJson;
     }
 
@@ -368,14 +390,34 @@ public class QuestionService {
         template = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
         questionList=new ArrayList<>();
         message=new ArrayList<>();
+        SelfIntroduction selfIntroduction;
         Boolean isQuestionCreatedNormally=false;
         int callNum=0;
 
         // 1. turn을 계산한다.
-        if(turn+1>2) return null;
+        if(turn+1>2) {
+            //마지막 꼬리질문에 대한 유저 응담
+            if(turn+1==3){
+                //0. selfIntroduction을 가져온다.
+                selfIntroduction=selfIntroductionRepository.findById(Long.valueOf(selfIntroductionId)).orElseThrow(()->new NotFoundException("해당하는 자소서를 찾을 수 없습니다."));
+
+                //1. 후보 꼬리 질문들 중 유저가 선택한 질문(유저의 응답 직전 시스템 질문)을 가져온다.
+                String questionContent=prevChat.get(prevChat.size()-2).get("content");
+
+                //2. 새로운 Question Entity를 생성한다.
+                Question question=Question.builder()
+                        .content(questionContent)
+                        .selfIntroduction(selfIntroduction)
+                        .build();
+
+                //3. DB에 question을 저장한다.
+                questionRepository.save(question);
+            }
+            return null;
+        }
 
         // 2. 이전 질문들과 새로운 요구사항을 붙여서 프롬프트를 생성한다.
-        setPromptForFollowUp(turn,dept,prevChat);
+        setPromptForFollowUp(turn,selfIntroductionId,dept,prevChat);
 
         //3. requestBody 만들기
         String requestBody=createRequestBody();
@@ -446,6 +488,23 @@ public class QuestionService {
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void saveEachQuestion(){
+
+    }
+
+    private void saveAllQuestions(int selfIntroductionId){
+        SelfIntroduction selfIntroduction=selfIntroductionRepository.findById(Long.valueOf(selfIntroductionId)).orElseThrow(()->new NotFoundException("해당하는 자소서를 찾을 수 없습니다"));
+        IntStream.range(0, questionList.size())
+                .forEach(index->{
+                    Question question=Question
+                            .builder()
+                            .content(questionList.get(index).get(String.valueOf(index)))
+                            .selfIntroduction(selfIntroduction)
+                            .build();
+                    questionRepository.save(question);
+                });
     }
 
 }
