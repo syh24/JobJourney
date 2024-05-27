@@ -314,7 +314,7 @@ public class QuestionService {
 
         //4.1 올바른 형식인지 검사 - 질문 형식이 맞는가? -> 재요청
         Map<String,String> first_Question_Audio_PairMap=textAudioTurnList.get(0).keySet().iterator().next();
-        String firstQuestion=first_Question_Audio_PairMap.keySet().iterator().next();
+        String firstQuestion=first_Question_Audio_PairMap.get("text");
         System.out.println("firstQuestion : "+firstQuestion);
         if(!(firstQuestion.endsWith("?") || firstQuestion.endsWith("요.")||firstQuestion.endsWith("바랍니다.")||firstQuestion.endsWith("바랍니다"))){
             System.out.println("wrong format");
