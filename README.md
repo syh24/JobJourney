@@ -2,7 +2,7 @@
 ![image](https://github.com/syh24/interview/assets/64251594/d425ac7c-a94f-4e44-82d4-a006707f8c7d)
 
 
-# Backend Struct
+# Backend 구조
 ![image](https://github.com/syh24/interview/assets/64251594/907470a2-ae74-4cb7-b49d-a9281e7f2045)
 
 
