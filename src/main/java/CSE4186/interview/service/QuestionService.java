@@ -33,7 +33,7 @@ public class QuestionService {
     private RestTemplate template;
     private String prompt;
     private String url;
-    private String system_content_tech="###Role###\n You need to write a script for a development team leader who will conduct an interview." +
+    private String system_content_tech="###Role###\n You need to write a script for a \"%s\" development team leader who will conduct an interview." +
             "Your role consists of two tasks: 1. Classify the given self-introduction into achievements and activities the applicant has undertaken" +
             "and the lessons the applicant has learned during the process." +
             "2. Provide %d questions to verify the authenticity of the 'achievements (activities)' " +
@@ -66,7 +66,7 @@ public class QuestionService {
             "3. 질문 3\n" +
             "4. 질문 4\n";
 
-    private String system_content_followUp="###Role###\nYou need to write a script for a team lead of a development team who is acting as an interviewer.\n" +
+    private String system_content_followUp="###Role###\nYou need to write a script for a team lead of a \"%s\" development team who is acting as an interviewer.\n" +
             "The team lead should continuously engage in conversation with the applicant.\n" +
             "Based on the context of the chat and the applicant's latest answer, the team lead should ask follow-up questions to assess the applicant's knowledge level. " +
             "The team lead can ask for detailed explanations about the technologies mentioned by the applicant or request the applicant to elaborate on advanced knowledge related to those technologies.\n\n"+
@@ -77,9 +77,9 @@ public class QuestionService {
             "You have to make questions in Korean.\n"+
             "I will now provide the conversation between you and the applicant.\n" +
             "You asked the first question, and your question is as follows:\n";
-    private String system_content_followUp_tail="\n###Role###\nPlease ask additional questions based on web development keywords in user's response.\n"+
+    private String system_content_followUp_tail="\n###Role###\nPlease ask additional questions based on %s development keywords in user's response.\n"+
             "You should give higher priority to the most recent user chat when generating new questions.\n"+
-            "You need to ask 3 questions to verify user's knowledge level. For example, you can ask user to explain web development keywords included in user's answer.\n"+
+            "You need to ask 3 questions to verify user's knowledge level. For example, you can ask user to explain %s development keywords included in user's answer.\n"+
             "###Note###\nnumber each question and separate them with line breaks.\n"+
             "###Example Response###\n"+
             "1. 질문 1\n"+
@@ -146,7 +146,15 @@ public class QuestionService {
 
     private void setPrompt(Integer questionNum, String dept, String type, String selfIntroductionContent){
         String messageToJson;
-        String system_content=type.matches("tech")?system_content_tech:system_content_personality;
+        String system_content;
+
+        //0. 질문 type을 판단하여 tech일 경우 직무를 프롬프트에 추가해준다
+        if(type.matches("tech")) system_content=String.format(system_content_tech,dept,questionNum/2,questionNum-(questionNum/2));
+        else system_content=String.format(system_content_personality,questionNum/2,questionNum-(questionNum/2));
+        System.out.println("######prompt set######");
+        System.out.println(system_content);
+        System.out.println("######prompt set######");
+
         message=new ArrayList<>();
 
         //1. system의 chat을 만든다
@@ -168,13 +176,18 @@ public class QuestionService {
     }
 
     /*프롬프트 테스트용. 프론트에서 사용자의 답변을 텍스트로 변환해서 줬다고 가정. STT 적용되면 수정해야 함.*/
-    private void setPromptForFollowUp(int turn, List<Map<String,String>>prevChat){
+    private void setPromptForFollowUp(int turn, String dept, List<Map<String,String>>prevChat){
         String messageToJson;
+        String system_content;
+        String system_content_tail;
 
         //1. turn이 0이라면 시스템 프롬프트를 추가한다.
         if(turn==0){
+            //1.0 시스템 프롬프트 설정
+            system_content=String.format(system_content_followUp,dept);
+
             //1.1 [시스템 프롬프트+prevChat의 첫번째 system chat(최초의 질문)]을 하나의 system chat으로
-            createChat("system",system_content_followUp+prevChat.get(0).get("content"));
+            createChat("system",system_content+prevChat.get(0).get("content"));
 
             //1.2 prevChat의 첫번째 system chat과 마지막 user chat을 제외하고 message 배열에 추가.
             message.addAll(prevChat.subList(1, prevChat.size()-1));
@@ -188,7 +201,8 @@ public class QuestionService {
         createChat("user",prevChat.get(prevChat.size()-1).get("content"));
 
         //3. 시스템의 프로므트를 다시 설정하여 chat에 추가
-        createChat("system",system_content_followUp_tail);
+        system_content_tail=String.format(system_content_followUp_tail,dept,dept);
+        createChat("system",system_content_tail);
 
         //4. message를 JSON으로 변환
         try {
@@ -231,6 +245,7 @@ public class QuestionService {
         System.out.println(textContent);
         //1. 질문을 \n 기준으로 파싱
         String[] questionsParsedByLine=textContent.split("\n");
+        for(int i=0; i<questionsParsedByLine.length; i++) System.out.println(questionsParsedByLine[i]);
 
         //2. 질문을 <숫자.> 기준으로 파싱하고 <숫자.>은 삭제
         String[] rawQuestions=Arrays.stream(questionsParsedByLine)
@@ -243,27 +258,41 @@ public class QuestionService {
         IntStream.range(0, rawQuestions.length)
                 .forEach(index->{
                     Map<String,String> taggedQuestionMap=new HashMap<>();
-                    taggedQuestionMap.put(Integer.toString(index),rawQuestions[index]);
+                    taggedQuestionMap.put(Integer.toString(index+questionList.size()),rawQuestions[index]);
                     questionsTaggedByNumber.add(taggedQuestionMap);
                 });
 
-        //4.1 올바른 형식인지 검사 - 빈 리스트인가? OR 원래 질문보다 적은 수가 생성되었는가? -> 재요청
-        if(questionsTaggedByNumber.size()==0 || questionsTaggedByNumber.size()<requiredQuestionNum) return false;
-        //4.2 올바른 형식인지 검사 - 질문 형식이 맞는가? -> 재요청
-        String firstQuestion=questionsTaggedByNumber.get(0).get("0");
-        System.out.println("firstQuestion : "+firstQuestion);
-        if(!(firstQuestion.endsWith("?") || firstQuestion.equals("요.")||firstQuestion.equals("까"))){
+        //4.0 올바른 형식인지 검사 - 빈 리스트인가?
+        if(questionsTaggedByNumber.size()==0){
+            System.out.println("Zero questions");
+            return false;
+        }
+
+        //4.1 올바른 형식인지 검사 - 질문 형식이 맞는가? -> 재요청
+        String firstQuestion=questionsTaggedByNumber.get(0).get(String.valueOf(questionList.size()));
+        if(!(firstQuestion.endsWith("?") || firstQuestion.endsWith("요.")||firstQuestion.endsWith("까")||firstQuestion.endsWith("바랍니다.")||firstQuestion.endsWith("바랍니다"))){
             System.out.println("wrong format");
             return false;
         }
-        //4.3 올바른 형식인지 검사 - 원래 질문보다 많은 수가 생성되었는가? -> 원래 개수만큼 선택 => (m개, m개)인데 (n개, n개)가 생성됨. (0~m-1)인덱스 선택. (n~n+m-1)인덱스 선택.
-        if(questionsTaggedByNumber.size()>requiredQuestionNum){
-            questionList.addAll(questionsTaggedByNumber.subList(0,requiredQuestionNum));
-            questionList.addAll(questionsTaggedByNumber.subList(questionsTaggedByNumber.size()/2,questionsTaggedByNumber.size()/2+requiredQuestionNum-1));
+
+        //4.2 올바른 형식인지 검사 - 원래 질문보다 적은 수가 생성되었는가? -> 재요청
+        if(questionsTaggedByNumber.size()+questionList.size()<requiredQuestionNum) {
+            System.out.println("less questions");
+            questionList.addAll(questionsTaggedByNumber);
+            return false;
+        }
+
+        //4.3 올바른 형식인지 검사 - 원래 질문보다 많은 수가 생성되었는가?
+        // -> 원래 개수만큼 선택 => (m개, m개)인데 (n개, n개)가 생성됨. (0~m)인덱스 선택. (n~n+m)인덱스 선택.
+        if(questionsTaggedByNumber.size()+questionList.size()>requiredQuestionNum){
+            System.out.println("too much questions");
+            int need=requiredQuestionNum-questionList.size();
+            questionList.addAll(questionsTaggedByNumber.subList(0,need));
             return true;
         }
         //5. questionList에 생성된 질문 담기
         questionList.addAll(questionsTaggedByNumber);
+        System.out.println("proper questions");
         return true;
     }
 
@@ -290,6 +319,7 @@ public class QuestionService {
 
         // 잘못된 형식의 답변이 생성되면 재요청
         while(!isQuestionCreatedNormally && callNum<3) {
+            System.out.println("callNum : "+callNum);
             //4. rest 통신
             ResponseEntity<String> responseEntity = template.exchange(
                     url,
@@ -319,10 +349,11 @@ public class QuestionService {
         selfIntroductionDetails.forEach(s->{createQuestionForEachSelfIntroductionDetails(requiredQuestionNum, dept, s.getType(), s.getContent());});
 
         //유저가 추가한 질문에 대해서도 questionList에 저장
+        int questionListSize=questionList.size();
         IntStream.range(0, userAddQuestions.size())
                 .forEach(index->{
                     Map<String,String> newQuestion=new HashMap<>();
-                    newQuestion.put(String.valueOf(index+userAddQuestions.size()),userAddQuestions.get(index));
+                    newQuestion.put(String.valueOf(index+questionListSize),userAddQuestions.get(index));
                     questionList.add(newQuestion);
                 });
 
@@ -332,7 +363,7 @@ public class QuestionService {
         return questionToJson;
     }
 
-    public Map<String,Object> createFollowUpQuestion(int turn, int selfIntroductionId, List<Map<String,String>>prevChat){
+    public Map<String,Object> createFollowUpQuestion(int turn, String dept, int selfIntroductionId, List<Map<String,String>>prevChat){
         url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" + apiKey;
         template = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
         questionList=new ArrayList<>();
@@ -344,7 +375,7 @@ public class QuestionService {
         if(turn+1>2) return null;
 
         // 2. 이전 질문들과 새로운 요구사항을 붙여서 프롬프트를 생성한다.
-        setPromptForFollowUp(turn,prevChat);
+        setPromptForFollowUp(turn,dept,prevChat);
 
         //3. requestBody 만들기
         String requestBody=createRequestBody();
