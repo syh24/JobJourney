@@ -27,7 +27,7 @@ public class QuestionController {
 
     @PostMapping("/question/create")
     @Operation(summary = "Create Question", description = "Gemini를 사용하여 질문 생성")
-    public ApiUtil.ApiSuccessResult<Map<String, List<Map<Map<String,String>, Integer>>>> createQuestionWithGemini(@RequestBody QuestionDto.Request request) {
+    public ApiUtil.ApiSuccessResult <Map<String, List<List<Map<String,String>>>>> createQuestionWithGemini(@RequestBody QuestionDto.Request request) {
 
         int questionNum= request.getQuestionNum();
         int selfIntroductionId = request.getSelfIntroductionId();
