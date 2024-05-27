@@ -32,8 +32,9 @@ public class QuestionController {
         int questionNum= request.getQuestionNum();
         int selfIntroductionId = request.getSelfIntroductionId();
         String dept= request.getDept();
+        List<String> userAddQuestions=request.getUserAddQuestions();
 
-        return ApiUtil.success(questionService.createQuestion(questionNum,dept,selfIntroductionId));
+        return ApiUtil.success(questionService.createQuestion(questionNum,dept,selfIntroductionId,userAddQuestions));
     }
 
     @PostMapping("/question/followUp")

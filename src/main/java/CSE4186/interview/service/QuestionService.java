@@ -308,7 +308,7 @@ public class QuestionService {
     }
 
 
-    public Map<String,List<Map<String,String>>> createQuestion(int requiredQuestionNum, String dept, int selfIntroductionId){
+    public Map<String,List<Map<String,String>>> createQuestion(int requiredQuestionNum, String dept, int selfIntroductionId, List<String> userAddQuestions){
         url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" + apiKey;
         template = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
         message=new ArrayList<>();
@@ -317,6 +317,14 @@ public class QuestionService {
         // selfIntroduction에 포함된 selfIntroductionDetails를 가져옴
         List<SelfIntroductionDetail> selfIntroductionDetails=getSelfIntroductionDetails(selfIntroductionId);
         selfIntroductionDetails.forEach(s->{createQuestionForEachSelfIntroductionDetails(requiredQuestionNum, dept, s.getType(), s.getContent());});
+
+        //유저가 추가한 질문에 대해서도 questionList에 저장
+        IntStream.range(0, userAddQuestions.size())
+                .forEach(index->{
+                    Map<String,String> newQuestion=new HashMap<>();
+                    newQuestion.put(String.valueOf(index+userAddQuestions.size()),userAddQuestions.get(index));
+                    questionList.add(newQuestion);
+                });
 
         // 생성된 모든 질문들을 JSON 형태로 저장한 후 리턴
         Map<String, List<Map<String,String>>> questionToJson=new HashMap<>();
