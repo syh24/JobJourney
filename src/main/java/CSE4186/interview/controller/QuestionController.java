@@ -43,7 +43,8 @@ public class QuestionController {
         int selfIntroductionId= request.getSelfIntroductionId();
         String dept=request.getDept();
         List<Map<String,String>> prevChats=request.getQuestions();
-        return ApiUtil.success(questionService.createFollowUpQuestion(turn,dept,selfIntroductionId,prevChats));
+        String userAudio = request.getUserAudio();
+        return ApiUtil.success(questionService.createFollowUpQuestion(turn,dept,selfIntroductionId,prevChats, userAudio));
     }
 
 }
