@@ -46,13 +46,13 @@ public class SecurityConfig {
                         authorizeRequests
                                 .requestMatchers("/").permitAll()
                                 .requestMatchers("/login").permitAll()
-                                .requestMatchers("/health-check").permitAll()
                                 .requestMatchers("/login/oauth2/**").permitAll()
                                 .requestMatchers("/oauth2/**").permitAll()
                                 .requestMatchers("/join/**").permitAll()
                                 .requestMatchers("/token/**").permitAll()
                                 .requestMatchers("/question/**").permitAll()
                                 .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                                .requestMatchers("/health-check").permitAll()
                                 .anyRequest().hasAnyRole("USER")
                 )
                 .oauth2Login(oauth2 ->
