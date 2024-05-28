@@ -13,12 +13,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Builder;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
@@ -40,6 +42,7 @@ public class QuestionService {
     private String prompt;
     private String url;
     private int followupNum;
+    private Map<String, List<String>> interviewQuestions;
 
     private String system_content_tech="###Role###\n You need to write a script for a \"%s\" development team leader who will conduct an interview." +
             "Your role consists of two tasks: 1. Classify the given self-introduction into achievements and activities the applicant has undertaken" +
@@ -417,14 +420,35 @@ public class QuestionService {
     public Map<String, List<List<Map<String,String>>>> createQuestion(int requiredQuestionNum, String dept, int selfIntroductionId, List<String> additionalQuestions){
 
         int totalDetailNum, eachQuestionNum, remainQuestionNum;
+        int professionalQuestionNum = 1;
 
         url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" + apiKey;
         template = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
         message=new ArrayList<>();
         questionList=new ArrayList<>();
-
         // 꼬리 질문 개수
         followupNum = 0;
+
+        //미리 뽑아 놓은 질문 넣기
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            ClassPathResource resource = new ClassPathResource("interviewQuestion.json");
+            interviewQuestions = mapper.readValue(resource.getInputStream(), Map.class);
+        }catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        if(interviewQuestions.get(dept)!=null)
+        {
+            List<String> professionalQuestions = interviewQuestions.get(dept);
+            Random random = new Random();
+            int randomIndex = random.nextInt(professionalQuestions.size());
+            String professionalQuestion = professionalQuestions.get(randomIndex);
+
+            //미리 뽑아 놓은 질문 additionalQuestions에 추가하기
+            additionalQuestions.addFirst(professionalQuestion);
+            //생성할 질문 수 줄이기
+            requiredQuestionNum = requiredQuestionNum - professionalQuestionNum;
+        }
 
         // selfIntroduction에 포함된 selfIntroductionDetails를 가져옴
         List<SelfIntroductionDetail> selfIntroductionDetails=getSelfIntroductionDetails(selfIntroductionId);
@@ -467,7 +491,10 @@ public class QuestionService {
 
             questionList.add(questionInfo);
         });
-
+        
+        //질문 순서 섞기
+        Collections.shuffle(questionList);
+        
         // 생성된 모든 질문들을 JSON 형태로 저장한 후 리턴
         Map<String, List<List<Map<String,String>>>> questionToJson=new HashMap<>();
         questionToJson.put("questions",questionList);
