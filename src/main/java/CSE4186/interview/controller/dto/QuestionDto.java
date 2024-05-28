@@ -34,5 +34,6 @@ public class QuestionDto {
         private int selfIntroductionId;
         private String dept;
         private List<Map<String,String>> questions;
+        private String userAudio;
     }
 }

@@ -28,8 +28,10 @@ public class SpeechToTextService {
         //base64Audio = base64Audio + "\\";
         Map<String, Object> requestMap = new HashMap<>();
         Map<String, Object> configMap = new HashMap<>();
-        configMap.put("encoding", "WEBM_OPUS");
+        configMap.put("encoding", "MP3");
         configMap.put("sampleRateHertz", 16000);
+        //configMap.put("encoding", "WEBM_OPUS");
+        //configMap.put("sampleRateHertz", 48000);
         configMap.put("languageCode", "ko-KR");
 
         Map<String, String> audioMap = new HashMap<>();

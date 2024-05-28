@@ -33,6 +33,7 @@ public class QuestionService {
     private final SelfIntroductionRepository selfIntroductionRepository;
     private final QuestionRepository questionRepository;
     private TextToSpeechService textToSpeechService;
+    private SpeechToTextService speechToTextService;
     private List<Map<String,String>> message;
     private List<List<Map<String,String>>> questionList;
     private RestTemplate template;
@@ -97,13 +98,14 @@ public class QuestionService {
             "2. 질문 2\n"+
             "3. 질문 3\n";
 
-    public QuestionService(@Value("${google.api-key}") String secret, ObjectMapper objectMapper, SelfIntroductionDetailRepository selfIntroductionDetailRepository, SelfIntroductionRepository selfIntroductionRepository, QuestionRepository questionRepository,  TextToSpeechService textToSpeechService){
+    public QuestionService(@Value("${google.api-key}") String secret, ObjectMapper objectMapper, SelfIntroductionDetailRepository selfIntroductionDetailRepository, SelfIntroductionRepository selfIntroductionRepository, QuestionRepository questionRepository,  TextToSpeechService textToSpeechService, SpeechToTextService speechToTextService){
         apiKey=secret;
         this.objectMapper = objectMapper;
         this.selfIntroductionDetailRepository = selfIntroductionDetailRepository;
         this.selfIntroductionRepository = selfIntroductionRepository;
         this.questionRepository = questionRepository;
         this.textToSpeechService = textToSpeechService;
+        this.speechToTextService = speechToTextService;
     }
 
     @Builder
@@ -189,7 +191,7 @@ public class QuestionService {
     }
 
     /*프롬프트 테스트용. 프론트에서 사용자의 답변을 텍스트로 변환해서 줬다고 가정. STT 적용되면 수정해야 함.*/
-    private void setPromptForFollowUp(int turn, int selfIntroductionId, String dept, List<Map<String,String>>prevChat){
+    private void setPromptForFollowUp(int turn, int selfIntroductionId, String dept, List<Map<String,String>>prevChat, String userAudio){
         String messageToJson;
         String system_content;
         String system_content_tail;
@@ -204,15 +206,15 @@ public class QuestionService {
             createChat("system",system_content+prevChat.get(0).get("content"));
 
             //1.2 prevChat의 첫번째 system chat과 마지막 user chat을 제외하고 message 배열에 추가.
-            message.addAll(prevChat.subList(1, prevChat.size()-1));
+            message.addAll(prevChat.subList(1, prevChat.size()));
         }
         //아닐 시 마지막 user chat을 제외하고 전부 message 배열에 추가한다.
         else{
-            message.addAll(prevChat.subList(0,prevChat.size()-1));
+            message.addAll(prevChat.subList(0,prevChat.size()));
 
             // DB에 저장한다.
             //1. 후보 꼬리 질문들 중 유저가 선택한 질문(유저의 응답 직전 시스템 질문)을 가져온다.
-            String questionContent=prevChat.get(prevChat.size()-2).get("content");
+            String questionContent=prevChat.get(prevChat.size()-1).get("content");
 
             //2. 새로운 Question Entity를 생성한다.
             Question question=Question.builder()
@@ -223,9 +225,14 @@ public class QuestionService {
             //3. DB에 question을 저장한다.
             questionRepository.save(question);
         }
+        
+        //user 음성 데이터를 텍스트로 변환한다.
+        String userText = speechToTextService.convertSpeechToText(userAudio);
 
-        //2. 마지막 user chat의 뒤에 유저 프롬프트를 추가한다.
-        createChat("user",prevChat.get(prevChat.size()-1).get("content"));
+        //2. 마지막 user chat의 뒤에 변환된 텍스트를 활용하여 유저 프롬프트를 추가한다.
+        //createChat("user",prevChat.get(prevChat.size()-1).get("content"));
+        createChat("user",userText);
+        System.out.println(userText);
 
         //3. 시스템의 프로므트를 다시 설정하여 chat에 추가
         system_content_tail=String.format(system_content_followUp_tail,dept,dept);
@@ -462,7 +469,7 @@ public class QuestionService {
         return questionToJson;
     }
 
-    public Map<String,Object> createFollowUpQuestion(int turn, String dept, int selfIntroductionId, List<Map<String,String>>prevChat){
+    public Map<String,Object> createFollowUpQuestion(int turn, String dept, int selfIntroductionId, List<Map<String,String>>prevChat, String userAudio){
         url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" + apiKey;
         template = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
         questionList=new ArrayList<>();
@@ -479,7 +486,7 @@ public class QuestionService {
                 selfIntroduction=selfIntroductionRepository.findById(Long.valueOf(selfIntroductionId)).orElseThrow(()->new NotFoundException("해당하는 자소서를 찾을 수 없습니다."));
 
                 //1. 후보 꼬리 질문들 중 유저가 선택한 질문(유저의 응답 직전 시스템 질문)을 가져온다.
-                String questionContent=prevChat.get(prevChat.size()-2).get("content");
+                String questionContent=prevChat.get(prevChat.size()-1).get("content");
 
                 //2. 새로운 Question Entity를 생성한다.
                 Question question=Question.builder()
@@ -494,7 +501,7 @@ public class QuestionService {
         }
 
         // 2. 이전 질문들과 새로운 요구사항을 붙여서 프롬프트를 생성한다.
-        setPromptForFollowUp(turn,selfIntroductionId,dept,prevChat);
+        setPromptForFollowUp(turn,selfIntroductionId,dept,prevChat,userAudio);
 
         //3. requestBody 만들기
         String requestBody=createRequestBody();
