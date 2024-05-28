@@ -48,7 +48,7 @@ public class QuestionService {
             "and %d questions to assess the applicant's 'technical understanding' based on the 'lessons learned'." +
             "\n\n###Note### \n Do not output the results of task 1. For task 2, number each question and separate them with line breaks." +
             "Do not categorize each question into \"achievements(activities)\" or \"lessons learned\". This is a script to be read to the applicant, " +
-            "so no additional comments should be added. Make sure to produce the correct total number of questions.\n\n" +
+            "so no additional comments should be added. Make sure to produce exactly total %d number of questions.\n\n" +
 
             "###Example Response###\n" +
             "<행위 질문>\n" +
@@ -66,7 +66,7 @@ public class QuestionService {
             "and %d questions to assess the applicant's 'technical understanding' based on the 'lessons learned'." +
             "\n\n###Note### \n Do not output the results of task 1. For task 2, number each question and separate them with line breaks." +
             "Do not categorize each question into \"action\" or \"lessons learned\". This is a script to be read to the applicant, " +
-            "so no additional comments should be added. Make sure to produce the correct total number of questions.\n\n" +
+            "so no additional comments should be added. Make sure to produce exactly total %d number of questions.\n\n" +
 
             "###Example Response###\n" +
             "<행위 질문>\n" +
@@ -164,8 +164,8 @@ public class QuestionService {
         String system_content;
 
         //0. 질문 type을 판단하여 tech일 경우 직무를 프롬프트에 추가해준다
-        if(type.matches("기술 항목")) system_content=String.format(system_content_tech,dept,questionNum/2,questionNum-(questionNum/2));
-        else system_content=String.format(system_content_personality,questionNum/2,questionNum-(questionNum/2));
+        if(type.matches("기술 항목")) system_content=String.format(system_content_tech,dept,questionNum/2,questionNum-(questionNum/2), questionNum);
+        else system_content=String.format(system_content_personality,questionNum/2,questionNum-(questionNum/2), questionNum);
         System.out.println("######prompt set######");
         System.out.println(system_content);
         System.out.println("######prompt set######");
@@ -275,7 +275,7 @@ public class QuestionService {
         return textContent;
     }
 
-    private Boolean getQuestions(Integer requiredQuestionNum, String textContent, String type){
+    private Boolean getQuestions(Integer requiredQuestionNum, String textContent, String type, Integer maxQuestionNum){
         //System.out.println(textContent);
         //1. 질문을 \n 기준으로 파싱
         int followupNumTemp = followupNum;
@@ -344,7 +344,10 @@ public class QuestionService {
         //4.2 올바른 형식인지 검사 - 원래 질문보다 적은 수가 생성되었는가? -> *추가 안하고* 재요청
         if(textAudioTurnList.size()<requiredQuestionNum) {
             System.out.println("less questions");
-            followupNum = followupNumTemp;
+            if(textAudioTurnList.size()>maxQuestionNum)
+                questionList.addAll(textAudioTurnList.subList(0,maxQuestionNum));
+            else
+                questionList.addAll(textAudioTurnList);
             return false;
         }
 
@@ -352,13 +355,13 @@ public class QuestionService {
         // -> 원래 개수만큼 선택 => (m개, m개)인데 (n개, n개)가 생성됨. (0~m)인덱스 선택. (n~n+m)인덱스 선택.
         if(textAudioTurnList.size()>requiredQuestionNum){
             System.out.println("too much questions");
-            int need=requiredQuestionNum;
-            questionList.addAll(textAudioTurnList.subList(0,need));
+            //int need=requiredQuestionNum;
+            questionList.addAll(textAudioTurnList.subList(0,maxQuestionNum));
             return true;
         }
 
         //5. questionList에 생성된 질문 담기
-        questionList.addAll(textAudioTurnList);
+        questionList.addAll(textAudioTurnList.subList(0,maxQuestionNum));
         System.out.println("proper questions");
         return true;
     }
@@ -374,7 +377,7 @@ public class QuestionService {
         System.out.println("selfIntroductionContent ; "+selfIntroductionContent);
         Boolean isQuestionCreatedNormally=false;
         int callNum=0;
-        int currentQuestionNum;
+        //int currentQuestionNum;
         //1. 프롬프트 세팅
         setPrompt(requiredQuestionNum,dept,type,selfIntroductionContent);
 
@@ -384,8 +387,12 @@ public class QuestionService {
         //3. 헤더 세팅
         HttpEntity<String> requestEntity = setHeader(requestBody);
 
+        //질문 생성 요청 이전에 질문 수
+        int prevQuestionNum = questionList.size();
+        //현재 detail에 대한 생성된 질문 수
+        int currentQuestionNum = questionList.size() - prevQuestionNum;
         // 잘못된 형식의 답변이 생성되면 재요청
-        while(!isQuestionCreatedNormally && callNum<3) {
+        while(!isQuestionCreatedNormally && callNum<3 && currentQuestionNum < requiredQuestionNum) {
             System.out.println("callNum : "+callNum);
             //4. rest 통신
             ResponseEntity<String> responseEntity = template.exchange(
@@ -399,7 +406,9 @@ public class QuestionService {
             String textContent = getTextContent(response);
 
             //6. 답변 속 질문을 파싱하여 List 형태로 저장
-            isQuestionCreatedNormally=getQuestions(requiredQuestionNum, textContent, type);
+            isQuestionCreatedNormally=getQuestions(requiredQuestionNum, textContent, type, (requiredQuestionNum - currentQuestionNum));
+
+            currentQuestionNum = questionList.size() - prevQuestionNum;
             callNum+=1;
         }
     }
@@ -523,7 +532,7 @@ public class QuestionService {
             String textContent = getTextContent(response);
 
             //7. 질문 목록 파싱하여 리스트로 저장하기
-            isQuestionCreatedNormally=getQuestions(3, textContent, "");
+            isQuestionCreatedNormally=getQuestions(3, textContent, "", 3);
             callNum+=1;
         }
 
