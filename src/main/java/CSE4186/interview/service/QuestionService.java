@@ -491,7 +491,10 @@ public class QuestionService {
 
             questionList.add(questionInfo);
         });
-
+        
+        //질문 순서 섞기
+        Collections.shuffle(questionList);
+        
         // 생성된 모든 질문들을 JSON 형태로 저장한 후 리턴
         Map<String, List<List<Map<String,String>>>> questionToJson=new HashMap<>();
         questionToJson.put("questions",questionList);
