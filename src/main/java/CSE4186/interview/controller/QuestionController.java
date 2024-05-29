@@ -31,9 +31,9 @@ public class QuestionController {
 
         int questionNum= request.getQuestionNum();
         int selfIntroductionId = request.getSelfIntroductionId();
-        String dept= request.getDept();
+        int deptNum= request.getDeptNum();
         List<String> additionalQuestions = request.getAdditionalQuestions();
-        return ApiUtil.success(questionService.createQuestion(questionNum,dept,selfIntroductionId, additionalQuestions));
+        return ApiUtil.success(questionService.createQuestion(questionNum,deptNum,selfIntroductionId, additionalQuestions));
     }
 
     @PostMapping("/question/followUp")
@@ -41,10 +41,10 @@ public class QuestionController {
     public ApiUtil.ApiSuccessResult <Map<String,Object>> createFollowUpQuestionWithGemini(@RequestBody QuestionDto.followUpRequest request){
         int turn= request.getTurn();
         int selfIntroductionId= request.getSelfIntroductionId();
-        String dept=request.getDept();
+        int deptNum=request.getDeptNum();
         List<Map<String,String>> prevChats=request.getQuestions();
         String userAudio = request.getUserAudio();
-        return ApiUtil.success(questionService.createFollowUpQuestion(turn,dept,selfIntroductionId,prevChats, userAudio));
+        return ApiUtil.success(questionService.createFollowUpQuestion(turn,deptNum,selfIntroductionId,prevChats, userAudio));
     }
 
 }

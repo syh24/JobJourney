@@ -44,6 +44,19 @@ public class QuestionService {
     private int followupNum;
     private Map<String, List<String>> interviewQuestions;
 
+    private List<String> deptName = new ArrayList<>(Arrays.asList(
+            "백엔드/서버개발",
+            "프론트엔드",
+            "앱개발",
+            "게임개발",
+            "데이터 사이언티스트",
+            "빅 데이터 개발",
+            "데브옵스 개발",
+            "임베디드 소프트웨어 개발",
+            "정보보안",
+            "인공지능 개발",
+            "기타 프로그램 개발"));
+
     private String system_content_tech="###Role###\n You need to write a script for a \"%s\" development team leader who will conduct an interview." +
             "Your role consists of two tasks: 1. Classify the given self-introduction into achievements and activities the applicant has undertaken" +
             "and the lessons the applicant has learned during the process." +
@@ -417,7 +430,7 @@ public class QuestionService {
     }
 
 
-    public Map<String, List<List<Map<String,String>>>> createQuestion(int requiredQuestionNum, String dept, int selfIntroductionId, List<String> additionalQuestions){
+    public Map<String, List<List<Map<String,String>>>> createQuestion(int requiredQuestionNum, int deptNum, int selfIntroductionId, List<String> additionalQuestions){
 
         int totalDetailNum, eachQuestionNum, remainQuestionNum;
         int professionalQuestionNum = 1;
@@ -428,6 +441,12 @@ public class QuestionService {
         questionList=new ArrayList<>();
         // 꼬리 질문 개수
         followupNum = 0;
+        // dept 추출
+        String dept;
+        if(deptNum<deptName.size())
+            dept = deptName.get(deptNum);
+        else
+            dept = "기타 프로그램 개발";
 
         //미리 뽑아 놓은 질문 넣기
         try {
@@ -437,18 +456,17 @@ public class QuestionService {
         }catch (IOException e) {
             throw new RuntimeException(e);
         }
-        if(interviewQuestions.get(dept)!=null)
-        {
-            List<String> professionalQuestions = interviewQuestions.get(dept);
-            Random random = new Random();
-            int randomIndex = random.nextInt(professionalQuestions.size());
-            String professionalQuestion = professionalQuestions.get(randomIndex);
 
-            //미리 뽑아 놓은 질문 additionalQuestions에 추가하기
-            additionalQuestions.addFirst(professionalQuestion);
-            //생성할 질문 수 줄이기
-            requiredQuestionNum = requiredQuestionNum - professionalQuestionNum;
-        }
+        List<String> professionalQuestions = interviewQuestions.get(dept);
+        Random random = new Random();
+        int randomIndex = random.nextInt(professionalQuestions.size());
+        String professionalQuestion = professionalQuestions.get(randomIndex);
+
+        //미리 뽑아 놓은 질문 additionalQuestions에 추가하기
+        additionalQuestions.addFirst(professionalQuestion);
+        //생성할 질문 수 줄이기
+        requiredQuestionNum = requiredQuestionNum - professionalQuestionNum;
+
 
         // selfIntroduction에 포함된 selfIntroductionDetails를 가져옴
         List<SelfIntroductionDetail> selfIntroductionDetails=getSelfIntroductionDetails(selfIntroductionId);
@@ -505,7 +523,7 @@ public class QuestionService {
         return questionToJson;
     }
 
-    public Map<String,Object> createFollowUpQuestion(int turn, String dept, int selfIntroductionId, List<Map<String,String>>prevChat, String userAudio){
+    public Map<String,Object> createFollowUpQuestion(int turn, int deptNum, int selfIntroductionId, List<Map<String,String>>prevChat, String userAudio){
         url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" + apiKey;
         template = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
         questionList=new ArrayList<>();
@@ -513,6 +531,13 @@ public class QuestionService {
         SelfIntroduction selfIntroduction;
         Boolean isQuestionCreatedNormally=false;
         int callNum=0;
+
+        // dept 추출
+        String dept;
+        if(deptNum<deptName.size())
+            dept = deptName.get(deptNum);
+        else
+            dept = "기타 프로그램 개발";
 
         // 1. turn을 계산한다.
         if(turn+1>2) {

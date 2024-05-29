@@ -20,7 +20,7 @@ public class QuestionDto {
     public static class Request{
         private int questionNum;
         private int selfIntroductionId;
-        private String dept;
+        private int deptNum;
         private List<String> additionalQuestions;
     }
 
@@ -32,7 +32,7 @@ public class QuestionDto {
     public static class followUpRequest{
         private int turn;
         private int selfIntroductionId;
-        private String dept;
+        private int deptNum;
         private List<Map<String,String>> questions;
         private String userAudio;
     }
