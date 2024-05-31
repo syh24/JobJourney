@@ -590,8 +590,8 @@ public class QuestionService {
 
         //8. 생성된 모든 질문들을 JSON 형태로 저장한 후 리턴
         Map<String, Object> questionToJson=new HashMap<>();
-        questionToJson.put("followUps=",questionList);
-        questionToJson.put("messages=",message);
+        questionToJson.put("followUps",questionList);
+        questionToJson.put("messages",message);
         questionToJson.put("turn",String.valueOf(turn+1));
         return questionToJson;
     }
