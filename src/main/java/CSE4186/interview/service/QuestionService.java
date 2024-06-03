@@ -421,6 +421,8 @@ public class QuestionService {
             //5. response에서 gemini 답변 부분만 가져오기
             String textContent = getTextContent(response);
 
+            //prevQuestionNum = questionList.size();
+
             //6. 답변 속 질문을 파싱하여 List 형태로 저장
             isQuestionCreatedNormally=getQuestions(requiredQuestionNum, textContent, type, (requiredQuestionNum - currentQuestionNum));
 
@@ -512,7 +514,8 @@ public class QuestionService {
         
         //질문 순서 섞기
         Collections.shuffle(questionList);
-        
+
+        questionList.subList(0, requiredQuestionNum);
         // 생성된 모든 질문들을 JSON 형태로 저장한 후 리턴
         Map<String, List<List<Map<String,String>>>> questionToJson=new HashMap<>();
         questionToJson.put("questions",questionList);
