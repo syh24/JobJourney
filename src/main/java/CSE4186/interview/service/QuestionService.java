@@ -69,7 +69,7 @@ public class QuestionService {
             "3. 질문 3\n" +
             "4. 질문 4\n" +
             "...";
-    private final String system_content_personality="###Role###\n You need to write a script for a development team leader who will conduct an interview." +
+    private final String system_content_personality="###Role###\n You need to write a script for a human resource team leader who will conduct an interview." +
             "Your role consists of two tasks: 1. Classify the given self-introduction into achievements and activities the applicant has undertaken" +
             "and the lessons the applicant has learned during the process." +
             "2. Provide %d questions to verify the authenticity of the 'achievements (activities)' " +
