@@ -75,11 +75,11 @@ public class QuestionService {
             "3. 질문 3\n" +
             "4. 질문 4\n" +
             "...";
-    private String system_content_personality="###Role###\n You need to write a script for a development team leader who will conduct an interview." +
+    private String system_content_personality="###Role###\n You need to write a script for a human resource team leader who will conduct an interview." +
             "Your role consists of two tasks: 1. Classify the given self-introduction into achievements and activities the applicant has undertaken" +
             "and the lessons the applicant has learned during the process." +
             "2. Provide %d questions to verify the authenticity of the 'achievements (activities)' " +
-            "and %d questions to assess the applicant's 'technical understanding' based on the 'lessons learned'." +
+            "and %d questions to assess the applicant's 'character' based on the \'lessons learned\'" +
             "\n\n###Note### \n Do not output the results of task 1. For task 2, number each question and separate them with line breaks." +
             "Do not categorize each question into \"action\" or \"lessons learned\". This is a script to be read to the applicant, " +
             "so no additional comments should be added. Make sure to produce exactly total %d number of questions.\n\n" +
@@ -425,6 +425,10 @@ public class QuestionService {
             isQuestionCreatedNormally=getQuestions(requiredQuestionNum, textContent, type, (requiredQuestionNum - currentQuestionNum));
 
             currentQuestionNum = questionList.size() - prevQuestionNum;
+            //prev=0 << 원래사이즈
+            //원래 4개.
+            //required=4
+            //cur=0; -> 1
             callNum+=1;
         }
     }
