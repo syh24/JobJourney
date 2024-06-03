@@ -37,7 +37,6 @@ public class QuestionService {
     private final TextToSpeechService textToSpeechService;
     private final SpeechToTextService speechToTextService;
     private final String url;
-    private int followupNum;
 
     private final List<String> deptName = new ArrayList<>(Arrays.asList(
             "백엔드/서버개발",
