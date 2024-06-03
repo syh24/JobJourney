@@ -70,6 +70,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
                         "Path=/;" +
                         "Domain=localhost; " +
                         "HttpOnly; " +
+                        "Secure; "+
                         "Max-Age=604800; "
         );
 
