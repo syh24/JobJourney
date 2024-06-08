@@ -32,6 +32,10 @@ public class SelfIntroduction extends BaseTimeEntity {
     @OrderBy("id asc")
     private List<SelfIntroductionDetail> selfIntroductionDetailList = new ArrayList<>();
 
+    @OneToMany(mappedBy = "selfIntroduction", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
+    @OrderBy("id asc")
+    private List<Question> quetions = new ArrayList<>();
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
