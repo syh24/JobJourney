@@ -90,7 +90,7 @@ class PostControllerTest {
         List<Post> postList = List.of(post1,post2);
         Page<Post> postPage = new PageImpl<>(postList);
 
-        given(postService.findPostsByCondition(Mockito.any(Pageable.class), eq(""), eq(""))).willReturn(postPage);
+        given(postService.findPostsByCondition(Mockito.any(Pageable.class), Mockito.anyString(), Mockito.anyString())).willReturn(postPage);
 
         ResultActions actions = mvc.perform(get("/post/list")
                 .with(user("1").password("password"))
@@ -117,7 +117,8 @@ class PostControllerTest {
 
         actions.andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.result").value("success"));
+                .andExpect(jsonPath("$.result").value("success"))
+                .andExpect(jsonPath("$.body.id").value(1L));
     }
 
     @Test
