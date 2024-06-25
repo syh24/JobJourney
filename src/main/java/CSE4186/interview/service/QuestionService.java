@@ -366,7 +366,7 @@ public class QuestionService {
     private void createQuestionForEachSelfIntroductionDetails(int requiredQuestionNum, String dept, String type, String selfIntroductionContent, QuestionObject questionObject){
         RestTemplate template = new RestTemplate(new HttpComponentsClientHttpRequestFactory());;
         System.out.println("selfIntroductionContent ; "+selfIntroductionContent);
-        Boolean isQuestionCreatedNormally=false;
+        boolean isQuestionCreatedNormally=false;
         int callNum=0;
 
         //1. 프롬프트 세팅
