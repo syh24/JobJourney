@@ -93,14 +93,14 @@ public class PostController {
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete Post", description = "게시글 삭제")
-    public ApiUtil.ApiSuccessResult<String> delete(@PathVariable(name = "id") Long id) {
+    public ApiUtil.ApiSuccessResult<String> deletePost(@PathVariable(name = "id") Long id) {
         postService.deletePost(id);
         return ApiUtil.success("게시글이 삭제되었습니다.");
     }
 
     @PostMapping("/{id}/comment")
     @Operation(summary = "Add Comment", description = "댓글 생성")
-    public ApiUtil.ApiSuccessResult<CommentDto.Response> addPost(@Valid @RequestBody CommentDto.CreateRequest request,
+    public ApiUtil.ApiSuccessResult<CommentDto.Response> addComment(@Valid @RequestBody CommentDto.CreateRequest request,
                                                                  @PathVariable(name = "id") Long id) {
         Comment comment = commentService.addComment(request, id);
         return ApiUtil.success(new CommentDto.Response(comment));

@@ -20,4 +20,8 @@ public class JobField {
 
     private String symbol;
 
+    public JobField(String field, String symbol) {
+        this.field = field;
+        this.symbol = symbol;
+    }
 }

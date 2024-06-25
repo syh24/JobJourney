@@ -40,6 +40,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.mockito.BDDMockito.given;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -60,20 +61,10 @@ class VideoControllerTest {
     private ObjectMapper objectMapper;
 
     @MockBean
-    private CustomUserDetailsService customUserDetailsService;
-
-    @MockBean
     private VideoService videoService;
-
-    @MockBean
-    private UserService userService;
-
-    private Authentication atc;
 
     @BeforeEach
     void setUp() {
-        atc = new TestingAuthenticationToken("test1@gmail.com", null, "ROLE_USER");
-
     }
 
     @Test
@@ -88,7 +79,6 @@ class VideoControllerTest {
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(content)
-                        .with(authentication(atc))
         );
 
         actions.andDo(print())
@@ -99,12 +89,8 @@ class VideoControllerTest {
     }
 
     @Test
-    @WithCustomMockUser
     void getAllVideo() throws Exception {
         User user = new User("syh", "syh@gmail.com", "1234");
-
-        UserDetails userDetails = customUserDetailsService.loadUserByUsername("test@gmail.com");
-
 
 
         Video video1 = new Video("title", "link", user);
@@ -115,7 +101,7 @@ class VideoControllerTest {
         given(videoService.findAllVideoByUser(Mockito.any(Pageable.class), Mockito.anyLong())).willReturn(videoPage);
 
         ResultActions actions = mvc.perform(get("/video/list")
-                .with(SecurityMockMvcRequestPostProcessors.user("1"))
+                .with(user("1").password("password"))
         );
 
         actions.andDo(print())

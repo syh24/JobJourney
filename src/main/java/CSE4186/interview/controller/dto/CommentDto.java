@@ -9,7 +9,6 @@ public class CommentDto {
 
     @Data
     @AllArgsConstructor
-    @NoArgsConstructor
     @Schema(name = "commentCreateRequest", description = "댓글 생성 DTO")
     public static class CreateRequest {
         @NotNull private String content;
@@ -18,7 +17,6 @@ public class CommentDto {
 
     @Data
     @AllArgsConstructor
-    @NoArgsConstructor
     @Schema(name = "commentUpdateRequest", description = "댓글 수정 DTO")
     public static class UpdateRequest {
         @NotNull
@@ -32,6 +30,7 @@ public class CommentDto {
     @NoArgsConstructor
     @Schema(name = "commentDeleteRequest", description = "댓글 삭제 DTO")
     public static class DeleteRequest {
+        @NotNull
         private Long id;
     }
 
