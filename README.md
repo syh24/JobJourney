@@ -22,7 +22,7 @@
 ## ⚙️ 기술스택
 - **Language**: `Java 21`
 - **IDE** : `IntelliJ`
-- **Framework** : Springboot(3.x)
+- **Framework** : Springboot(3.2.3)
 - **Database** : MySQL
 - **ORM** : JPA
 
