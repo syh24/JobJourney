@@ -30,5 +30,9 @@
 <img src="https://github.com/syh24/interview/assets/64251594/907470a2-ae74-4cb7-b49d-a9281e7f2045" width="400" height="200">
 <img src="https://github.com/syh24/interview/assets/64251594/d425ac7c-a94f-4e44-82d4-a006707f8c7d" width="400" height="200">
 
+## ERD Schema Diagram
+<img src="https://github.com/syh24/interview/assets/64251594/b20cc98b-b013-4aa2-9e4f-5fefcc14b80e" width="500" height="500">
+
+
 ## 결과 보고서
 [결과 보고서](https://github.com/user-attachments/files/15944075/I_5._193.212._.3.docx)
