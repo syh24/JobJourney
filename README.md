@@ -60,8 +60,7 @@
 
 
 ## Backend 구조
-<img width="400" alt="image" src="https://github.com/syh24/interview/assets/64251594/e2805319-4383-4728-8692-40728995b3e6">
-<img width="400" alt="image" src="https://github.com/syh24/interview/assets/64251594/88b1a5b9-8982-4631-ab88-e28b1925e238">
+<img width="400" alt="image" src="https://github.com/syh24/interview/assets/64251594/04be1afe-09e7-494e-91f5-a5358802aaf2">
 
 
 ## ERD Schema Diagram
