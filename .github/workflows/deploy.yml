@@ -47,5 +47,6 @@ jobs:
           script: |
                 sudo docker rm -f $(docker ps -qa)
                 sudo docker pull ${{ secrets.DOCKER_REPO }}/interview
-                docker-compose up -d
+                chmod 777 ./deploy.sh
+                ./deploy.sh
                 docker image prune -f
