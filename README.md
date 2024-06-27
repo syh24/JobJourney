@@ -1,4 +1,4 @@
-![image](https://github.com/syh24/interview/assets/64251594/58c78e82-f5d7-4560-a584-6ff73b247c62)## 소개
+## 소개
 
 <img width="300" alt="logo" src="https://github.com/among-neighbors/AN-backend/assets/64251594/aacc3b52-0422-441d-bb54-979c77eb54a0">
 
