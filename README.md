@@ -21,10 +21,19 @@
 
 ## 기술스택
 - **Language**: `Java 21`
-- **IDE** : `IntelliJ`
 - **Framework** : Springboot(3.2.3)
 - **Database** : MySQL
 - **ORM** : JPA
+
+## 개발 내용
+### 모의 면접
+ - 자소서 CRUD
+### 커뮤니티
+ - 게시글 CRUD
+ - 게시판 검색 기능
+ - 댓글 CRUD
+ - 게시글 좋아요 및 신고 기능
+
 
 ## 프로젝트 화면
 
@@ -51,11 +60,6 @@
 
 ### 면접 영상 평가표
 <img width="400" alt="image" src="https://github.com/syh24/interview/assets/64251594/6daaff00-d815-4750-b3c4-7233403aab4d">
-
-
-
-
-
 
 
 
