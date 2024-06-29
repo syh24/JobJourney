@@ -6,7 +6,7 @@
 
 최근 증가하는 면접의 중요성에 대비하여 AI를 활용하여 자기소개서를 기반으로 질문을 생성하여 모의 면접 환경 제공합니다. <br>
 또한 자신의 모의 면접 영상을 커뮤니티에 공유하여 사용자들에게 피드백을 받을 수 있는 커뮤니티 제공합니다. <br><br>
-[JobJourney 홈페이지 ](https://jobjourney.online) | [JobJourney API Docs ](http://ec2-3-39-165-26.ap-northeast-2.compute.amazonaws.com:8080/swagger-ui.html) | [팀 회의록](https://www.notion.so/fb4ca4dad1cb4dd79a1448162a05409b?v=acde86b06c06469dad47089da7e4c1a8) 
+[JobJourney 홈페이지 ](https://jobjourney.online) | [JobJourney API Docs ](https://jobjourney.shop/swagger-ui.html) | [팀 회의록](https://www.notion.so/fb4ca4dad1cb4dd79a1448162a05409b?v=acde86b06c06469dad47089da7e4c1a8) 
 
 
 ## 개발 기간
