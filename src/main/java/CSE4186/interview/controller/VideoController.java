@@ -27,7 +27,7 @@ public class VideoController {
 
     @PostMapping
     @Operation(summary = "Add Video", description = "비디오 생성")
-    public ApiUtil.ApiSuccessResult<Long> addVideo(@Valid @RequestBody VideoDto.CreateRequest request) {
+    public ApiUtil.ApiSuccessResult<Long> createVideo(@Valid @RequestBody VideoDto.CreateRequest request) {
         Long videoId = videoService.addVideo(request);
         return ApiUtil.success(videoId);
     }

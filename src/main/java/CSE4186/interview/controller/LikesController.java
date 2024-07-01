@@ -17,7 +17,7 @@ public class LikesController {
     private final LikesService likeService;
 
     @PostMapping
-    public ApiUtil.ApiSuccessResult<String> addLike(
+    public ApiUtil.ApiSuccessResult<String> createLike(
             @Valid @RequestBody LikesDto.CreteRequest request,
             @PathVariable(name = "id") Long postId
     ) {

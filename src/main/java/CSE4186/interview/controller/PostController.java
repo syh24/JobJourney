@@ -79,16 +79,16 @@ public class PostController {
 
     @PostMapping
     @Operation(summary = "Add Post", description = "게시글 생성")
-    public ApiUtil.ApiSuccessResult<PostDto.Response> addPost(@Valid @RequestBody PostDto.CreateRequest request) {
+    public ApiUtil.ApiSuccessResult<PostDto.Response> createPost(@Valid @RequestBody PostDto.CreateRequest request) {
         Post post = postService.addPost(request);
         return ApiUtil.success(new PostDto.Response(post));
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Update Post", description = "게시글 수정")
-    public ApiUtil.ApiSuccessResult<PostDto.UpdateResponse> updatePost(@PathVariable Long id, @Valid @RequestBody PostDto.UpdateRequest request) {
+    public ApiUtil.ApiSuccessResult<String> updatePost(@PathVariable Long id, @Valid @RequestBody PostDto.UpdateRequest request) {
         postService.updatePost(id, request);
-        return ApiUtil.success(new PostDto.UpdateResponse(id));
+        return ApiUtil.success("게시글이 수정되었습니다.");
     }
 
     @DeleteMapping("/{id}")
@@ -108,9 +108,9 @@ public class PostController {
 
     @PutMapping("/{id}/comment")
     @Operation(summary = "Update Comment", description = "댓글 수정")
-    public ApiUtil.ApiSuccessResult<CommentDto.UpdateResponse> updateComment(@Valid @RequestBody CommentDto.UpdateRequest request) {
+    public ApiUtil.ApiSuccessResult<String> updateComment(@Valid @RequestBody CommentDto.UpdateRequest request) {
         commentService.updateComment(request);
-        return ApiUtil.success(new CommentDto.UpdateResponse(request.getId()));
+        return ApiUtil.success("댓글이 수정되었습니다.");
     }
 
     @DeleteMapping("/{id}/comment")

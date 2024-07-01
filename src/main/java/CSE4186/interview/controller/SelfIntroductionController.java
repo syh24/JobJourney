@@ -42,18 +42,19 @@ public class SelfIntroductionController {
 
     @PostMapping("/save")
     @Operation(summary = "Save selfIntroductions", description = "자소서 저장")
-    public ApiUtil.ApiSuccessResult<Long> saveSelfIntroductionList(@Valid @RequestBody SelfIntroductionDto.CreateRequest request, @AuthenticationPrincipal User loginUser){
+    public ApiUtil.ApiSuccessResult<Long> createSelfIntroductionList(@Valid @RequestBody SelfIntroductionDto.CreateRequest request, @AuthenticationPrincipal User loginUser){
         SelfIntroduction selfIntroduction = selfIntroductionService.save(request, loginUser.getUsername());
         return ApiUtil.success(selfIntroduction.getId());
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Update selfIntroductions", description = "자소서 수정")
-    public ApiUtil.ApiSuccessResult<Long> updateSelfIntroduction(
+    public ApiUtil.ApiSuccessResult<String> updateSelfIntroduction(
             @Valid @RequestBody SelfIntroductionDto.UpdateRequest request,
             @PathVariable(name = "id") Long id
             ){
-        return ApiUtil.success(selfIntroductionService.updateSelfIntroduction(request, id));
+        selfIntroductionService.updateSelfIntroduction(request, id);
+        return ApiUtil.success("자기소개서가 수정되었습니다.");
     }
 
     @DeleteMapping("/{id}")
