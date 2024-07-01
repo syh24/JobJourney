@@ -3,6 +3,8 @@ package CSE4186.interview.controller;
 import CSE4186.interview.annotation.WithCustomMockUser;
 import CSE4186.interview.config.TestSecurityConfig;
 import CSE4186.interview.controller.dto.VideoDto;
+import CSE4186.interview.entity.JobField;
+import CSE4186.interview.entity.Post;
 import CSE4186.interview.entity.User;
 import CSE4186.interview.entity.Video;
 import CSE4186.interview.login.CustomUserDetailsService;
@@ -63,8 +65,30 @@ class VideoControllerTest {
     @MockBean
     private VideoService videoService;
 
-    @BeforeEach
-    void setUp() {
+    private User createUser() {
+        return User.builder()
+                .id(1L)
+                .name("서윤혁")
+                .email("test@gmail.com")
+                .password("password")
+                .build();
+    }
+
+    private JobField createJobField() {
+        return JobField.builder()
+                .field("백엔드")
+                .symbol("BE")
+                .build();
+    }
+
+    private Post createPost() {
+        return Post.builder()
+                .id(1L)
+                .title("테스트")
+                .content("내용")
+                .user(createUser())
+                .jobField(createJobField())
+                .build();
     }
 
     @Test
@@ -90,7 +114,7 @@ class VideoControllerTest {
 
     @Test
     void getAllVideo() throws Exception {
-        User user = new User("syh", "syh@gmail.com", "1234");
+        User user = createUser();
 
 
         Video video1 = new Video("title", "link", user);

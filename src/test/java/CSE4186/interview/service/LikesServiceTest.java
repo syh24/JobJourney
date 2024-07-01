@@ -40,12 +40,39 @@ class LikesServiceTest {
     @Mock
     private PostRepository postRepository;
 
+    private User createUser() {
+        return User.builder()
+                .id(1L)
+                .name("서윤혁")
+                .email("test@gmail.com")
+                .password("password")
+                .build();
+    }
+
+    private JobField createJobField() {
+        return JobField.builder()
+                .field("백엔드")
+                .symbol("BE")
+                .build();
+    }
+
+    private Post createPost() {
+        return Post.builder()
+                .id(1L)
+                .title("테스트")
+                .content("내용")
+                .user(createUser())
+                .jobField(createJobField())
+                .likeCount(0)
+                .dislikeCount(0)
+                .build();
+    }
+
     @Test
     @DisplayName("좋아요 성공 테스트")
     void successLike() {
-        User user = new User(1L, "syh", "syh@gmail.com", "1234");
-        JobField jobField = new JobField("백엔드", "BE");
-        Post post = new Post(1L, "title", "content", user, jobField);
+        User user = createUser();
+        Post post = createPost();
         LikesDto.CreteRequest request = new LikesDto.CreteRequest(1L);
 
         given(userRepository.findById(Mockito.anyLong())).willReturn(Optional.of(user));
@@ -60,9 +87,8 @@ class LikesServiceTest {
     @Test
     @DisplayName("좋아요 실패 테스트 (싫어요 누름)")
     void failLikeByDisLike() {
-        User user = new User(1L, "syh", "syh@gmail.com", "1234");
-        JobField jobField = new JobField("백엔드", "BE");
-        Post post = new Post(1L, "title", "content", user, jobField);
+        User user = createUser();
+        Post post = createPost();
         Dislike dislike = new Dislike(1L, user, post);
         LikesDto.CreteRequest request = new LikesDto.CreteRequest(1L);
 
@@ -77,9 +103,8 @@ class LikesServiceTest {
     @Test
     @DisplayName("좋아요 실패 테스트")
     void failLike() {
-        User user = new User(1L, "syh", "syh@gmail.com", "1234");
-        JobField jobField = new JobField("백엔드", "BE");
-        Post post = new Post(1L, "title", "content", user, jobField);
+        User user = createUser();
+        Post post = createPost();
         Likes like = new Likes(1L, user, post);
         LikesDto.CreteRequest request = new LikesDto.CreteRequest(1L);
 
