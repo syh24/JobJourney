@@ -71,7 +71,7 @@ public class PostDto {
         private Long userId;
         private String userName;
         private List<CommentDto.Response> comments;
-        private List<PostVideoDto.Response> videoList;
+        private List<VideoDto.Response> videoList;
     }
 
     @Getter

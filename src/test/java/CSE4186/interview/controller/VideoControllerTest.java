@@ -38,6 +38,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -91,6 +92,49 @@ class VideoControllerTest {
                 .build();
     }
 
+    private Video createVideo() {
+        return Video.builder()
+                .id(1L)
+                .title("재밌는 비디오")
+                .link("test.link")
+                .user(createUser())
+                .build();
+    }
+
+    private Video createAnotherVideo() {
+        return Video.builder()
+                .id(1L)
+                .title("재밌는 비디오")
+                .link("test.link")
+                .user(createUser())
+                .build();
+    }
+
+    private Page<Video> createVideoPage() {
+        List<Video> videoList = new ArrayList<>();
+        videoList.add(createVideo());
+        videoList.add(createAnotherVideo());
+        return new PageImpl<>(videoList);
+    }
+
+    private VideoDto.Response createVideoResponse() {
+        return VideoDto.Response.builder()
+                .id(1L)
+                .title("재밌는 비디오")
+                .link("test.link")
+                .userId(createUser().getId())
+                .build();
+    }
+
+    private VideoDto.VideoListResponse createVideoListResponse() {
+        List<VideoDto.Response> videoResponseList = new ArrayList<>();
+        videoResponseList.add(createVideoResponse());
+        return VideoDto.VideoListResponse.builder()
+                .list(videoResponseList)
+                .pageCount(1)
+                .build();
+    }
+
     @Test
     void addVideo() throws Exception {
         VideoDto.CreateRequest request = new VideoDto.CreateRequest("title", "link", 1L);
@@ -114,15 +158,7 @@ class VideoControllerTest {
 
     @Test
     void getAllVideo() throws Exception {
-        User user = createUser();
-
-
-        Video video1 = new Video("title", "link", user);
-        Video video2 = new Video("title2", "link2", user);
-        List<Video> videoList = List.of(video1,video2);
-        Page<Video> videoPage = new PageImpl<>(videoList);
-
-        given(videoService.findAllVideoByUser(Mockito.any(Pageable.class), Mockito.anyLong())).willReturn(videoPage);
+        given(videoService.findAllVideoByUser(Mockito.any(Pageable.class), Mockito.anyLong())).willReturn(createVideoListResponse());
 
         ResultActions actions = mvc.perform(get("/video/list")
                 .with(user("1").password("password"))

@@ -29,21 +29,16 @@ public class VideoService {
         User findUser = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new NotFoundException("해당 유저가 존재하지 않습니다."));
 
-        Video video = Video.builder()
-                .link(request.getLink())
-                .title(request.getTitle())
-                .user(findUser)
-                .build();
-
-        videoRepository.save(video);
+        Video video = videoRepository.save(request.toEntity(findUser));
         return video.getId();
     }
 
-    public Page<Video> findAllVideoByUser(Pageable pageable, Long userId) {
+    public VideoDto.VideoListResponse findAllVideoByUser(Pageable pageable, Long userId) {
         User findUser = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("해당 유저가 존재하지 않습니다."));
         int page = pageable.getPageNumber() - 1;
-        return videoRepository.findAllByUser(PageRequest.of(page, pageable.getPageSize(), Sort.by(Sort.Direction.DESC, "createdAt")), findUser);
+        Page<Video> videoPage = videoRepository.findAllByUser(PageRequest.of(page, pageable.getPageSize(), Sort.by(Sort.Direction.DESC, "createdAt")), findUser);
+        return new VideoDto.VideoListResponse(videoPage.stream().map(Video::toVideoResponse).toList(), videoPage.getTotalPages());
     }
 
     @Transactional

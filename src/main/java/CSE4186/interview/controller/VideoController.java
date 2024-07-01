@@ -39,9 +39,7 @@ public class VideoController {
             @PageableDefault(page = 1, size = 10) Pageable pageable
     ) {
         Long userId = Long.valueOf(loginUser.getUsername());
-        Page<Video> findVideos = videoService.findAllVideoByUser(pageable, userId);
-        List<VideoDto.Response> videoList = findVideos.stream().map(VideoDto.Response::new).toList();
-        return ApiUtil.success(new VideoDto.VideoListResponse(videoList, findVideos.getTotalPages()));
+        return ApiUtil.success(videoService.findAllVideoByUser(pageable, userId));
     }
 
     @DeleteMapping("/{id}")
