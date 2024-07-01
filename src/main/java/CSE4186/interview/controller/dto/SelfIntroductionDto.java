@@ -2,6 +2,7 @@ package CSE4186.interview.controller.dto;
 
 import CSE4186.interview.entity.SelfIntroduction;
 import CSE4186.interview.entity.SelfIntroductionDetail;
+import CSE4186.interview.entity.User;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -33,14 +34,19 @@ public class SelfIntroductionDto {
     @AllArgsConstructor
     @Schema(name = "selfIntroductionDetailRequest", description = "자소서 detail DTO")
     public static class SelfIntroductionDetailRequest{
-        @NotNull private String title;
-        @NotNull private String content;
-        @NotNull private String type;
+        @NotNull(message = "자기소개서 제목을 입력해주세요.")
+        private String title;
+        @NotNull(message = "자기소개서 내용을 입력해주세요.")
+        private String content;
+        @NotNull(message = "자기소개서 타입을 명시해주세요.")
+        private String type;
     }
 
 
-    @Data
+    @Getter
+    @Builder
     @AllArgsConstructor
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
     @Schema(name = "selfIntroductionRequest", description = "자소서 응답 DTO")
     public static class Response {
         private Long id;
@@ -48,14 +54,6 @@ public class SelfIntroductionDto {
         private String createdAt;
         private String updatedAt;
         private List<SelfIntroductionDetailDto.Response> detailList;
-
-        public Response(SelfIntroduction selfIntroduction){
-            this.id= selfIntroduction.getId();
-            this.title = selfIntroduction.getTitle();
-            this.createdAt = String.valueOf(selfIntroduction.getCreatedAt());
-            this.updatedAt = String.valueOf(selfIntroduction.getUpdatedAt());
-            this.detailList = selfIntroduction.getSelfIntroductionDetailList().stream().map(SelfIntroductionDetailDto.Response::new).toList();
-        }
     }
 
     @Data

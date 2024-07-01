@@ -34,17 +34,14 @@ public class SelfIntroductionController {
             @PageableDefault(page = 1, size = 10) Pageable pageable
     ) {
         Long userId = Long.valueOf(loginUser.getUsername());
-        Page<SelfIntroduction> pageSelfIntroduction = selfIntroductionService.findAllSelfIntroductions(pageable, userId);
-        List<SelfIntroductionDto.Response> selfIntroductionList = pageSelfIntroduction.stream().map(SelfIntroductionDto.Response::new)
-                .toList();
-        return ApiUtil.success(new SelfIntroductionDto.SelfIntroductionListResponse(selfIntroductionList, pageSelfIntroduction.getTotalPages()));
+        return ApiUtil.success(selfIntroductionService.findAllSelfIntroductions(pageable, userId));
     }
 
     @PostMapping("/save")
     @Operation(summary = "Save selfIntroductions", description = "자소서 저장")
-    public ApiUtil.ApiSuccessResult<Long> createSelfIntroductionList(@Valid @RequestBody SelfIntroductionDto.CreateRequest request, @AuthenticationPrincipal User loginUser){
-        SelfIntroduction selfIntroduction = selfIntroductionService.save(request, loginUser.getUsername());
-        return ApiUtil.success(selfIntroduction.getId());
+    public ApiUtil.ApiSuccessResult<String> createSelfIntroductionList(@Valid @RequestBody SelfIntroductionDto.CreateRequest request, @AuthenticationPrincipal User loginUser){
+        selfIntroductionService.save(request, loginUser.getUsername());
+        return ApiUtil.success("자기소개서가 저장되었습니다.");
     }
 
     @PutMapping("/{id}")

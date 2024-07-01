@@ -16,6 +16,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -25,10 +27,12 @@ public class SelfIntroductionService {
     private final SelfIntroductionDetailRepository selfIntroductionDetailRepository;
     private final UserRepository userRepository;
 
-    public Page<SelfIntroduction> findAllSelfIntroductions(Pageable pageable, Long userId) {
+    public SelfIntroductionDto.SelfIntroductionListResponse findAllSelfIntroductions(Pageable pageable, Long userId) {
         int page = pageable.getPageNumber() - 1;
         User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("해당 유저가 존재하지 않습니다."));
-        return selfIntroductionRepository.findAllByUser(PageRequest.of(page, pageable.getPageSize(), Sort.by(Sort.Direction.DESC, "createdAt")), user);
+        Page<SelfIntroduction> selfIntroductionPage = selfIntroductionRepository.findAllByUser(PageRequest.of(page, pageable.getPageSize(), Sort.by(Sort.Direction.DESC, "createdAt")), user);
+        List<SelfIntroductionDto.Response> selfIntroductionList = selfIntroductionPage.stream().map(SelfIntroduction::toSelfIntroductionResponse).toList();
+        return new SelfIntroductionDto.SelfIntroductionListResponse(selfIntroductionList, selfIntroductionPage.getTotalPages());
     }
 
     @Transactional
