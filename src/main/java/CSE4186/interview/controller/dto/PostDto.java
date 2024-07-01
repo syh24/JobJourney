@@ -1,6 +1,9 @@
 package CSE4186.interview.controller.dto;
 
+import CSE4186.interview.entity.JobField;
 import CSE4186.interview.entity.Post;
+import CSE4186.interview.entity.User;
+import CSE4186.interview.entity.Video;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -14,9 +17,9 @@ public class PostDto {
     @AllArgsConstructor
     @Schema(name = "postCreateRequest", description = "게시글 생성 DTO")
     public static class CreateRequest {
-        @NotNull
+        @NotNull(message = "게시글 제목을 입력해주세요")
         private String title;
-        @NotNull
+        @NotNull(message = "게시글 내용을 입력해주세요")
         private String content;
         @NotNull
         private Long userId;
@@ -24,6 +27,15 @@ public class PostDto {
         private Long jobFieldId;
         @NotNull
         private List<Long> videoIdList;
+
+        public Post toEntity(User user, JobField jobField) {
+            return Post.builder()
+                    .title(this.title)
+                    .content(this.content)
+                    .user(user)
+                    .jobField(jobField)
+                    .build();
+        }
     }
 
     @Data
@@ -41,75 +53,45 @@ public class PostDto {
         private List<Long> videoIdList;
     }
 
-    @RequiredArgsConstructor
     @Getter
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
     @Schema(name = "postResponse", description = "게시글 응답 DTO")
     public static class Response {
-        private final Long id;
-        private final String title;
-        private final String content;
-        private final Integer like;
-        private final Integer dislike;
-        private final Integer viewCount;
-        private final String createdAt;
-        private final String updatedAt;
-        private final String jobField;
-        private final Long userId;
-        private final String userName;
-        private String checkLikeOrDislike;
-        private final List<CommentDto.Response> comments;
-        private final List<PostVideoDto.Response> videoList;
-
-        public Response(Post post) {
-            this.id = post.getId();
-            this.title = post.getTitle();
-            this.content = post.getContent().replaceAll(System.lineSeparator(), "<br>");;
-            this.createdAt = String.valueOf(post.getCreatedAt());
-            this.updatedAt = String.valueOf(post.getUpdatedAt());
-            this.userId = post.getUser().getId();
-            this.userName = post.getUser().getName();
-            this.jobField = post.getJobField().getField();
-            this.comments = post.getComments().stream().map(CommentDto.Response::new).toList();
-            this.like = post.getLikeCount();
-            this.dislike = post.getDislikeCount();
-            this.viewCount = post.getViewCount();
-            this.videoList = post.getPostVideo().stream().map(PostVideoDto.Response::new).toList();
-        }
-
-        public Response(Post post, String checkLikeOrDislike) {
-            this.id = post.getId();
-            this.title = post.getTitle();
-            this.content = post.getContent().replaceAll(System.lineSeparator(), "<br>");;
-            this.createdAt = String.valueOf(post.getCreatedAt());
-            this.updatedAt = String.valueOf(post.getUpdatedAt());
-            this.userId = post.getUser().getId();
-            this.userName = post.getUser().getName();
-            this.jobField = post.getJobField().getField();
-            this.comments = post.getComments().stream().map(CommentDto.Response::new).collect(Collectors.toList());
-            this.like = post.getLikeCount();
-            this.dislike = post.getDislikeCount();
-            this.viewCount = post.getViewCount();
-            this.checkLikeOrDislike = checkLikeOrDislike;
-            this.videoList = post.getPostVideo().stream().map(PostVideoDto.Response::new).toList();
-        }
+        private Long id;
+        private String title;
+        private String content;
+        private Integer like;
+        private Integer dislike;
+        private Integer viewCount;
+        private String createdAt;
+        private String updatedAt;
+        private String jobField;
+        private Long userId;
+        private String userName;
+        private List<CommentDto.Response> comments;
+        private List<PostVideoDto.Response> videoList;
     }
 
-    @Data
-    @RequiredArgsConstructor
+    @Getter
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    @Schema(name = "postDetailResponse", description = "게시글 응답 detail DTO")
+    public static class PostDetailResponse {
+        private Response post;
+        private String checkLikeOrDislike;
+    }
+
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Builder
+    @Getter
     @Schema(name = "postListResponse", description = "게시글 전체 list 응답 DTO")
     public static class PostListResponse {
         @NotNull
-        private final List<PostDto.Response> list;
-        private final int pageCount;
-    }
-
-    @Getter
-    @Schema(name = "postUpdateResponse", description = "게시글 수정 DTO")
-    public static class UpdateResponse {
-        private final Long id;
-
-        public UpdateResponse(Long id) {
-            this.id = id;
-        }
+        private List<PostDto.Response> list;
+        private int pageCount;
     }
 }

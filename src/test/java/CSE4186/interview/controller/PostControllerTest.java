@@ -3,6 +3,8 @@ package CSE4186.interview.controller;
 import CSE4186.interview.config.TestSecurityConfig;
 import CSE4186.interview.controller.dto.CommentDto;
 import CSE4186.interview.controller.dto.PostDto;
+import CSE4186.interview.controller.dto.PostVideoDto;
+import CSE4186.interview.controller.dto.ReviewDto;
 import CSE4186.interview.entity.Comment;
 import CSE4186.interview.entity.JobField;
 import CSE4186.interview.entity.Post;
@@ -23,11 +25,14 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.eq;
@@ -60,6 +65,98 @@ class PostControllerTest {
     @MockBean
     private UserService userService;
 
+
+    private User createUser() {
+        return User.builder()
+                .id(1L)
+                .name("서윤혁")
+                .email("test@gmail.com")
+                .password("password")
+                .build();
+    }
+
+    private JobField createJobField() {
+        return JobField.builder()
+                .id(1L)
+                .field("백엔드")
+                .symbol("백엔드")
+                .build();
+    }
+
+    private Pageable createPageable() {
+        return PageRequest.of(0, 10);
+    }
+
+    private Post createPost() {
+        return Post.builder()
+                .id(1L)
+                .title("테스트")
+                .content("내용")
+                .user(createUser())
+                .jobField(createJobField())
+                .build();
+    }
+
+    private Post createAnotherPost() {
+        return Post.builder()
+                .id(2L)
+                .title("테스트2")
+                .content("내용 다름")
+                .user(createUser())
+                .jobField(createJobField())
+                .build();
+    }
+
+    private PostDto.Response createPostResponse() {
+        User user = createUser();
+        return PostDto.Response
+                .builder()
+                .id(1L)
+                .title("테스트")
+                .content("내용")
+                .createdAt(String.valueOf(LocalDateTime.now()))
+                .updatedAt(String.valueOf(LocalDateTime.now()))
+                .like(10)
+                .dislike(0)
+                .viewCount(100)
+                .jobField(createJobField().getField())
+                .userId(user.getId())
+                .userName(user.getName())
+                .build();
+    }
+
+    private PostDto.PostListResponse createPostListResponse() {
+        List<PostDto.Response> postDtoList = new ArrayList<>();
+        postDtoList.add(createPostResponse());
+        return PostDto.PostListResponse.builder()
+                .list(postDtoList)
+                .pageCount(1)
+                .build();
+    }
+
+    private Comment createComment() {
+        return Comment.builder()
+                .id(1L)
+                .content("댓글")
+                .post(createPost())
+                .user(createUser())
+                .build();
+    }
+
+    private CommentDto.Response createCommentResponse() {
+        User user = createUser();
+        return CommentDto.Response.builder()
+                .id(1L)
+                .content(new ReviewDto(commentJsonString))
+                .username(user.getName())
+                .userId(user.getId())
+                .createdAt(String.valueOf(LocalDateTime.now()))
+                .updatedAt(String.valueOf(LocalDateTime.now()))
+                .build();
+    }
+
+
+
     private final String commentJsonString = """
                         {
                             "verbal": [
@@ -81,16 +178,7 @@ class PostControllerTest {
 
     @Test
     void getAllPosts() throws Exception {
-        User user = new User("syh", "syh@gmail.com", "1234");
-        JobField jobField = new JobField("백엔드", "BE");
-
-        Post post1 = new Post(1L, "title", "content", user, jobField);
-        Post post2 = new Post(2L, "title2", "content2", user, jobField);
-
-        List<Post> postList = List.of(post1,post2);
-        Page<Post> postPage = new PageImpl<>(postList);
-
-        given(postService.findPostsByCondition(Mockito.any(Pageable.class), Mockito.anyString(), Mockito.anyString())).willReturn(postPage);
+        given(postService.findPostsByCondition(Mockito.any(Pageable.class), Mockito.anyString(), Mockito.anyString())).willReturn(createPostListResponse());
 
         ResultActions actions = mvc.perform(get("/post/list")
                 .with(user("1").password("password"))
@@ -104,12 +192,7 @@ class PostControllerTest {
 
     @Test
     void getPost() throws Exception {
-        User user = new User("syh", "syh@gmail.com", "1234");
-        JobField jobField = new JobField("백엔드", "BE");
-
-        Post post = new Post(1L, "title", "content", user, jobField);
-
-        given(postService.findPost(Mockito.anyLong())).willReturn(post);
+        given(postService.findPost(Mockito.anyLong())).willReturn(createPostResponse());
 
         ResultActions actions = mvc.perform(get("/post/1")
                 .with(user("1").password("password"))
@@ -118,20 +201,19 @@ class PostControllerTest {
         actions.andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.result").value("success"))
-                .andExpect(jsonPath("$.body.id").value(1L));
+                .andExpect(jsonPath("$.body.post.id").value(1L))
+                .andExpect(jsonPath("$.body.post.title").value("테스트"))
+                .andExpect(jsonPath("$.body.post.content").value("내용"));
     }
 
     @Test
     void addPost() throws Exception {
-        User user = new User("syh", "syh@gmail.com", "1234");
-        JobField jobField = new JobField("백엔드", "BE");
-        Post post = new Post(1L, "title", "content", user, jobField);
         PostDto.CreateRequest request = new PostDto.CreateRequest("title", "content", 1L, 1L, List.of(1L, 2L));
 
         String content = objectMapper.writeValueAsString(request);
 
 
-        given(postService.addPost(Mockito.any(PostDto.CreateRequest.class))).willReturn(post);
+        given(postService.addPost(Mockito.any(PostDto.CreateRequest.class))).willReturn(createPostResponse());
 
         ResultActions actions = mvc.perform(post("/post")
                 .accept(MediaType.APPLICATION_JSON)
@@ -176,19 +258,13 @@ class PostControllerTest {
     }
 
     @Test
-    void addComment() throws Exception {
-        User user = new User("syh", "syh@gmail.com", "1234");
-        JobField jobField = new JobField("백엔드", "BE");
-        Post post = new Post(1L, "title", "content", user, jobField);
-
-        Comment comment = new Comment(1L, commentJsonString, user, post, 0, 0);
-
+    void createCommentTest() throws Exception {
         CommentDto.CreateRequest request = new CommentDto.CreateRequest(commentJsonString, 1L);
 
         String content = objectMapper.writeValueAsString(request);
 
 
-        given(commentService.addComment(Mockito.any(CommentDto.CreateRequest.class), Mockito.anyLong())).willReturn(comment);
+        given(commentService.addComment(Mockito.any(CommentDto.CreateRequest.class), Mockito.anyLong())).willReturn(createCommentResponse());
 
         ResultActions actions = mvc.perform(post("/post/1/comment")
                 .accept(MediaType.APPLICATION_JSON)

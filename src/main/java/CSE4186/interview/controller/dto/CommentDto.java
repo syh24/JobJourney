@@ -1,6 +1,8 @@
 package CSE4186.interview.controller.dto;
 
 import CSE4186.interview.entity.Comment;
+import CSE4186.interview.entity.Post;
+import CSE4186.interview.entity.User;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -13,6 +15,14 @@ public class CommentDto {
     public static class CreateRequest {
         @NotNull private String content;
         @NotNull private Long userId;
+
+        public Comment toEntity(User user, Post post) {
+            return Comment.builder()
+                    .content(this.content)
+                    .user(user)
+                    .post(post)
+                    .build();
+        }
     }
 
     @Data
@@ -35,35 +45,16 @@ public class CommentDto {
     }
 
     @Getter
+    @AllArgsConstructor
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    @Builder
     @Schema(name = "commentResponse", description = "댓글 응답 DTO")
     public static class Response {
-        private final Long id;
-        private final ReviewDto content;
-        private final String username;
-        private final String createdAt;
-        private final String updatedAt;
-        private final Long userId;
-        private final Long postId;
-
-        public Response(Comment comment) {
-            this.id = comment.getId();
-            this.content = new ReviewDto(comment.getContent());
-            this.createdAt = String.valueOf(comment.getCreatedAt());
-            this.updatedAt = String.valueOf(comment.getUpdatedAt());
-            this.username = comment.getUser().getName();
-            this.userId = comment.getUser().getId();
-            this.postId = comment.getPost().getId();
-        }
+        private Long id;
+        private ReviewDto content;
+        private String username;
+        private String createdAt;
+        private String updatedAt;
+        private Long userId;
     }
-
-    @Getter
-    @Schema(name = "commentUpdateResponse", description = "댓글 수정 DTO")
-    public static class UpdateResponse {
-        private final Long id;
-
-        public UpdateResponse(Long id) {
-            this.id = id;
-        }
-    }
-
 }
