@@ -61,7 +61,6 @@ class PostControllerTest {
     @MockBean
     private UserService userService;
 
-
     private User createUser() {
         return User.builder()
                 .id(1L)
@@ -208,9 +207,6 @@ class PostControllerTest {
 
         String content = objectMapper.writeValueAsString(request);
 
-
-        given(postService.addPost(Mockito.any(PostDto.CreateRequest.class))).willReturn(createPostResponse());
-
         ResultActions actions = mvc.perform(post("/post")
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -258,10 +254,6 @@ class PostControllerTest {
         CommentDto.CreateRequest request = new CommentDto.CreateRequest(commentJsonString, 1L);
 
         String content = objectMapper.writeValueAsString(request);
-
-
-        given(commentService.addComment(Mockito.any(CommentDto.CreateRequest.class), Mockito.anyLong())).willReturn(createCommentResponse());
-
         ResultActions actions = mvc.perform(post("/post/1/comment")
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)

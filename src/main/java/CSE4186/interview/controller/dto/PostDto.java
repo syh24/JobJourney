@@ -21,6 +21,7 @@ public class PostDto {
         private String title;
         @NotNull(message = "게시글 내용을 입력해주세요")
         private String content;
+
         @NotNull
         private Long userId;
         @NotNull

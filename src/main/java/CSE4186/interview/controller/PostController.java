@@ -70,8 +70,9 @@ public class PostController {
 
     @PostMapping
     @Operation(summary = "Add Post", description = "게시글 생성")
-    public ApiUtil.ApiSuccessResult<PostDto.Response> createPost(@Valid @RequestBody PostDto.CreateRequest request) {
-        return ApiUtil.success(postService.addPost(request));
+    public ApiUtil.ApiSuccessResult<String> createPost(@Valid @RequestBody PostDto.CreateRequest request) {
+        postService.addPost(request);
+        return ApiUtil.success("게시글이 생성되었습니다.");
     }
 
     @PutMapping("/{id}")
@@ -90,9 +91,10 @@ public class PostController {
 
     @PostMapping("/{id}/comment")
     @Operation(summary = "Add Comment", description = "댓글 생성")
-    public ApiUtil.ApiSuccessResult<CommentDto.Response> addComment(@Valid @RequestBody CommentDto.CreateRequest request,
+    public ApiUtil.ApiSuccessResult<String> addComment(@Valid @RequestBody CommentDto.CreateRequest request,
                                                                  @PathVariable(name = "id") Long id) {
-        return ApiUtil.success(commentService.addComment(request, id));
+        commentService.addComment(request, id);
+        return ApiUtil.success("댓글이 생성되었습니다.");
     }
 
     @PutMapping("/{id}/comment")

@@ -36,7 +36,7 @@ public class PostService {
         return new PostDto.PostListResponse(postList, posts.getTotalPages());
     }
 
-    public PostDto.Response addPost(PostDto.CreateRequest request) {
+    public void addPost(PostDto.CreateRequest request) {
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new NotFoundException("해당 유저가 존재하지 않습니다."));
 
@@ -45,8 +45,6 @@ public class PostService {
         Post post = postRepository.save(request.toEntity(user, jobField));
 
         createPostVideo(request.getVideoIdList(), post);
-
-        return post.toPostResponse();
     }
 
     public void deletePost(Long id) {
