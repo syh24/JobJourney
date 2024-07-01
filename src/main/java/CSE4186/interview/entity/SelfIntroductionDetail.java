@@ -1,5 +1,7 @@
 package CSE4186.interview.entity;
 
+import CSE4186.interview.controller.dto.SelfIntroductionDetailDto;
+import CSE4186.interview.controller.dto.SelfIntroductionDto;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -24,4 +26,13 @@ public class SelfIntroductionDetail {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "self_introduction_id")
     private SelfIntroduction selfIntroduction;
+
+    public SelfIntroductionDetailDto.Response toSelfIntroductionDetailResponse() {
+        return SelfIntroductionDetailDto.Response.builder()
+                .id(this.id)
+                .title(this.title)
+                .content(this.content)
+                .type(this.type)
+                .build();
+    }
 }

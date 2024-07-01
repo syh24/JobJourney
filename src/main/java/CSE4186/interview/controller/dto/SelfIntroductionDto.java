@@ -56,13 +56,15 @@ public class SelfIntroductionDto {
         private List<SelfIntroductionDetailDto.Response> detailList;
     }
 
-    @Data
-    @RequiredArgsConstructor
+    @Getter
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
     @Schema(name = "selfIntroductionListResponse", description = "자소서 전체 list 응답 DTO")
     public static class SelfIntroductionListResponse {
         @NotNull
-        private final List<SelfIntroductionDto.Response> list;
-        private final int pageCount;
+        private List<SelfIntroductionDto.Response> list;
+        private int pageCount;
     }
 
 

@@ -2,21 +2,17 @@ package CSE4186.interview.controller;
 
 import CSE4186.interview.annotation.LoginUser;
 import CSE4186.interview.controller.dto.SelfIntroductionDto;
-import CSE4186.interview.entity.SelfIntroduction;
 import CSE4186.interview.service.SelfIntroductionService;
 import CSE4186.interview.utils.ApiUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 // 면접 기능 관련
 @RestController
@@ -40,7 +36,7 @@ public class SelfIntroductionController {
     @PostMapping("/save")
     @Operation(summary = "Save selfIntroductions", description = "자소서 저장")
     public ApiUtil.ApiSuccessResult<String> createSelfIntroductionList(@Valid @RequestBody SelfIntroductionDto.CreateRequest request, @AuthenticationPrincipal User loginUser){
-        selfIntroductionService.save(request, loginUser.getUsername());
+        selfIntroductionService.saveSelfIntroduction(request, Long.valueOf(loginUser.getUsername()));
         return ApiUtil.success("자기소개서가 저장되었습니다.");
     }
 
@@ -60,6 +56,6 @@ public class SelfIntroductionController {
             @PathVariable(name = "id") Long id
     ){
         selfIntroductionService.deleteSelfIntroduction(id);
-        return ApiUtil.success("삭제되었습니다.");
+        return ApiUtil.success("자기소개서가 삭제되었습니다.");
     }
 }

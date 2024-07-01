@@ -1,5 +1,6 @@
 package CSE4186.interview.entity;
 
+import CSE4186.interview.controller.dto.SelfIntroductionDetailDto;
 import CSE4186.interview.controller.dto.SelfIntroductionDto;
 import jakarta.persistence.*;
 import lombok.*;
@@ -41,10 +42,18 @@ public class SelfIntroduction extends BaseTimeEntity {
         return SelfIntroductionDto.Response.builder()
                 .id(this.id)
                 .title(this.title)
+                .detailList(getSelfIntroductionDetailResponseList())
                 .createdAt(this.getCreatedAt())
                 .updatedAt(this.getUpdatedAt())
                 .build();
     }
+
+    private List<SelfIntroductionDetailDto.Response> getSelfIntroductionDetailResponseList() {
+        return this.selfIntroductionDetailList.stream()
+                .map(SelfIntroductionDetail::toSelfIntroductionDetailResponse)
+                .toList();
+    }
+
 
     public void changeTitle(String title) {
         this.title = title;
