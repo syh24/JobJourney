@@ -2,12 +2,10 @@ package CSE4186.interview.entity;
 
 import CSE4186.interview.controller.dto.CommentDto;
 import CSE4186.interview.controller.dto.PostDto;
-import CSE4186.interview.controller.dto.PostVideoDto;
+import CSE4186.interview.controller.dto.VideoDto;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +15,6 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-@ToString
 public class Post extends BaseTimeEntity {
 
     @Id
@@ -88,9 +85,21 @@ public class Post extends BaseTimeEntity {
                 .jobField(jobField.getField())
                 .userId(user.getId())
                 .userName(user.getName())
-                .comments(comments.stream().map(Comment::toCommentResponse).toList())
-                .videoList(postVideo.stream().map(PostVideoDto.Response::new).toList())
+                .comments(getCommentList())
+                .videoList(getVideoResponse())
                 .build();
+    }
+
+    private List<CommentDto.Response> getCommentList() {
+        return comments.stream()
+                .map(Comment::toCommentResponse)
+                .toList();
+    }
+
+    private List<VideoDto.Response> getVideoResponse() {
+        return postVideo.stream()
+                .map(postVideo -> postVideo.getVideo().toVideoResponse())
+                .toList();
     }
 
     public void addViewCount() {
