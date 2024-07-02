@@ -16,13 +16,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -56,39 +53,33 @@ public class PostController {
             @RequestParam(value = "q", defaultValue = "") String q,
             @RequestParam(value = "searchBy", defaultValue = "") String searchBy
     ) {
-
-        Page<Post> postsByCondition = postService.findPostsByCondition(pageable, q, searchBy);
-        List<PostDto.Response> response = postsByCondition
-                .stream().map(PostDto.Response::new)
-                .toList();
-
-        return ApiUtil.success(new PostDto.PostListResponse(response, postsByCondition.getTotalPages()));
+        return ApiUtil.success(postService.findPostsByCondition(pageable, q, searchBy));
     }
     @GetMapping("/{id}")
     @Operation(summary = "Get Post", description = "게시글 상세")
-    public ApiUtil.ApiSuccessResult<PostDto.Response> getPost(
+    public ApiUtil.ApiSuccessResult<PostDto.PostDetailResponse> getPost(
             @PathVariable(name = "id") Long id,
             @LoginUser User loginUser
     ) {
         Long userId = Long.valueOf(loginUser.getUsername());
-        Post post = postService.findPost(id);
+        PostDto.Response postDto = postService.findPost(id);
         String checkLikeOrDislike = userService.checkLikeOrDislike(id, userId);
 
-        return ApiUtil.success(new PostDto.Response(post, checkLikeOrDislike));
+        return ApiUtil.success(new PostDto.PostDetailResponse(postDto, checkLikeOrDislike));
     }
 
     @PostMapping
     @Operation(summary = "Add Post", description = "게시글 생성")
-    public ApiUtil.ApiSuccessResult<PostDto.Response> addPost(@Valid @RequestBody PostDto.CreateRequest request) {
-        Post post = postService.addPost(request);
-        return ApiUtil.success(new PostDto.Response(post));
+    public ApiUtil.ApiSuccessResult<String> createPost(@Valid @RequestBody PostDto.CreateRequest request) {
+        postService.addPost(request);
+        return ApiUtil.success("게시글이 생성되었습니다.");
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Update Post", description = "게시글 수정")
-    public ApiUtil.ApiSuccessResult<PostDto.UpdateResponse> updatePost(@PathVariable Long id, @Valid @RequestBody PostDto.UpdateRequest request) {
+    public ApiUtil.ApiSuccessResult<String> updatePost(@PathVariable Long id, @Valid @RequestBody PostDto.UpdateRequest request) {
         postService.updatePost(id, request);
-        return ApiUtil.success(new PostDto.UpdateResponse(id));
+        return ApiUtil.success("게시글이 수정되었습니다.");
     }
 
     @DeleteMapping("/{id}")
@@ -100,17 +91,17 @@ public class PostController {
 
     @PostMapping("/{id}/comment")
     @Operation(summary = "Add Comment", description = "댓글 생성")
-    public ApiUtil.ApiSuccessResult<CommentDto.Response> addComment(@Valid @RequestBody CommentDto.CreateRequest request,
+    public ApiUtil.ApiSuccessResult<String> addComment(@Valid @RequestBody CommentDto.CreateRequest request,
                                                                  @PathVariable(name = "id") Long id) {
-        Comment comment = commentService.addComment(request, id);
-        return ApiUtil.success(new CommentDto.Response(comment));
+        commentService.addComment(request, id);
+        return ApiUtil.success("댓글이 생성되었습니다.");
     }
 
     @PutMapping("/{id}/comment")
     @Operation(summary = "Update Comment", description = "댓글 수정")
-    public ApiUtil.ApiSuccessResult<CommentDto.UpdateResponse> updateComment(@Valid @RequestBody CommentDto.UpdateRequest request) {
+    public ApiUtil.ApiSuccessResult<String> updateComment(@Valid @RequestBody CommentDto.UpdateRequest request) {
         commentService.updateComment(request);
-        return ApiUtil.success(new CommentDto.UpdateResponse(request.getId()));
+        return ApiUtil.success("댓글이 수정되었습니다.");
     }
 
     @DeleteMapping("/{id}/comment")

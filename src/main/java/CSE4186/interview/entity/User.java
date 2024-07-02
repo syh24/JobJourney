@@ -13,24 +13,11 @@ import java.util.Set;
 
 @Entity
 @Getter
+@AllArgsConstructor
+@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
 public class User extends BaseTimeEntity {
-
-    @Builder
-    public User(String name, String email, String password){
-        this.name=name;
-        this.email=email;
-        this.password=password;
-    }
-
-    @Builder
-    public User(Long id, String name, String email, String password) {
-        this.id = id;
-        this.name = name;
-        this.email = email;
-        this.password = password;
-    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

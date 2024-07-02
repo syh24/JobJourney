@@ -17,7 +17,7 @@ public class DislikeController {
     private final DislikeService dislikeService;
 
     @PostMapping
-    public ApiUtil.ApiSuccessResult<String> addDislike(
+    public ApiUtil.ApiSuccessResult<String> createDislike(
             @Valid @RequestBody DislikeDto.CreteRequest request,
             @PathVariable(name = "id") Long postId
     ) {

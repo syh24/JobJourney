@@ -3,6 +3,8 @@ package CSE4186.interview.controller;
 import CSE4186.interview.annotation.WithCustomMockUser;
 import CSE4186.interview.config.TestSecurityConfig;
 import CSE4186.interview.controller.dto.VideoDto;
+import CSE4186.interview.entity.JobField;
+import CSE4186.interview.entity.Post;
 import CSE4186.interview.entity.User;
 import CSE4186.interview.entity.Video;
 import CSE4186.interview.login.CustomUserDetailsService;
@@ -36,6 +38,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -63,8 +66,73 @@ class VideoControllerTest {
     @MockBean
     private VideoService videoService;
 
-    @BeforeEach
-    void setUp() {
+    private User createUser() {
+        return User.builder()
+                .id(1L)
+                .name("서윤혁")
+                .email("test@gmail.com")
+                .password("password")
+                .build();
+    }
+
+    private JobField createJobField() {
+        return JobField.builder()
+                .field("백엔드")
+                .symbol("BE")
+                .build();
+    }
+
+    private Post createPost() {
+        return Post.builder()
+                .id(1L)
+                .title("테스트")
+                .content("내용")
+                .user(createUser())
+                .jobField(createJobField())
+                .build();
+    }
+
+    private Video createVideo() {
+        return Video.builder()
+                .id(1L)
+                .title("재밌는 비디오")
+                .link("test.link")
+                .user(createUser())
+                .build();
+    }
+
+    private Video createAnotherVideo() {
+        return Video.builder()
+                .id(1L)
+                .title("재밌는 비디오")
+                .link("test.link")
+                .user(createUser())
+                .build();
+    }
+
+    private Page<Video> createVideoPage() {
+        List<Video> videoList = new ArrayList<>();
+        videoList.add(createVideo());
+        videoList.add(createAnotherVideo());
+        return new PageImpl<>(videoList);
+    }
+
+    private VideoDto.Response createVideoResponse() {
+        return VideoDto.Response.builder()
+                .id(1L)
+                .title("재밌는 비디오")
+                .link("test.link")
+                .userId(createUser().getId())
+                .build();
+    }
+
+    private VideoDto.VideoListResponse createVideoListResponse() {
+        List<VideoDto.Response> videoResponseList = new ArrayList<>();
+        videoResponseList.add(createVideoResponse());
+        return VideoDto.VideoListResponse.builder()
+                .list(videoResponseList)
+                .pageCount(1)
+                .build();
     }
 
     @Test
@@ -90,15 +158,7 @@ class VideoControllerTest {
 
     @Test
     void getAllVideo() throws Exception {
-        User user = new User("syh", "syh@gmail.com", "1234");
-
-
-        Video video1 = new Video("title", "link", user);
-        Video video2 = new Video("title2", "link2", user);
-        List<Video> videoList = List.of(video1,video2);
-        Page<Video> videoPage = new PageImpl<>(videoList);
-
-        given(videoService.findAllVideoByUser(Mockito.any(Pageable.class), Mockito.anyLong())).willReturn(videoPage);
+        given(videoService.findAllVideoByUser(Mockito.any(Pageable.class), Mockito.anyLong())).willReturn(createVideoListResponse());
 
         ResultActions actions = mvc.perform(get("/video/list")
                 .with(user("1").password("password"))

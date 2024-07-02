@@ -22,7 +22,7 @@ public class ReportController {
 
     @PostMapping
     @Operation(summary = "Create Report", description = "신고하기")
-    public ApiUtil.ApiSuccessResult<Long> addReport(@Valid @RequestBody ReportDto.CreateRequest request) {
+    public ApiUtil.ApiSuccessResult<Long> createReport(@Valid @RequestBody ReportDto.CreateRequest request) {
         Long reportId = reportService.addReport(request);
         return ApiUtil.success(reportId);
     }

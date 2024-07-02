@@ -22,7 +22,7 @@ public class CommentService {
     private final UserRepository userRepository;
     private final PostRepository postRepository;
 
-    public Comment addComment(CreateRequest request, Long postId) {
+    public void addComment(CreateRequest request, Long postId) {
         User findUser = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new NotFoundException("해당 유저가 존재하지 않습니다."));
 
@@ -30,12 +30,7 @@ public class CommentService {
                 .orElseThrow(() -> new NotFoundException("해당 게시글이 존재하지 않습니다."));
 
 
-        return commentRepository.save(Comment.builder()
-                .user(findUser)
-                .post(findPost)
-                .content(request.getContent())
-                .build());
-
+        commentRepository.save(request.toEntity(findUser, findPost));
     }
 
     public void updateComment(UpdateRequest request) {

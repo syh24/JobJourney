@@ -1,5 +1,7 @@
 package CSE4186.interview.service;
 
+import CSE4186.interview.controller.dto.PostDto;
+import CSE4186.interview.entity.Comment;
 import CSE4186.interview.entity.JobField;
 import CSE4186.interview.entity.Post;
 import CSE4186.interview.entity.User;
@@ -18,6 +20,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
@@ -35,50 +38,105 @@ class PostServiceTest {
     @Mock
     private PostRepository postRepository;
 
+
+    private User createUser() {
+        return User.builder()
+                .id(1L)
+                .name("서윤혁")
+                .email("test@gmail.com")
+                .password("password")
+                .build();
+    }
+
+    private JobField createJobField() {
+        return JobField.builder()
+                .id(1L)
+                .field("백엔드")
+                .symbol("백엔드")
+                .build();
+    }
+
+    private Pageable createPageable() {
+        return PageRequest.of(0, 10);
+    }
+
+    private Post createPost() {
+        return Post.builder()
+                .id(1L)
+                .title("테스트")
+                .content("내용")
+                .user(createUser())
+                .jobField(createJobField())
+                .comments(new ArrayList<>())
+                .postVideo(new ArrayList<>())
+                .build();
+    }
+
+    private Post createAnotherPost() {
+        return Post.builder()
+                .id(2L)
+                .title("테스트2")
+                .content("내용 다름")
+                .user(createUser())
+                .comments(new ArrayList<>())
+                .postVideo(new ArrayList<>())
+                .jobField(createJobField())
+                .build();
+    }
+
+    private Page<Post> createPagePost() {
+        List<Post> postList = new ArrayList<>();
+        postList.add(createPost());
+        postList.add(createAnotherPost());
+        return new PageImpl<>(postList, createPageable(), 2);
+    }
+
+    private Comment createComment() {
+        return Comment.builder()
+                .id(1L)
+                .content("댓글")
+                .post(createPost())
+                .user(createUser())
+                .build();
+    }
+
+    private List<Comment> createCommentList() {
+        List<Comment> commentList = new ArrayList<>();
+        commentList.add(createComment());
+        return commentList;
+    }
+
     @Test
     @DisplayName("조건으로 검색")
     void findPostsByCondition() {
-        User user = new User("syh", "syh@gmail.com", "1234");
-        JobField jobField = new JobField("백엔드", "BE");
-
-        Post post1 = new Post(1L, "title", "content", user, jobField);
-        Post post2 = new Post(2L, "title2", "content2", user, jobField);
-
-        List<Post> postList = List.of(post1,post2);
-        Page<Post> postPage = new PageImpl<>(postList);
+        Page<Post> postPage = createPagePost();
 
         given(postRepository.findPostsBySearchCondition(Mockito.anyString(), Mockito.anyString(), Mockito.any(Pageable.class)))
                 .willReturn(postPage);
 
-        Page<Post> result = postService.findPostsByCondition(PageRequest.of(1, 10), "test", "title");
+        PostDto.PostListResponse result = postService.findPostsByCondition(PageRequest.of(1, 10), "test", "title");
 
-        List<Post> content = result.getContent();
+        List<PostDto.Response> list = result.getList();
 
-        assertThat(result.getTotalElements()).isEqualTo(2);
-        assertThat(content.get(0).getTitle()).isEqualTo("title");
-        assertThat(content.get(1).getTitle()).isEqualTo("title2");
+        assertThat(result.getPageCount()).isEqualTo(1);
+        assertThat(list.get(0).getTitle()).isEqualTo("테스트");
+        assertThat(list.get(1).getTitle()).isEqualTo("테스트2");
     }
 
     @Test
     @DisplayName("전체 검색")
     void findAll() {
-        User user = new User("syh", "syh@gmail.com", "1234");
-        JobField jobField = new JobField("백엔드", "BE");
+        Page<Post> postPage = createPagePost();
 
-        Post post1 = new Post(1L, "title", "content", user, jobField);
-        Post post2 = new Post(2L, "title2", "content2", user, jobField);
+        given(postRepository.findPostsBySearchCondition(Mockito.anyString(), Mockito.anyString(), Mockito.any(Pageable.class)))
+                .willReturn(postPage);
 
-        List<Post> postList = List.of(post1,post2);
-        Page<Post> postPage = new PageImpl<>(postList);
+        PostDto.PostListResponse result = postService.findPostsByCondition(PageRequest.of(1, 10), "", "");
 
-        given(postRepository.findAll(Mockito.any(Pageable.class))).willReturn(postPage);
+        List<PostDto.Response> list = result.getList();
 
-        Page<Post> result = postService.findPostsByCondition(PageRequest.of(1, 10), "", "");
-
-        List<Post> content = result.getContent();
-
-        assertThat(result.getTotalElements()).isEqualTo(2);
-        assertThat(content.get(0).getTitle()).isEqualTo("title");
-        assertThat(content.get(1).getTitle()).isEqualTo("title2");
+        assertThat(result.getPageCount()).isEqualTo(1);
+        assertThat(list.get(0).getTitle()).isEqualTo("테스트");
+        assertThat(list.get(1).getTitle()).isEqualTo("테스트2");
     }
 }

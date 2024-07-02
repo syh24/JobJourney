@@ -27,7 +27,7 @@ public class VideoController {
 
     @PostMapping
     @Operation(summary = "Add Video", description = "비디오 생성")
-    public ApiUtil.ApiSuccessResult<Long> addVideo(@Valid @RequestBody VideoDto.CreateRequest request) {
+    public ApiUtil.ApiSuccessResult<Long> createVideo(@Valid @RequestBody VideoDto.CreateRequest request) {
         Long videoId = videoService.addVideo(request);
         return ApiUtil.success(videoId);
     }
@@ -39,9 +39,7 @@ public class VideoController {
             @PageableDefault(page = 1, size = 10) Pageable pageable
     ) {
         Long userId = Long.valueOf(loginUser.getUsername());
-        Page<Video> findVideos = videoService.findAllVideoByUser(pageable, userId);
-        List<VideoDto.Response> videoList = findVideos.stream().map(VideoDto.Response::new).toList();
-        return ApiUtil.success(new VideoDto.VideoListResponse(videoList, findVideos.getTotalPages()));
+        return ApiUtil.success(videoService.findAllVideoByUser(pageable, userId));
     }
 
     @DeleteMapping("/{id}")

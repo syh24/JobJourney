@@ -1,32 +1,21 @@
 package CSE4186.interview.entity;
 
+import CSE4186.interview.controller.dto.CommentDto;
+import CSE4186.interview.controller.dto.PostDto;
+import CSE4186.interview.controller.dto.VideoDto;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Getter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-@EntityListeners(AuditingEntityListener.class)
 public class Post extends BaseTimeEntity {
-
-
-    @Builder
-    public Post(Long id, String title, String content, User user, JobField jobField) {
-        this.id = id;
-        this.title = title;
-        this.content = content;
-        this.user = user;
-        this.jobField = jobField;
-    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -81,6 +70,36 @@ public class Post extends BaseTimeEntity {
         this.title = title;
         this.content = content;
         this.jobField = jobField;
+    }
+
+    public PostDto.Response toPostResponse() {
+        return PostDto.Response.builder()
+                .id(this.getId())
+                .title(this.getTitle())
+                .content(this.getContent().replaceAll(System.lineSeparator(), "<br>"))
+                .createdAt(String.valueOf(this.getCreatedAt()))
+                .updatedAt(String.valueOf(this.getUpdatedAt()))
+                .like(this.getLikeCount())
+                .dislike(this.getDislikeCount())
+                .viewCount(this.getViewCount())
+                .jobField(jobField.getField())
+                .userId(user.getId())
+                .userName(user.getName())
+                .comments(getCommentList())
+                .videoList(getVideoResponse())
+                .build();
+    }
+
+    private List<CommentDto.Response> getCommentList() {
+        return comments.stream()
+                .map(Comment::toCommentResponse)
+                .toList();
+    }
+
+    private List<VideoDto.Response> getVideoResponse() {
+        return postVideo.stream()
+                .map(postVideo -> postVideo.getVideo().toVideoResponse())
+                .toList();
     }
 
     public void addViewCount() {
