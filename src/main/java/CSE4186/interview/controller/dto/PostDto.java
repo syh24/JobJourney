@@ -34,6 +34,9 @@ public class PostDto {
                     .title(this.title)
                     .content(this.content)
                     .user(user)
+                    .likeCount(0)
+                    .dislikeCount(0)
+                    .viewCount(0)
                     .jobField(jobField)
                     .build();
         }
