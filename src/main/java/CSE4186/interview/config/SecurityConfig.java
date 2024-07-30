@@ -5,6 +5,7 @@ import CSE4186.interview.jwt.TokenProvider;
 import CSE4186.interview.login.CustomAuthenticationManager;
 import CSE4186.interview.login.FilterExceptionHandler;
 import CSE4186.interview.login.LoginFilter;
+import CSE4186.interview.login.handler.CustomAccessDeniedHandler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,7 @@ import java.util.List;
 public class SecurityConfig {
     private final TokenProvider tokenProvider;
     private final CustomAuthenticationManager customAuthenticationManager;
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
     private final ObjectMapper objectMapper;
 
     @Bean
@@ -55,11 +57,15 @@ public class SecurityConfig {
                                 .requestMatchers("/health-check").permitAll()
                                 .anyRequest().hasAnyRole("USER")
                 )
+
                 .oauth2Login(oauth2 ->
                         oauth2
                                 .authorizationEndpoint(a->{
                                     a.baseUri("/login/oauth2");
                                 })
+                )
+                .exceptionHandling(exceptionHandling -> exceptionHandling
+                        .accessDeniedHandler(customAccessDeniedHandler)
                 )
                 .addFilterBefore(new FilterExceptionHandler(objectMapper),UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new JwtFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class)
