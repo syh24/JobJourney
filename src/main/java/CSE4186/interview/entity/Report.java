@@ -34,4 +34,9 @@ public class Report {
         this.post = post;
         this.comment = comment;
     }
+
+    public void removeParentRelation() {
+        this.post = null;
+        this.comment = null;
+    }
 }

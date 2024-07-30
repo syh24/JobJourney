@@ -56,10 +56,6 @@ public class Post extends BaseTimeEntity {
     @OrderBy("id asc")
     private List<PostVideo> postVideo = new ArrayList<>();
 
-    @OneToMany(mappedBy = "post", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
-    @OrderBy("id asc")
-    private List<Report> reports = new ArrayList<>();
-
     @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
     private List<Likes> likes = new ArrayList<>();
 
