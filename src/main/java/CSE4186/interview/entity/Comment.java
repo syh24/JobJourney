@@ -37,11 +37,6 @@ public class Comment extends BaseTimeEntity {
     @JoinColumn(name = "post_id")
     private Post post;
 
-    @OneToMany(mappedBy = "comment", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
-    @OrderBy("id asc")
-    private List<Report> reports = new ArrayList<>();
-
-
     public CommentDto.Response toCommentResponse() {
         return CommentDto.Response
                 .builder()

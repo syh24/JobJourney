@@ -13,7 +13,8 @@ import java.util.stream.Collectors;
 
 public class PostDto {
 
-    @Data
+    @Getter
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
     @AllArgsConstructor
     @Schema(name = "postCreateRequest", description = "게시글 생성 DTO")
     public static class CreateRequest {
@@ -33,10 +34,10 @@ public class PostDto {
             return Post.builder()
                     .title(this.title)
                     .content(this.content)
-                    .user(user)
-                    .likeCount(0)
                     .dislikeCount(0)
+                    .likeCount(0)
                     .viewCount(0)
+                    .user(user)
                     .jobField(jobField)
                     .build();
         }

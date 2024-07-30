@@ -22,6 +22,7 @@ public class PostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final VideoRepository videoRepository;
+    private final ReportRepository reportRepository;
     private final PostVideoRepository postVideoRepository;
     private final JobFieldRepository jobFieldRepository;
 
@@ -50,6 +51,9 @@ public class PostService {
     public void deletePost(Long id) {
         Post post = postRepository.findById(id).orElseThrow(() ->
                 new NotFoundException("해당 게시글이 존재하지 않습니다. id=" + id));
+
+        List<Report> reports = reportRepository.findReportByPost(post);
+        reports.forEach(Report::removeParentRelation);
 
         postRepository.delete(post);
     }
