@@ -5,6 +5,7 @@ import CSE4186.interview.controller.dto.PostDto;
 import CSE4186.interview.controller.dto.VideoDto;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.util.ArrayList;
@@ -48,18 +49,22 @@ public class Post extends BaseTimeEntity {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @OneToMany(mappedBy = "post", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
-    @OrderBy("id asc")
+    @BatchSize(size=50)
+    @OneToMany(mappedBy = "post", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    @OrderBy("createdAt asc")
     private List<Comment> comments = new ArrayList<>();
 
-    @OneToMany(mappedBy = "post", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
+    @BatchSize(size=10)
+    @OneToMany(mappedBy = "post", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     @OrderBy("id asc")
     private List<PostVideo> postVideo = new ArrayList<>();
 
-    @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
+    @BatchSize(size=100)
+    @OneToMany(mappedBy = "post", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     private List<Likes> likes = new ArrayList<>();
 
-    @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
+    @BatchSize(size=100)
+    @OneToMany(mappedBy = "post", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     private List<Dislike> dislikes = new ArrayList<>();
 
     public void updatePost(String title, String content, JobField jobField) {
