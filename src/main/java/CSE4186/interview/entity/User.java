@@ -52,7 +52,11 @@ public class User extends BaseTimeEntity {
         this.authority=authority;
     }
 
+    public boolean isSuspended() {
+        return this.getAuthority() == Role.SUSPEND;
+    }
+
     public void accountSuspension() {
-        this.suspensionStatus = true;
+        this.authority = Role.SUSPEND;
     }
 }
