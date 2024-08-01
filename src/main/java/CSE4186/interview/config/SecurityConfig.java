@@ -55,7 +55,7 @@ public class SecurityConfig {
                                 .requestMatchers("/question/**").permitAll()
                                 .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                                 .requestMatchers("/health-check").permitAll()
-                                .anyRequest().hasAnyRole("USER")
+                                .anyRequest().hasAnyAuthority("USER")
                 )
 
                 .oauth2Login(oauth2 ->
