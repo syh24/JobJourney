@@ -5,6 +5,7 @@ import CSE4186.interview.controller.dto.SelfIntroductionDto;
 import jakarta.persistence.*;
 import lombok.*;
 import org.checkerframework.checker.units.qual.A;
+import org.hibernate.annotations.BatchSize;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -26,11 +27,13 @@ public class SelfIntroduction extends BaseTimeEntity {
 
     private String title;
 
-    @OneToMany(mappedBy = "selfIntroduction", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
+    @BatchSize(size = 5)
+    @OneToMany(mappedBy = "selfIntroduction", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     @OrderBy("id asc")
     private List<SelfIntroductionDetail> selfIntroductionDetailList = new ArrayList<>();
 
-    @OneToMany(mappedBy = "selfIntroduction", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
+    @BatchSize(size = 30)
+    @OneToMany(mappedBy = "selfIntroduction", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     @OrderBy("id asc")
     private List<Question> quetions = new ArrayList<>();
 

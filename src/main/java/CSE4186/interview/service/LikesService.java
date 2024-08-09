@@ -30,7 +30,7 @@ public class LikesService {
         User findUser = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new NotFoundException("해당 유저가 존재하지 않습니다."));
 
-        Post post = postRepository.findById(postId).orElseThrow(() ->
+        Post post = postRepository.findPostForUpdateById(postId).orElseThrow(() ->
                 new NotFoundException("해당 게시글이 존재하지 않습니다."));
 
         Optional<Likes> findLike = likeRepository.findAllByPostAndUser(post.getId(), findUser.getId());
