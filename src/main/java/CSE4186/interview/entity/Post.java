@@ -50,22 +50,26 @@ public class Post extends BaseTimeEntity {
     private User user;
 
     @BatchSize(size=50)
-    @OneToMany(mappedBy = "post", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "post", fetch = FetchType.LAZY, orphanRemoval = true)
     @OrderBy("createdAt asc")
     private List<Comment> comments = new ArrayList<>();
 
     @BatchSize(size=10)
-    @OneToMany(mappedBy = "post", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "post", fetch = FetchType.LAZY, orphanRemoval = true)
     @OrderBy("id asc")
     private List<PostVideo> postVideo = new ArrayList<>();
 
     @BatchSize(size=100)
-    @OneToMany(mappedBy = "post", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "post", fetch = FetchType.LAZY, orphanRemoval = true)
     private List<Likes> likes = new ArrayList<>();
 
     @BatchSize(size=100)
-    @OneToMany(mappedBy = "post", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "post", fetch = FetchType.LAZY, orphanRemoval = true)
     private List<Dislike> dislikes = new ArrayList<>();
+
+    @OneToOne(mappedBy = "post", orphanRemoval = true)
+    @JoinColumn(name = "alarm_id")
+    private Alarm alarm;
 
     public void updatePost(String title, String content, JobField jobField) {
         this.title = title;
