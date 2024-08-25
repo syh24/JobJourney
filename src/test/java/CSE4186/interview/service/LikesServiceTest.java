@@ -2,10 +2,7 @@ package CSE4186.interview.service;
 
 import CSE4186.interview.controller.dto.LikesDto;
 import CSE4186.interview.entity.*;
-import CSE4186.interview.repository.DislikeRepository;
-import CSE4186.interview.repository.LikesRepository;
-import CSE4186.interview.repository.PostRepository;
-import CSE4186.interview.repository.UserRepository;
+import CSE4186.interview.repository.*;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -36,6 +33,9 @@ class LikesServiceTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private AlarmRepository alarmRepository;
 
     @Mock
     private PostRepository postRepository;
@@ -76,7 +76,7 @@ class LikesServiceTest {
         LikesDto.CreteRequest request = new LikesDto.CreteRequest(1L);
 
         given(userRepository.findById(Mockito.anyLong())).willReturn(Optional.of(user));
-        given(postRepository.findById(Mockito.anyLong())).willReturn(Optional.of(post));
+        given(postRepository.findPostForUpdateById(Mockito.anyLong())).willReturn(Optional.of(post));
         given(likesRepository.findAllByPostAndUser(Mockito.anyLong(), Mockito.anyLong())).willReturn(Optional.empty());
         given(dislikeRepository.findAllByPostAndUser(Mockito.anyLong(), Mockito.anyLong())).willReturn(Optional.empty());
 
@@ -93,7 +93,7 @@ class LikesServiceTest {
         LikesDto.CreteRequest request = new LikesDto.CreteRequest(1L);
 
         given(userRepository.findById(Mockito.anyLong())).willReturn(Optional.of(user));
-        given(postRepository.findById(Mockito.anyLong())).willReturn(Optional.of(post));
+        given(postRepository.findPostForUpdateById(Mockito.anyLong())).willReturn(Optional.of(post));
         given(likesRepository.findAllByPostAndUser(Mockito.anyLong(), Mockito.anyLong())).willReturn(Optional.empty());
         given(dislikeRepository.findAllByPostAndUser(Mockito.anyLong(), Mockito.anyLong())).willReturn(Optional.of(dislike));
 
@@ -109,7 +109,7 @@ class LikesServiceTest {
         LikesDto.CreteRequest request = new LikesDto.CreteRequest(1L);
 
         given(userRepository.findById(Mockito.anyLong())).willReturn(Optional.of(user));
-        given(postRepository.findById(Mockito.anyLong())).willReturn(Optional.of(post));
+        given(postRepository.findPostForUpdateById(Mockito.anyLong())).willReturn(Optional.of(post));
         given(likesRepository.findAllByPostAndUser(Mockito.anyLong(), Mockito.anyLong())).willReturn(Optional.of(like));
 
         String result = likesService.addLike(request, 1L);
