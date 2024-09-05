@@ -80,5 +80,6 @@
 <img src="https://github.com/syh24/interview/assets/64251594/b20cc98b-b013-4aa2-9e4f-5fefcc14b80e" width="500" height="500">
 
 
-## 결과 보고서
-[결과 보고서](https://github.com/user-attachments/files/15944075/I_5._193.212._.3.docx)
+## 발표자료료
+[발표자료.pptx](https://github.com/user-attachments/files/16893482/default.pptx)
+
