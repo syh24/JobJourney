@@ -50,6 +50,7 @@ public class SecurityConfig {
                                 .requestMatchers("/login").permitAll()
                                 .requestMatchers("/login/oauth2/**").permitAll()
                                 .requestMatchers("/oauth2/**").permitAll()
+                                .requestMatchers("/actuator/**").permitAll()
                                 .requestMatchers("/join/**").permitAll()
                                 .requestMatchers("/token/**").permitAll()
                                 .requestMatchers("/question/**").permitAll()
