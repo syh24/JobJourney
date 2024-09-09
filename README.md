@@ -24,6 +24,8 @@
 - **Framework** : Springboot(3.2.3)
 - **Database** : MySQL
 - **ORM** : JPA
+- **Testing** : JUnit5, Locust
+- **Mornitoring Tool** : Prometheus, Grafana
 
 ## 개발 내용 (★: 내가 개발한 것)
 ### 모의 면접
