@@ -12,20 +12,12 @@
 ## 개발 기간
 * 24.03.11일 ~ 24.06.03일
 
-## 맴버구성
- - 팀장  : OOO (FE) - 팀장, 커뮤니티 구현, 자소서 관련 기능 구현, UI/UX 디자인
- - 팀원1 : OOO (FE) - 모의 면접 기능 구현, 로그인 구현, UI/UX 디자인
- - 팀원2 : OOO (BE) - CI/CD 구축, 모의 면접 커뮤니티 기능 구현, 데이터베이스 스키마 설계
- - 팀원3 : OOO (BE) - Gemini API 관리 및 프롬프트 엔지니어링, TTS / STT API 연동
- - 팀원4 : OOO (BE) - Gemini API 관리 및 프롬프트 엔지니어링, 회원가입/로그인 기능 구현
-
 ## 기술스택
-- **Language**: `Java 21`
+- **Language**: Java 21
 - **Framework** : Springboot(3.2.3)
 - **Database** : MySQL
 - **ORM** : JPA
 - **Testing** : JUnit5, Locust
-- **Mornitoring Tool** : Prometheus, Grafana
 
 ## 개발 내용 (★: 내가 개발한 것)
 ### 모의 면접
@@ -39,6 +31,7 @@
  - 게시글 검색 기능 (제목, 내용) (★)
  - 댓글 CRUD (★)
  - 게시글 좋아요 및 신고 기능 (★)
+ - 댓글, 좋아요 알림 기능 (★)
 
 ### 로그인/회원가입
 - 회원가입
