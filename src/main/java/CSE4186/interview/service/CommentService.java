@@ -1,14 +1,8 @@
 package CSE4186.interview.service;
 
-import CSE4186.interview.entity.Comment;
-import CSE4186.interview.entity.Post;
-import CSE4186.interview.entity.Report;
-import CSE4186.interview.entity.User;
+import CSE4186.interview.entity.*;
 import CSE4186.interview.exception.NotFoundException;
-import CSE4186.interview.repository.CommentRepository;
-import CSE4186.interview.repository.PostRepository;
-import CSE4186.interview.repository.ReportRepository;
-import CSE4186.interview.repository.UserRepository;
+import CSE4186.interview.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +20,7 @@ public class CommentService {
     private final ReportRepository reportRepository;
     private final UserRepository userRepository;
     private final PostRepository postRepository;
+    private final AlarmRepository alarmRepository;
 
     public void addComment(CreateRequest request, Long postId) {
         User findUser = userRepository.findById(request.getUserId())
@@ -36,6 +31,7 @@ public class CommentService {
 
 
         commentRepository.save(request.toEntity(findUser, findPost));
+        registerAlarm(findUser, findPost);
     }
 
     public void updateComment(UpdateRequest request) {
@@ -53,5 +49,14 @@ public class CommentService {
         reports.forEach(Report::removeParentRelation);
 
         commentRepository.delete(comment);
+    }
+
+    private void registerAlarm(User by, Post post) {
+        alarmRepository.save(Alarm.builder()
+                .isRead(false)
+                .content(by.getName() + "님이 댓글을 추가하였습니다.")
+                .user(post.getUser())
+                .post(post)
+                .build());
     }
 }
